@@ -30,7 +30,16 @@
   <script type="text/babel">
     const { useState, useRef } = React;
 
-    // Sample chain data with emojis
+    // ============================================
+    // PUZZLE DATA - Update this for each new puzzle
+    // ============================================
+    // TO RELEASE A NEW PUZZLE:
+    // 1. Update 'number' (increment by 1)
+    // 2. Update 'date' (day name or full date)
+    // 3. Replace all 6 'links' with new puzzle chain
+    // 4. Commit and push to deploy
+    // ============================================
+
     const CHAIN_DATA = {
       number: 47,
       date: "Wednesday",
