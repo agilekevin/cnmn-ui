@@ -202,7 +202,7 @@ export default function CNMN() {
       missedLinks.includes(i) ? '○' : '●'
     ).join('');
     
-    return `CNMN #${chain.number} 🔗\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed`;
+    return `cnmn #${chain.number} 🔗\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed`;
   };
   
   const handleShare = async () => {
@@ -226,7 +226,7 @@ export default function CNMN() {
       <div style={styles.container}>
         <div style={styles.resultsCard}>
           <div style={styles.resultsHeader}>
-            <span style={styles.logo}>CNMN</span>
+            <span style={styles.logo}>cnmn</span>
             <span style={styles.puzzleNum}>#{chain.number}</span>
           </div>
           
@@ -285,7 +285,7 @@ export default function CNMN() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <span style={styles.logo}>CNMN</span>
+        <span style={styles.logo}>cnmn</span>
         <span style={styles.puzzleInfo}>#{chain.number} · {chain.date}</span>
       </div>
       

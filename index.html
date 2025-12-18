@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNMN - Word Chain Puzzle</title>
+  <title>cnmn - Word Chain Puzzle</title>
   <style>
     body {
       margin: 0;
@@ -241,7 +241,7 @@
           missedLinks.includes(i) ? '○' : '●'
         ).join('');
 
-        return `CNMN #${chain.number} 🔗\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed`;
+        return `cnmn #${chain.number} 🔗\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed`;
       };
 
       const handleShare = async () => {
@@ -265,7 +265,7 @@
           <div style={styles.container}>
             <div style={styles.resultsCard}>
               <div style={styles.resultsHeader}>
-                <span style={styles.logo}>CNMN</span>
+                <span style={styles.logo}>cnmn</span>
                 <span style={styles.puzzleNum}>#{chain.number}</span>
               </div>
 
@@ -324,7 +324,7 @@
       return (
         <div style={styles.container}>
           <div style={styles.header}>
-            <span style={styles.logo}>CNMN</span>
+            <span style={styles.logo}>cnmn</span>
             <span style={styles.puzzleInfo}>#{chain.number} · {chain.date}</span>
           </div>
 
