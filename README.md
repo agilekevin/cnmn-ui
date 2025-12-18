@@ -16,6 +16,7 @@ See `cnmn-checkpoint1.md` for full game design details.
 ```
 cnmn/
 ├── index.html              # Main game (deploy this!)
+├── puzzle-generator.html   # Puzzle creation tool
 ├── cnmn-prototype-v2.jsx   # React component source
 ├── cnmn-checkpoint1.md     # Game design document
 └── README.md               # This file
@@ -38,7 +39,34 @@ python -m http.server 8000
 
 ## Releasing a New Puzzle
 
-### 1. Edit the puzzle data
+### Method 1: Using the Puzzle Generator (Recommended)
+
+1. **Open the generator**
+   ```
+   \\wsl.localhost\Ubuntu\home\zipwow\cnmn\puzzle-generator.html
+   ```
+   (Or open `puzzle-generator.html` directly in your browser)
+
+2. **Fill out the form**
+   - Puzzle # and date
+   - For each of the 6 links:
+     - Decoded word (the actual answer)
+     - Emoji (click one or type it)
+     - 4 disguised word options
+     - Correct answer (should match first option)
+     - Bridge hint (connection to next word)
+   - First link also needs a category
+
+3. **Generate and copy**
+   - Click "Generate Code"
+   - Click "Copy to Clipboard"
+
+4. **Paste into index.html**
+   - Open `index.html`
+   - Find `const CHAIN_DATA = {` (around line 43)
+   - Replace the entire CHAIN_DATA object with the generated code
+
+### Method 2: Manual Editing
 
 Open `index.html` and find the `CHAIN_DATA` object (around line 43).
 

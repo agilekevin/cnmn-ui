@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cnmn Puzzle Generator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(165deg, #fdfbf7 0%, #f5e6d3 50%, #ecdbc8 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #6b3410;
+      margin-bottom: 10px;
+      font-size: 32px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      color: #8b6340;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(107, 52, 16, 0.1);
+    }
+
+    .panel h2 {
+      color: #6b3410;
+      margin-bottom: 20px;
+      font-size: 20px;
+      border-bottom: 2px solid #ecdbc8;
+      padding-bottom: 10px;
+    }
+
+    .form-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #fdfbf7;
+      border-radius: 12px;
+      border: 2px solid #ecdbc8;
+    }
+
+    .form-section h3 {
+      color: #6b3410;
+      margin-bottom: 15px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .link-number {
+      background: #6b3410;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #6b3410;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #c4a574;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: monospace;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #6b3410;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #8b6340;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    button {
+      background: #6b3410;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      background: #8b4513;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .output-area {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .copy-success {
+      background: #4caf50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .emoji-picker {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 5px;
+    }
+
+    .emoji-option {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .emoji-option:hover {
+      background: rgba(107, 52, 16, 0.1);
+    }
+
+    .header-inputs {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>cnmn Puzzle Generator</h1>
+    <p class="subtitle">Create new puzzle chains for your daily game</p>
+
+    <div class="layout">
+      <!-- Input Form -->
+      <div class="panel">
+        <h2>📝 Puzzle Details</h2>
+
+        <div class="form-section">
+          <div class="header-inputs">
+            <div class="form-group">
+              <label>Puzzle #</label>
+              <input type="number" id="puzzleNumber" value="47" min="1">
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="text" id="puzzleDate" value="Wednesday" placeholder="e.g., Wednesday or Jan 15">
+            </div>
+          </div>
+        </div>
+
+        <div id="linksContainer"></div>
+
+        <div class="button-group">
+          <button onclick="generateCode()">🎯 Generate Code</button>
+          <button onclick="resetForm()" style="background: #8b6340;">🔄 Reset</button>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="panel">
+        <h2>📋 Generated Code</h2>
+        <div class="output-area" id="output">// Fill out the form and click "Generate Code"</div>
+        <div class="button-group">
+          <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Common emojis for quick selection
+    const commonEmojis = ['🦈', '🐋', '🐠', '🌊', '⚓', '🛠️', '🔧', '🔨', '⚙️', '🗼', '🏛️', '🗿', '🎭', '🎨', '🎪', '⛳', '🏌️', '⚽', '🏀', '👔', '👕', '👗', '🎩', '🍕', '🍔', '🍰', '🎂', '🚗', '🚕', '✈️', '🚀', '🌙', '⭐', '☀️', '🌈', '🔥', '💎', '👑', '🎸', '🎹', '📚', '📖', '✏️', '🎓', '🏆', '🎯', '🎲', '🎰'];
+
+    function createLinkForm(index) {
+      const isFirst = index === 0;
+      const isLast = index === 5;
+
+      return `
+        <div class="form-section">
+          <h3><span class="link-number">${index + 1}</span> Link ${index + 1}</h3>
+
+          ${isFirst ? `
+            <div class="form-group">
+              <label>Category (clue for first link only)</label>
+              <input type="text" id="link${index}_category" placeholder="e.g., Ocean animal">
+              <div class="hint">This is shown to the player for the first link</div>
+            </div>
+          ` : ''}
+
+          <div class="form-group">
+            <label>Decoded Word (answer)</label>
+            <input type="text" id="link${index}_decoded" placeholder="e.g., SHARK" style="text-transform: uppercase;">
+          </div>
+
+          <div class="form-group">
+            <label>Emoji</label>
+            <input type="text" id="link${index}_emoji" placeholder="🦈" maxlength="2">
+            <div class="emoji-picker" id="emojiPicker${index}"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Disguised Word Options (4 required)</label>
+            <div class="option-grid">
+              <input type="text" id="link${index}_opt0" placeholder="shrk (correct)">
+              <input type="text" id="link${index}_opt1" placeholder="cml">
+              <input type="text" id="link${index}_opt2" placeholder="frg">
+              <input type="text" id="link${index}_opt3" placeholder="lbrtr">
+            </div>
+            <div class="hint">First option should be the correct answer</div>
+          </div>
+
+          <div class="form-group">
+            <label>Correct Answer (disguised)</label>
+            <input type="text" id="link${index}_answer" placeholder="shrk">
+            <div class="hint">Should match the first option above</div>
+          </div>
+
+          ${!isLast ? `
+            <div class="form-group">
+              <label>Bridge Hint (connection to next word)</label>
+              <input type="text" id="link${index}_bridge" placeholder="Has sharp teeth...">
+              <div class="hint">Helps show the connection logic</div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function initializeForm() {
+      const container = document.getElementById('linksContainer');
+      let html = '';
+      for (let i = 0; i < 6; i++) {
+        html += createLinkForm(i);
+      }
+      container.innerHTML = html;
+
+      // Add emoji pickers
+      for (let i = 0; i < 6; i++) {
+        const picker = document.getElementById(`emojiPicker${i}`);
+        commonEmojis.forEach(emoji => {
+          const span = document.createElement('span');
+          span.className = 'emoji-option';
+          span.textContent = emoji;
+          span.onclick = () => {
+            document.getElementById(`link${i}_emoji`).value = emoji;
+          };
+          picker.appendChild(span);
+        });
+      }
+
+      // Load sample data
+      loadSampleData();
+    }
+
+    function loadSampleData() {
+      const sample = {
+        number: 47,
+        date: "Wednesday",
+        links: [
+          { category: "Ocean animal", decoded: "SHARK", emoji: "🦈", options: ["shrk", "cml", "frg", "lbrtr"], answer: "shrk", bridge: "Has sharp teeth..." },
+          { decoded: "DRILL", emoji: "🛠️", options: ["drl", "hmrtn", "skrw", "pncl"], answer: "drl", bridge: "Makes holes..." },
+          { decoded: "DERRICK", emoji: "🗼", options: ["drik", "pump", "fns", "bskt"], answer: "drik", bridge: "Tall tower..." },
+          { decoded: "EIFFEL", emoji: "🗼", options: ["efl", "lvr", "notr", "mprs"], answer: "efl", bridge: "Made of iron..." },
+          { decoded: "IRON", emoji: "⛳", options: ["irn", "wdg", "putr", "drvr"], answer: "irn", bridge: "Pressed flat..." },
+          { decoded: "COLLAR", emoji: "👔", options: ["colr", "slf", "cuf", "bttn"], answer: "colr" }
+        ]
+      };
+
+      document.getElementById('puzzleNumber').value = sample.number;
+      document.getElementById('puzzleDate').value = sample.date;
+
+      sample.links.forEach((link, i) => {
+        if (link.category) document.getElementById(`link${i}_category`).value = link.category;
+        document.getElementById(`link${i}_decoded`).value = link.decoded;
+        document.getElementById(`link${i}_emoji`).value = link.emoji;
+        link.options.forEach((opt, j) => {
+          document.getElementById(`link${i}_opt${j}`).value = opt;
+        });
+        document.getElementById(`link${i}_answer`).value = link.answer;
+        if (link.bridge) document.getElementById(`link${i}_bridge`).value = link.bridge;
+      });
+    }
+
+    function generateCode() {
+      const puzzleNumber = document.getElementById('puzzleNumber').value;
+      const puzzleDate = document.getElementById('puzzleDate').value;
+
+      const links = [];
+      for (let i = 0; i < 6; i++) {
+        const link = {
+          decoded: document.getElementById(`link${i}_decoded`).value.toUpperCase(),
+          emoji: document.getElementById(`link${i}_emoji`).value,
+          options: [
+            document.getElementById(`link${i}_opt0`).value,
+            document.getElementById(`link${i}_opt1`).value,
+            document.getElementById(`link${i}_opt2`).value,
+            document.getElementById(`link${i}_opt3`).value
+          ],
+          answer: document.getElementById(`link${i}_answer`).value
+        };
+
+        if (i === 0) {
+          link.category = document.getElementById(`link${i}_category`).value;
+        }
+
+        if (i < 5) {
+          link.bridge = document.getElementById(`link${i}_bridge`).value;
+        }
+
+        links.push(link);
+      }
+
+      const code = `const CHAIN_DATA = {
+  number: ${puzzleNumber},
+  date: "${puzzleDate}",
+  links: [
+${links.map((link, i) => `    {
+${i === 0 ? `      category: "${link.category}",\n` : ''}      options: [${link.options.map(o => `"${o}"`).join(', ')}],
+      answer: "${link.answer}",
+      decoded: "${link.decoded}",
+      emoji: "${link.emoji}",
+      bridge: ${i < 5 ? `"${link.bridge}"` : 'null'}
+    }`).join(',\n')}
+  ]
+};`;
+
+      document.getElementById('output').textContent = code;
+    }
+
+    function copyToClipboard() {
+      const output = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(output).then(() => {
+        showCopySuccess();
+      });
+    }
+
+    function showCopySuccess() {
+      const notification = document.createElement('div');
+      notification.className = 'copy-success';
+      notification.textContent = '✓ Copied to clipboard!';
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+    }
+
+    function resetForm() {
+      if (confirm('Reset form to default sample data?')) {
+        loadSampleData();
+        generateCode();
+      }
+    }
+
+    // Initialize on load
+    initializeForm();
+  </script>
+</body>
+</html>
