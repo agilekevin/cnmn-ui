@@ -15,11 +15,12 @@ See `cnmn-checkpoint1.md` for full game design details.
 
 ```
 cnmn/
-├── index.html              # Main game (deploy this!)
-├── puzzle-generator.html   # Puzzle creation tool
-├── cnmn-prototype-v2.jsx   # React component source
-├── cnmn-checkpoint1.md     # Game design document
-└── README.md               # This file
+├── index.html               # Main game (deploy this!)
+├── puzzle-generator.html    # Puzzle creation tool
+├── puzzle-ai-assistant.html # AI helper for puzzle ideas
+├── cnmn-prototype-v2.jsx    # React component source
+├── cnmn-checkpoint1.md      # Game design document
+└── README.md                # This file
 ```
 
 ## Local Development
@@ -129,6 +130,30 @@ Your static host will auto-deploy the update.
 2. Framework: Other
 3. Root directory: `./`
 4. Auto-deploys on push
+
+## AI Puzzle Assistant
+
+Need help brainstorming puzzles? Use the AI assistant tool:
+
+```
+\\wsl.localhost\Ubuntu\home\zipwow\cnmn\puzzle-ai-assistant.html
+```
+
+**Features:**
+- **💡 Brainstorm Chain:** Get AI suggestions for 6-word chains based on a theme
+- **🎭 Create Disguises:** Generate phonetic variants for words
+- **✅ Validate Chain:** Get feedback on connection logic and difficulty
+
+**Providers:**
+- **Rule-Based (Free):** No API key needed, uses simple algorithms
+- **OpenAI (GPT-4):** More creative, requires API key (~$0.01/puzzle)
+- **Anthropic (Claude):** Great at word puzzles, requires API key
+
+**Usage:**
+1. Select your provider
+2. (Optional) Add API key if using OpenAI/Anthropic
+3. Use the three tabs to brainstorm, create disguises, or validate
+4. Copy suggestions into the puzzle generator
 
 ## Puzzle Creation Tips
 
