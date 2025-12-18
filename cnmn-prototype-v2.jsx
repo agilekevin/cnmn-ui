@@ -323,6 +323,7 @@ export default function CNMN() {
                 </>
               ) : (
                 <>
+                  <div style={styles.categoryLabel}>What connects to...</div>
                   <div style={{...styles.previousEmojiContainer, ...styles.emojiContainer}}>
                     <span style={styles.emojiMedium}>{chain.links[currentLink - 1].emoji}</span>
                   </div>
