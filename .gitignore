@@ -16,3 +16,8 @@ npm-debug.log*
 # Temp files
 *.tmp
 .env
+
+# Python
+venv/
+__pycache__/
+*.pyc

@@ -11,6 +11,55 @@ Inspired by Part III of the Modern Language Aptitude Test (MLAT), players:
 
 See `cnmn-checkpoint1.md` for full game design details.
 
+## How the Puzzle Works
+
+Each puzzle presents a **prompt word** and four **consonant-only options**. Players must:
+
+1. **Decode** the consonant patterns back into words
+2. **Identify** which decoded word is a true synonym of the prompt
+
+### Example
+
+**Prompt:** "shed"
+
+| Option | Decoded | Analysis |
+|--------|---------|----------|
+| a: lntso | lean-to? | ❌ Wrong letters — "lean-to" has no 's' |
+| b: grj | garage | ✅ **Correct!** A garage is a synonym for shed |
+| c: prch | porch | ❌ Valid word, but not a synonym for shed |
+| d: chk | chuck? | ❌ Phonetic trap — "ch" ≠ "sh", so not "shack" |
+
+### Distractor Types
+
+The puzzle uses three types of "almost right" distractors:
+
+- **Wrong letters**: The consonants don't quite match a real word (lntso ≈ lean-to, but the 's' is wrong)
+- **Non-synonyms**: Valid words that decode correctly but aren't synonyms of the prompt
+- **Phonetic traps**: Consonant patterns that look like they could be a synonym but use the wrong phoneme
+
+This creates a layered challenge: decoding skill alone isn't enough — players must also verify meaning.
+
+### Chain Mode
+
+The game extends beyond single puzzles into **chain mode**, where each answer becomes the prompt for the next puzzle. A daily chain consists of 6 linked puzzles:
+
+```
+SHED → garage → VEHICLE → ... → [final word]
+       ↑                ↑
+    answer #1       prompt #2
+```
+
+This creates a satisfying flow where solving one puzzle unlocks the next, and players can use the emerging theme to help decode trickier words later in the chain.
+
+### Puzzle Builder
+
+The `puzzle-generator.html` tool helps admins create these chains by:
+- Defining each link's answer, options, and distractors
+- Setting bridge hints that connect adjacent words
+- Validating that the chain flows logically
+
+The `puzzle-ai-assistant.html` provides AI-powered help for brainstorming chains, generating plausible distractors, and validating puzzle quality.
+
 ## Project Structure
 
 ```
