@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cnmn AI Puzzle Assistant</title>
+  <title>cnmn Quiz Generator</title>
   <style>
     * {
       box-sizing: border-box;
@@ -19,14 +19,14 @@
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 900px;
       margin: 0 auto;
     }
 
     h1 {
       color: #6b3410;
       margin-bottom: 10px;
-      font-size: 32px;
+      font-size: 28px;
       letter-spacing: 2px;
     }
 
@@ -39,127 +39,256 @@
     .panel {
       background: rgba(255, 255, 255, 0.9);
       border-radius: 16px;
-      padding: 30px;
+      padding: 24px;
       box-shadow: 0 4px 20px rgba(107, 52, 16, 0.1);
       margin-bottom: 20px;
     }
 
     .panel h2 {
       color: #6b3410;
-      margin-bottom: 20px;
-      font-size: 20px;
-      border-bottom: 2px solid #ecdbc8;
-      padding-bottom: 10px;
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 16px;
     }
 
     .form-group {
-      margin-bottom: 20px;
+      flex: 1;
     }
 
     label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       color: #6b3410;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
     }
 
-    input[type="text"],
-    input[type="password"],
-    select,
-    textarea {
+    input[type="text"], select {
       width: 100%;
-      padding: 12px;
+      padding: 10px 12px;
       border: 2px solid #c4a574;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 14px;
       font-family: inherit;
       transition: border-color 0.2s;
     }
 
-    input:focus,
-    select:focus,
-    textarea:focus {
+    input:focus, select:focus {
       outline: none;
       border-color: #6b3410;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-      font-family: inherit;
     }
 
     button {
       background: #6b3410;
       color: white;
       border: none;
-      padding: 14px 28px;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border-radius: 6px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      width: 100%;
+      white-space: nowrap;
     }
 
     button:hover {
       background: #8b4513;
-      transform: translateY(-2px);
-    }
-
-    button:active {
-      transform: translateY(0);
     }
 
     button:disabled {
       background: #c4a574;
       cursor: not-allowed;
-      transform: none;
+    }
+
+    button.small {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    button.secondary {
+      background: #8b6340;
+    }
+
+    button.export {
+      background: #2e7d32;
+    }
+
+    button.export:hover {
+      background: #388e3c;
     }
 
     .hint {
       font-size: 12px;
       color: #8b6340;
-      margin-top: 5px;
+      margin-top: 4px;
       font-style: italic;
     }
 
-    .result-box {
+    /* Provider selection */
+    .provider-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #ecdbc8;
+    }
+
+    .provider-btn {
+      padding: 8px 16px;
+      border: 2px solid #c4a574;
+      background: white;
+      color: #6b3410;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .provider-btn:hover {
+      border-color: #6b3410;
+    }
+
+    .provider-btn.selected {
+      background: #6b3410;
+      color: white;
+      border-color: #6b3410;
+    }
+
+    .provider-btn.unavailable {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .provider-status {
+      font-size: 12px;
+      color: #8b6340;
+      margin-left: auto;
+      align-self: center;
+    }
+
+    /* Question cards */
+    .questions-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .question-card {
+      background: white;
+      border: 2px solid #ecdbc8;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .question-card h3 {
+      color: #6b3410;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .question-card h3 .num {
+      background: #6b3410;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .field-row label {
+      width: 70px;
+      margin: 0;
+      font-size: 12px;
+    }
+
+    .field-row input {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .disguise-preview {
+      font-family: 'Courier New', monospace;
       background: #2d2d2d;
       color: #f8f8f2;
-      padding: 20px;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      line-height: 1.8;
-      margin-top: 20px;
-      white-space: pre-wrap;
-      max-height: 500px;
-      overflow-y: auto;
-      display: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      min-width: 60px;
+      text-align: center;
     }
 
-    .result-box.show {
-      display: block;
+    .type-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: #ecdbc8;
+      color: #6b3410;
+      white-space: nowrap;
     }
 
+    .type-badge.wrong-letters { background: #ffcdd2; color: #c62828; }
+    .type-badge.non-synonym { background: #fff3e0; color: #e65100; }
+    .type-badge.phonetic-trap { background: #e3f2fd; color: #1565c0; }
+
+    .type-badge.clickable {
+      cursor: pointer;
+    }
+    .type-badge.clickable:hover {
+      opacity: 0.8;
+    }
+
+    .distractors-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ecdbc8;
+    }
+
+    .distractors-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .distractors-header label {
+      font-size: 12px;
+      margin: 0;
+    }
+
+    /* Loading state */
     .loading {
       text-align: center;
       padding: 40px;
-      color: #6b3410;
+      color: #8b6340;
     }
 
     .spinner {
       border: 3px solid #ecdbc8;
       border-top: 3px solid #6b3410;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
+      margin: 0 auto 12px;
     }
 
     @keyframes spin {
@@ -167,521 +296,141 @@
       100% { transform: rotate(360deg); }
     }
 
-    .provider-select {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .provider-option {
-      padding: 15px;
-      border: 2px solid #c4a574;
-      border-radius: 8px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-      background: white;
-    }
-
-    .provider-option:hover {
-      border-color: #6b3410;
-      background: #fdfbf7;
-    }
-
-    .provider-option.selected {
-      border-color: #6b3410;
-      background: #6b3410;
-      color: white;
-    }
-
-    .provider-option.unavailable {
-      opacity: 0.4;
-      pointer-events: none;
-      display: none;
-    }
-
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 15px;
-      margin-bottom: 10px;
-    }
-
-    .checkbox-group input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: #6b3410;
-    }
-
-    .checkbox-group label {
-      display: inline;
-      margin: 0;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .tooltip-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      background: #c4a574;
-      color: white;
-      border-radius: 50%;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: help;
-      position: relative;
-    }
-
-    .tooltip-icon:hover .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .tooltip-text {
-      visibility: hidden;
-      opacity: 0;
-      position: absolute;
-      bottom: 130%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 280px;
-      background: #2d2d2d;
-      color: #f8f8f2;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: normal;
-      line-height: 1.5;
-      z-index: 100;
-      transition: opacity 0.2s;
-    }
-
-    .tooltip-text::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border: 6px solid transparent;
-      border-top-color: #2d2d2d;
-    }
-
-    .provider-option .name {
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .provider-option .desc {
-      font-size: 11px;
-      opacity: 0.8;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #ecdbc8;
-    }
-
-    .tab {
-      padding: 12px 24px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      color: #8b6340;
-      font-weight: 600;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      width: auto;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-
-    .tab:hover {
-      color: #6b3410;
-      background: transparent;
-      transform: none;
-    }
-
-    .tab.active {
-      color: #6b3410;
-      border-bottom-color: #6b3410;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .example-box {
-      background: #fdfbf7;
-      border: 2px solid #ecdbc8;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-
-    .example-box h3 {
-      color: #6b3410;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-
-    .example-box p {
-      color: #8b6340;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .flow-button {
-      background: #2e7d32;
-      margin-top: 15px;
-    }
-
-    .flow-button:hover {
-      background: #388e3c;
-    }
-
-    .chain-words {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 15px 0;
-    }
-
-    .chain-word {
-      background: #6b3410;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 13px;
-    }
-
-    .chain-word.editable {
-      background: white;
-      color: #6b3410;
-      border: 2px solid #6b3410;
-      cursor: pointer;
-    }
-
-    .chain-word.editable:hover {
-      background: #fdfbf7;
-    }
-
-    .step-indicator {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #ecdbc8;
-    }
-
-    .step {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #c4a574;
-      font-size: 13px;
-    }
-
-    .step.active {
-      color: #6b3410;
-      font-weight: 600;
-    }
-
-    .step.completed {
-      color: #2e7d32;
-    }
-
-    .step-num {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #ecdbc8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 12px;
-    }
-
-    .step.active .step-num {
-      background: #6b3410;
-      color: white;
-    }
-
-    .step.completed .step-num {
-      background: #2e7d32;
-      color: white;
-    }
-
-    .step-arrow {
-      color: #c4a574;
-    }
-
-    .section-result {
-      background: #fdfbf7;
-      border: 2px solid #ecdbc8;
-      border-radius: 8px;
-      padding: 20px;
-      margin-top: 20px;
-    }
-
-    .section-result h3 {
-      color: #6b3410;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-
+    /* Hidden */
     .hidden {
       display: none !important;
     }
 
-    .disguise-grid {
-      display: grid;
-      gap: 15px;
+    /* Export section */
+    .export-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #ecdbc8;
+      display: flex;
+      gap: 12px;
     }
 
-    .disguise-item {
-      background: white;
-      border: 2px solid #ecdbc8;
-      border-radius: 8px;
-      padding: 15px;
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #8b6340;
     }
 
-    .disguise-item .word {
-      font-weight: 700;
+    .empty-state h3 {
       color: #6b3410;
       margin-bottom: 8px;
-    }
-
-    .disguise-item .variants {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .variant {
-      background: #2d2d2d;
-      color: #f8f8f2;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .variant:hover {
-      background: #6b3410;
-    }
-
-    .variant.selected {
-      background: #2e7d32;
-    }
-
-    .validation-result {
-      background: white;
-      border: 2px solid #ecdbc8;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-    }
-
-    .validation-result.success {
-      border-color: #2e7d32;
-    }
-
-    .validation-result.warning {
-      border-color: #f57c00;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🤖 cnmn AI Puzzle Assistant</h1>
-    <p class="subtitle">Get AI help brainstorming puzzle chains and creating phonetic disguises</p>
+    <h1>cnmn Quiz Generator</h1>
+    <p class="subtitle">Generate themed synonym puzzles with phonetic disguises</p>
 
     <!-- Provider Selection -->
     <div class="panel">
-      <h2>⚙️ AI Provider</h2>
-
-      <div class="form-group">
-        <label>Select AI Provider</label>
-        <div class="provider-select" id="providerSelect">
-          <div class="provider-option" data-provider="openai" onclick="selectProvider('openai')">
-            <div class="name">OpenAI</div>
-            <div class="desc">GPT-4</div>
-          </div>
-          <div class="provider-option" data-provider="anthropic" onclick="selectProvider('anthropic')">
-            <div class="name">Anthropic</div>
-            <div class="desc">Claude</div>
-          </div>
-          <div class="provider-option selected" data-provider="rules" onclick="selectProvider('rules')">
-            <div class="name">Rule-Based</div>
-            <div class="desc">Free, no API needed</div>
-          </div>
-        </div>
-        <div class="hint" id="providerHint">Loading available providers...</div>
+      <div class="provider-bar">
+        <button class="provider-btn selected" data-provider="openai" onclick="selectProvider('openai')">OpenAI</button>
+        <button class="provider-btn" data-provider="anthropic" onclick="selectProvider('anthropic')">Anthropic</button>
+        <button class="provider-btn" data-provider="rules" onclick="selectProvider('rules')">Rule-Based</button>
+        <span class="provider-status" id="providerStatus">Checking...</span>
       </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Theme</label>
+          <input type="text" id="themeInput" placeholder="e.g., Buildings, Emotions, Weather, Animals">
+        </div>
+        <div class="form-group" style="max-width: 180px;">
+          <label>Publication Date</label>
+          <input type="date" id="pubDate">
+        </div>
+        <button onclick="generateQuiz()" id="generateBtn">Generate 6 Questions</button>
+      </div>
+      <p class="hint">Enter a theme and publication date to generate 6 synonym quiz questions.</p>
     </div>
 
-    <!-- Workflow -->
-    <div class="panel">
-      <h2>🛠️ Puzzle Builder</h2>
+    <!-- Questions -->
+    <div class="panel" id="questionsPanel">
+      <h2>Quiz Questions</h2>
 
-      <div class="step-indicator">
-        <div class="step active" id="step1">
-          <span class="step-num">1</span>
-          <span>Brainstorm</span>
-        </div>
-        <span class="step-arrow">→</span>
-        <div class="step" id="step2">
-          <span class="step-num">2</span>
-          <span>Disguise</span>
-        </div>
-        <span class="step-arrow">→</span>
-        <div class="step" id="step3">
-          <span class="step-num">3</span>
-          <span>Validate</span>
+      <div id="questionsContainer">
+        <div class="empty-state">
+          <h3>No quiz generated yet</h3>
+          <p>Enter a theme above and click "Generate 6 Questions"</p>
         </div>
       </div>
 
-      <!-- Step 1: Brainstorm -->
-      <div id="brainstorm-section">
-        <div class="example-box">
-          <h3>Step 1: Generate a Chain</h3>
-          <p>Enter a theme or starting word to generate a 6-word chain with logical connections.</p>
-        </div>
-
-        <div class="form-group">
-          <label>Theme or Starting Word</label>
-          <input type="text" id="brainstormInput" placeholder="e.g., Ocean, Sports, Kitchen Tools" onkeypress="if(event.key==='Enter')brainstormChain()">
-        </div>
-
-        <div class="checkbox-group">
-          <input type="checkbox" id="strictConsistency">
-          <label for="strictConsistency">Strict consistency</label>
-          <span class="tooltip-icon">?
-            <span class="tooltip-text">
-              <strong>Strict:</strong> All words stay within the category.<br>
-              Example: "kitchen tools" → knife, whisk, spatula, grater, peeler, tongs<br><br>
-              <strong>Default (off):</strong> Chain can flow between related categories.<br>
-              Example: "kitchen tools" → knife → cut → steak → cattle → ranch
-            </span>
-          </span>
-        </div>
-
-        <button onclick="brainstormChain()">🎯 Generate Chain Ideas</button>
-
-        <div id="brainstormResult" class="result-box"></div>
-
-        <div id="chainPreview" class="section-result hidden">
-          <h3>📋 Your Chain</h3>
-          <div class="chain-words" id="chainWords"></div>
-          <p class="hint">Click a word to edit it, or proceed to create disguises.</p>
-          <button class="flow-button" onclick="proceedToDisguises()">🎭 Create Disguises for This Chain →</button>
-        </div>
-      </div>
-
-      <!-- Step 2: Disguises -->
-      <div id="disguise-section" class="hidden">
-        <div class="example-box">
-          <h3>Step 2: Create Disguises</h3>
-          <p>Generating phonetic variants for each word in your chain...</p>
-        </div>
-
-        <div class="chain-words" id="chainWordsSmall"></div>
-
-        <div id="disguiseResult" class="disguise-grid"></div>
-
-        <div id="disguiseActions" class="hidden">
-          <button onclick="regenerateDisguises()">🔄 Regenerate Disguises</button>
-          <button class="flow-button" onclick="proceedToValidation()">✅ Validate Chain →</button>
-        </div>
-      </div>
-
-      <!-- Step 3: Validation -->
-      <div id="validate-section" class="hidden">
-        <div class="example-box">
-          <h3>Step 3: Validation</h3>
-          <p>Checking connection logic and difficulty balance...</p>
-        </div>
-
-        <div class="chain-words" id="chainWordsFinal"></div>
-
-        <div id="validateResult" class="validation-result"></div>
-
-        <div id="finalActions" class="hidden" style="margin-top: 20px;">
-          <button onclick="copyForGenerator()">📋 Copy for Puzzle Generator</button>
-          <button onclick="startOver()">🔄 Start New Chain</button>
-        </div>
+      <div class="export-section hidden" id="exportSection">
+        <button class="export" onclick="saveQuiz()">💾 Save Puzzle</button>
+        <button class="secondary" onclick="exportQuiz()">📋 Copy JSON</button>
+        <button class="secondary" onclick="clearQuiz()">🗑️ Clear</button>
       </div>
     </div>
   </div>
 
   <script>
-    let currentProvider = 'rules';
+    // State
+    let currentProvider = 'openai';
     let availableProviders = { openai: false, anthropic: false };
-    let currentChain = [];
-    let currentDisguises = {};
+    let quiz = {
+      theme: '',
+      publicationDate: '',
+      questions: []  // Array of 6 question objects
+    };
 
-    // Load available providers from server
+    // Initialize date picker to tomorrow
+    document.addEventListener('DOMContentLoaded', () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('pubDate').value = tomorrow.toISOString().split('T')[0];
+    });
+
+    // Question structure:
+    // {
+    //   prompt: "shed",
+    //   rejectedPrompts: [],
+    //   answer: { word: "GARAGE", disguise: "grj" },
+    //   rejectedAnswers: [],
+    //   distractors: [
+    //     { word: "LEAN-TO", disguise: "lntso", type: "wrong-letters" },
+    //     { word: "PORCH", disguise: "prch", type: "non-synonym" },
+    //     { word: "SHACK", disguise: "chk", type: "phonetic-trap" }
+    //   ],
+    //   rejectedDistractors: []
+    // }
+
+    // Load providers
     async function loadProviders() {
-      const hint = document.getElementById('providerHint');
+      const status = document.getElementById('providerStatus');
       try {
         const response = await fetch('/api/providers');
         availableProviders = await response.json();
 
-        console.log('Providers from API:', availableProviders);
-
-        const openaiOption = document.querySelector('[data-provider="openai"]');
-        const anthropicOption = document.querySelector('[data-provider="anthropic"]');
-
-        // Mark unavailable providers
-        if (availableProviders.openai) {
-          openaiOption.classList.remove('unavailable');
-        } else {
-          openaiOption.classList.add('unavailable');
-        }
-
-        if (availableProviders.anthropic) {
-          anthropicOption.classList.remove('unavailable');
-        } else {
-          anthropicOption.classList.add('unavailable');
-        }
-
-        const configuredProviders = [];
-        if (availableProviders.openai) configuredProviders.push('OpenAI');
-        if (availableProviders.anthropic) configuredProviders.push('Anthropic');
-
-        if (configuredProviders.length > 0) {
-          hint.textContent = `Available: ${configuredProviders.join(', ')} (configured in .env)`;
-          // Auto-select first available AI provider
-          const saved = localStorage.getItem('cnmn_ai_provider');
-          if (saved && (saved === 'rules' || availableProviders[saved])) {
-            selectProvider(saved);
-          } else {
-            selectProvider(configuredProviders[0].toLowerCase());
+        document.querySelectorAll('.provider-btn').forEach(btn => {
+          const provider = btn.dataset.provider;
+          if (provider === 'rules') return;
+          if (!availableProviders[provider]) {
+            btn.classList.add('unavailable');
           }
+        });
+
+        const available = [];
+        if (availableProviders.openai) available.push('OpenAI');
+        if (availableProviders.anthropic) available.push('Anthropic');
+
+        if (available.length > 0) {
+          status.textContent = `Available: ${available.join(', ')}`;
+          if (availableProviders.openai) selectProvider('openai');
+          else if (availableProviders.anthropic) selectProvider('anthropic');
+          else selectProvider('rules');
         } else {
-          hint.textContent = 'No AI providers configured. Using rule-based mode.';
+          status.textContent = 'No AI configured - using rules';
           selectProvider('rules');
         }
-      } catch (error) {
-        hint.textContent = 'Server not running. Using rule-based mode only.';
-        console.error('Failed to load providers:', error);
-        // Hide AI options when server not available
+      } catch (e) {
+        status.textContent = 'Server offline - using rules';
         document.querySelector('[data-provider="openai"]').classList.add('unavailable');
         document.querySelector('[data-provider="anthropic"]').classList.add('unavailable');
         selectProvider('rules');
@@ -690,375 +439,481 @@
 
     function selectProvider(provider) {
       currentProvider = provider;
-      document.querySelectorAll('.provider-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      const selected = document.querySelector(`[data-provider="${provider}"]`);
-      if (selected) {
-        selected.classList.add('selected');
-      }
-      localStorage.setItem('cnmn_ai_provider', provider);
-    }
-
-    function setStep(stepNum) {
-      ['step1', 'step2', 'step3'].forEach((id, i) => {
-        const el = document.getElementById(id);
-        el.classList.remove('active', 'completed');
-        if (i + 1 < stepNum) el.classList.add('completed');
-        if (i + 1 === stepNum) el.classList.add('active');
+      document.querySelectorAll('.provider-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.provider === provider);
       });
     }
 
-    function renderChainWords(containerId, editable = false) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = currentChain.map((word, i) =>
-        `<span class="chain-word ${editable ? 'editable' : ''}" ${editable ? `onclick="editWord(${i})"` : ''}>${word}</span>`
-      ).join('<span style="color:#8b6340">→</span>');
-    }
+    // Disguise generation (rule-based)
+    function generateDisguise(word) {
+      if (!word) return '';
+      const lower = word.toLowerCase();
+      // Remove vowels, apply phonetic simplifications
+      let disguise = lower
+        .replace(/tion$/i, 'shn')
+        .replace(/sion$/i, 'zhn')
+        .replace(/age$/i, 'j')
+        .replace(/dge$/i, 'j')
+        .replace(/ght$/i, 't')
+        .replace(/ck/g, 'k')
+        .replace(/ph/g, 'f')
+        .replace(/wh/g, 'w')
+        .replace(/wr/g, 'r')
+        .replace(/kn/g, 'n')
+        .replace(/[aeiou]/g, '');
 
-    function editWord(index) {
-      const newWord = prompt(`Edit word #${index + 1}:`, currentChain[index]);
-      if (newWord && newWord.trim()) {
-        currentChain[index] = newWord.trim().toUpperCase();
-        renderChainWords('chainWords', true);
+      // Ensure minimum length
+      if (disguise.length < 2) {
+        disguise = lower.replace(/[aeiou](?=[aeiou])/g, '').replace(/[aeiou]$/g, '');
       }
+      return disguise || lower.substring(0, 3);
     }
 
-    // Step 1: Brainstorm Chain
-    async function brainstormChain() {
-      const input = document.getElementById('brainstormInput').value.trim();
-      if (!input) {
-        alert('Please enter a theme or starting word');
+    // Generate full quiz
+    async function generateQuiz() {
+      const theme = document.getElementById('themeInput').value.trim();
+      if (!theme) {
+        alert('Please enter a theme');
         return;
       }
 
-      const resultBox = document.getElementById('brainstormResult');
-      const chainPreview = document.getElementById('chainPreview');
-
-      resultBox.classList.add('show');
-      resultBox.innerHTML = '<div class="loading"><div class="spinner"></div>Generating chain ideas...</div>';
-      chainPreview.classList.add('hidden');
-
-      try {
-        let result;
-        if (currentProvider === 'rules') {
-          result = ruleBasedBrainstorm(input);
-        } else {
-          result = await aiBrainstorm(input);
-        }
-        resultBox.textContent = result;
-
-        // Extract chain words from result
-        currentChain = extractChainFromResult(result);
-        if (currentChain.length >= 4) {
-          renderChainWords('chainWords', true);
-          chainPreview.classList.remove('hidden');
-        }
-      } catch (error) {
-        resultBox.textContent = `Error: ${error.message}`;
-      }
-    }
-
-    function extractChainFromResult(text) {
-      // Try to find numbered list (1. WORD, 2. WORD, etc.)
-      const numberedMatch = text.match(/\d\.\s*([A-Z]+)/gi);
-      if (numberedMatch && numberedMatch.length >= 4) {
-        return numberedMatch.map(m => m.replace(/\d\.\s*/i, '').toUpperCase()).slice(0, 6);
-      }
-
-      // Try to find arrow-separated chain
-      const arrowMatch = text.match(/([A-Z]{3,})\s*[→\-\>]+/gi);
-      if (arrowMatch && arrowMatch.length >= 4) {
-        return arrowMatch.map(m => m.replace(/\s*[→\-\>]+/gi, '').toUpperCase()).slice(0, 6);
-      }
-
-      // Try to find capitalized words in sequence
-      const capsMatch = text.match(/\b[A-Z]{3,}\b/g);
-      if (capsMatch && capsMatch.length >= 4) {
-        return [...new Set(capsMatch)].slice(0, 6);
-      }
-
-      return [];
-    }
-
-    // Step 2: Create Disguises
-    async function proceedToDisguises() {
-      if (currentChain.length < 4) {
-        alert('Need at least 4 words in the chain');
-        return;
-      }
-
-      setStep(2);
-      document.getElementById('brainstorm-section').classList.add('hidden');
-      document.getElementById('disguise-section').classList.remove('hidden');
-
-      renderChainWords('chainWordsSmall', false);
-
-      const resultBox = document.getElementById('disguiseResult');
-      resultBox.innerHTML = '<div class="loading"><div class="spinner"></div>Creating disguises...</div>';
+      quiz.theme = theme;
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '<div class="loading"><div class="spinner"></div>Generating quiz...</div>';
+      document.getElementById('exportSection').classList.add('hidden');
 
       try {
         if (currentProvider === 'rules') {
-          currentDisguises = ruleBasedDisguiseStructured(currentChain);
+          quiz.questions = generateRuleBasedQuiz(theme);
         } else {
-          const result = await aiDisguise(currentChain.join('\n'));
-          currentDisguises = parseAiDisguises(result);
+          quiz.questions = await generateAIQuiz(theme);
         }
-        renderDisguises();
-        document.getElementById('disguiseActions').classList.remove('hidden');
+        renderQuestions();
+        document.getElementById('exportSection').classList.remove('hidden');
       } catch (error) {
-        resultBox.innerHTML = `<div style="color:red">Error: ${error.message}</div>`;
+        container.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${error.message}</p></div>`;
       }
     }
 
-    function ruleBasedDisguiseStructured(words) {
-      const result = {};
-      words.forEach(word => {
-        result[word] = createPhoneticVariants(word);
-      });
-      return result;
-    }
+    // Rule-based quiz generation (fallback)
+    function generateRuleBasedQuiz(theme) {
+      const themeData = {
+        'buildings': [
+          { prompt: 'shed', answer: 'GARAGE', distractors: ['LEAN-TO', 'PORCH', 'SHACK'] },
+          { prompt: 'home', answer: 'HOUSE', distractors: ['HUT', 'TENT', 'DOME'] },
+          { prompt: 'inn', answer: 'HOTEL', distractors: ['MOTEL', 'HOSTEL', 'LODGE'] },
+          { prompt: 'church', answer: 'CHAPEL', distractors: ['TEMPLE', 'SHRINE', 'MOSQUE'] },
+          { prompt: 'shop', answer: 'STORE', distractors: ['MARKET', 'MALL', 'BOOTH'] },
+          { prompt: 'castle', answer: 'FORTRESS', distractors: ['PALACE', 'MANOR', 'TOWER'] },
+        ],
+        'emotions': [
+          { prompt: 'happy', answer: 'JOYFUL', distractors: ['GLAD', 'MERRY', 'PLEASED'] },
+          { prompt: 'sad', answer: 'GLOOMY', distractors: ['MOODY', 'DREARY', 'SOMBER'] },
+          { prompt: 'angry', answer: 'FURIOUS', distractors: ['ANNOYED', 'IRATE', 'CROSS'] },
+          { prompt: 'scared', answer: 'AFRAID', distractors: ['NERVOUS', 'WORRIED', 'ANXIOUS'] },
+          { prompt: 'calm', answer: 'SERENE', distractors: ['PEACEFUL', 'QUIET', 'STILL'] },
+          { prompt: 'tired', answer: 'WEARY', distractors: ['SLEEPY', 'DROWSY', 'FATIGUED'] },
+        ],
+        'weather': [
+          { prompt: 'rain', answer: 'SHOWER', distractors: ['DRIZZLE', 'SPRINKLE', 'DOWNPOUR'] },
+          { prompt: 'wind', answer: 'BREEZE', distractors: ['GUST', 'DRAFT', 'GALE'] },
+          { prompt: 'storm', answer: 'TEMPEST', distractors: ['SQUALL', 'CYCLONE', 'TYPHOON'] },
+          { prompt: 'fog', answer: 'MIST', distractors: ['HAZE', 'SMOG', 'VAPOR'] },
+          { prompt: 'snow', answer: 'FLURRY', distractors: ['SLEET', 'FROST', 'BLIZZARD'] },
+          { prompt: 'sun', answer: 'SHINE', distractors: ['GLOW', 'BEAM', 'GLARE'] },
+        ],
+      };
 
-    function parseAiDisguises(text) {
-      const result = {};
-      currentChain.forEach(word => {
-        const regex = new RegExp(word + '[:\\s]+([a-z,\\s]+)', 'i');
-        const match = text.match(regex);
-        if (match) {
-          result[word] = match[1].split(/[,\s]+/).filter(v => v.length >= 2).slice(0, 4);
-        } else {
-          result[word] = createPhoneticVariants(word);
+      // Find matching theme or use default
+      const lowerTheme = theme.toLowerCase();
+      let data = null;
+      for (const [key, value] of Object.entries(themeData)) {
+        if (lowerTheme.includes(key) || key.includes(lowerTheme)) {
+          data = value;
+          break;
         }
-      });
-      return result;
+      }
+
+      if (!data) {
+        // Generate placeholder data
+        data = Array(6).fill(null).map((_, i) => ({
+          prompt: `word${i + 1}`,
+          answer: `ANSWER${i + 1}`,
+          distractors: [`WRONG${i}A`, `WRONG${i}B`, `WRONG${i}C`]
+        }));
+      }
+
+      return data.map(q => ({
+        prompt: q.prompt,
+        rejectedPrompts: [],
+        answer: { word: q.answer, disguise: generateDisguise(q.answer) },
+        rejectedAnswers: [],
+        distractors: q.distractors.map((d, i) => ({
+          word: d,
+          disguise: generateDisguise(d),
+          type: ['wrong-letters', 'non-synonym', 'non-synonym'][i % 3]
+        })),
+        rejectedDistractors: []
+      }));
     }
 
-    function renderDisguises() {
-      const container = document.getElementById('disguiseResult');
-      container.innerHTML = currentChain.map(word => `
-        <div class="disguise-item">
-          <div class="word">${word}</div>
-          <div class="variants">
-            ${(currentDisguises[word] || []).map((v, i) =>
-              `<span class="variant ${i === 0 ? 'selected' : ''}" onclick="selectVariant(this, '${word}')">${v}</span>`
-            ).join('')}
+    // AI quiz generation
+    async function generateAIQuiz(theme) {
+      const prompt = `Generate 6 synonym quiz questions for the theme "${theme}".
+
+For each question provide:
+1. A prompt word (common word)
+2. An answer word (synonym of prompt)
+3. Three distractor words with their types (use ONLY these two types):
+   - wrong-letters: a plausible-looking consonant pattern that doesn't quite decode to a real word
+   - non-synonym: a valid word in the same category but NOT a synonym of the prompt
+
+Format as JSON array:
+[
+  {
+    "prompt": "shed",
+    "answer": "GARAGE",
+    "distractors": [
+      {"word": "LEAN-TO", "type": "wrong-letters"},
+      {"word": "PORCH", "type": "non-synonym"},
+      {"word": "SHACK", "type": "phonetic-trap"}
+    ]
+  }
+]
+
+Return ONLY the JSON array, no other text.`;
+
+      const response = await callServer(prompt);
+
+      // Parse JSON from response
+      let parsed;
+      try {
+        // Try to extract JSON from response
+        const jsonMatch = response.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (e) {
+        console.error('Failed to parse AI response:', response);
+        throw new Error('Failed to parse AI response. Try again or use Rule-Based mode.');
+      }
+
+      return parsed.slice(0, 6).map(q => ({
+        prompt: q.prompt || '',
+        rejectedPrompts: [],
+        answer: {
+          word: (q.answer || '').toUpperCase(),
+          disguise: generateDisguise(q.answer || '')
+        },
+        rejectedAnswers: [],
+        distractors: (q.distractors || []).slice(0, 3).map(d => ({
+          word: (d.word || '').toUpperCase(),
+          disguise: generateDisguise(d.word || ''),
+          type: d.type || 'non-synonym'
+        })),
+        rejectedDistractors: []
+      }));
+    }
+
+    // Render all questions
+    function renderQuestions() {
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = quiz.questions.map((q, i) => renderQuestionCard(q, i)).join('');
+    }
+
+    // Render single question card
+    function renderQuestionCard(q, index) {
+      return `
+        <div class="question-card" id="question-${index}">
+          <h3><span class="num">${index + 1}</span> Question</h3>
+
+          <div class="field-row">
+            <label>Prompt:</label>
+            <input type="text" value="${q.prompt}" onchange="updatePrompt(${index}, this.value)" />
+            <button class="small" onclick="reshufflePrompt(${index})">🔄</button>
+          </div>
+
+          <div class="field-row">
+            <label>Answer:</label>
+            <input type="text" value="${q.answer.word}" onchange="updateAnswer(${index}, this.value)" />
+            <span class="disguise-preview">${q.answer.disguise}</span>
+            <button class="small" onclick="reshuffleAnswer(${index})">🔄</button>
+          </div>
+
+          <div class="distractors-section">
+            <div class="distractors-header">
+              <label>Distractors:</label>
+              <button class="small secondary" onclick="reshuffleAllDistractors(${index})">🔄 All</button>
+            </div>
+            ${q.distractors.map((d, di) => `
+              <div class="field-row">
+                <input type="text" value="${d.word}" onchange="updateDistractor(${index}, ${di}, this.value)" style="flex:1" />
+                <span class="disguise-preview">${d.disguise}</span>
+                <span class="type-badge clickable ${d.type}" onclick="cycleType(${index}, ${di})" title="Click to change type">${d.type}</span>
+                <button class="small" onclick="reshuffleDistractor(${index}, ${di})">🔄</button>
+              </div>
+            `).join('')}
           </div>
         </div>
-      `).join('');
+      `;
     }
 
-    function selectVariant(el, word) {
-      el.parentElement.querySelectorAll('.variant').forEach(v => v.classList.remove('selected'));
-      el.classList.add('selected');
+    // Update functions
+    function updatePrompt(qIndex, value) {
+      quiz.questions[qIndex].prompt = value.toLowerCase();
     }
 
-    async function regenerateDisguises() {
-      const resultBox = document.getElementById('disguiseResult');
-      resultBox.innerHTML = '<div class="loading"><div class="spinner"></div>Regenerating disguises...</div>';
+    function updateAnswer(qIndex, value) {
+      const word = value.toUpperCase();
+      quiz.questions[qIndex].answer = {
+        word: word,
+        disguise: generateDisguise(word)
+      };
+      renderQuestions();
+    }
+
+    function updateDistractor(qIndex, dIndex, value) {
+      const word = value.toUpperCase();
+      quiz.questions[qIndex].distractors[dIndex].word = word;
+      quiz.questions[qIndex].distractors[dIndex].disguise = generateDisguise(word);
+      renderQuestions();
+    }
+
+    function cycleType(qIndex, dIndex) {
+      const types = ['wrong-letters', 'non-synonym', 'phonetic-trap'];
+      const d = quiz.questions[qIndex].distractors[dIndex];
+      const currentIdx = types.indexOf(d.type);
+      d.type = types[(currentIdx + 1) % types.length];
+      renderQuestions();
+    }
+
+    // Reshuffle functions
+    async function reshufflePrompt(qIndex) {
+      const q = quiz.questions[qIndex];
+      q.rejectedPrompts.push(q.prompt);
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '...';
 
       try {
         if (currentProvider === 'rules') {
-          currentDisguises = ruleBasedDisguiseStructured(currentChain);
+          q.prompt = `newprompt${qIndex + 1}`;
         } else {
-          const result = await aiDisguise(currentChain.join('\n'));
-          currentDisguises = parseAiDisguises(result);
+          const prompt = `Give me ONE different word related to "${quiz.theme}" that could be used as a quiz prompt.
+Avoid these words: ${q.rejectedPrompts.join(', ')}
+Return ONLY the single word, nothing else.`;
+          const response = await callServer(prompt);
+          q.prompt = response.trim().toLowerCase().replace(/[^a-z]/g, '');
         }
-        renderDisguises();
-      } catch (error) {
-        resultBox.innerHTML = `<div style="color:red">Error: ${error.message}</div>`;
+        renderQuestions();
+      } catch (e) {
+        alert('Reshuffle failed: ' + e.message);
       }
+
+      btn.disabled = false;
+      btn.textContent = '🔄';
     }
 
-    // Step 3: Validation
-    async function proceedToValidation() {
-      setStep(3);
-      document.getElementById('disguise-section').classList.add('hidden');
-      document.getElementById('validate-section').classList.remove('hidden');
+    async function reshuffleAnswer(qIndex) {
+      const q = quiz.questions[qIndex];
+      q.rejectedAnswers.push(q.answer.word);
 
-      renderChainWords('chainWordsFinal', false);
-
-      const resultBox = document.getElementById('validateResult');
-      resultBox.innerHTML = '<div class="loading"><div class="spinner"></div>Validating chain...</div>';
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '...';
 
       try {
-        let result;
         if (currentProvider === 'rules') {
-          result = ruleBasedValidate(currentChain.join('\n'));
+          q.answer = { word: `NEWANS${qIndex + 1}`, disguise: generateDisguise(`NEWANS${qIndex + 1}`) };
         } else {
-          result = await aiValidate(currentChain.join('\n'));
+          const prompt = `Give me ONE synonym for "${q.prompt}".
+Avoid these words: ${q.rejectedAnswers.join(', ')}
+Return ONLY the single word in UPPERCASE, nothing else.`;
+          const response = await callServer(prompt);
+          const word = response.trim().toUpperCase().replace(/[^A-Z]/g, '');
+          q.answer = { word, disguise: generateDisguise(word) };
         }
-
-        const isSuccess = !result.includes('ERROR') && !result.includes('⚠️');
-        resultBox.className = `validation-result ${isSuccess ? 'success' : 'warning'}`;
-        resultBox.innerHTML = `<pre style="white-space:pre-wrap;margin:0;font-family:inherit;">${result}</pre>`;
-        document.getElementById('finalActions').classList.remove('hidden');
-      } catch (error) {
-        resultBox.innerHTML = `<div style="color:red">Error: ${error.message}</div>`;
+        renderQuestions();
+      } catch (e) {
+        alert('Reshuffle failed: ' + e.message);
       }
+
+      btn.disabled = false;
+      btn.textContent = '🔄';
     }
 
-    function copyForGenerator() {
-      const selectedDisguises = {};
-      currentChain.forEach(word => {
-        const selected = document.querySelector(`.disguise-item .word:contains('${word}')`);
-        const variant = document.querySelector(`.disguise-item:has(.word:contains('${word}')) .variant.selected`);
-        selectedDisguises[word] = variant ? variant.textContent : (currentDisguises[word] || [''])[0];
-      });
+    async function reshuffleDistractor(qIndex, dIndex) {
+      const q = quiz.questions[qIndex];
+      const d = q.distractors[dIndex];
+      q.rejectedDistractors.push(d.word);
 
-      // Fallback: get selected variants differently
-      const items = document.querySelectorAll('.disguise-item');
-      const output = currentChain.map((word, i) => {
-        const item = [...items].find(el => el.querySelector('.word').textContent === word);
-        const variant = item ? item.querySelector('.variant.selected')?.textContent : currentDisguises[word]?.[0];
-        return `${i + 1}. ${word} → ${variant || '?'}`;
-      }).join('\n');
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '...';
 
-      const fullOutput = `Chain: ${currentChain.join(' → ')}\n\nDisguises:\n${output}`;
+      try {
+        if (currentProvider === 'rules') {
+          d.word = `NEWDIST${qIndex}${dIndex}`;
+          d.disguise = generateDisguise(d.word);
+        } else {
+          const existingWords = [q.answer.word, q.prompt.toUpperCase(), ...q.distractors.map(x => x.word), ...q.rejectedDistractors];
+          const prompt = `Give me ONE distractor word for a synonym quiz.
+The prompt is "${q.prompt}" and the answer is "${q.answer.word}".
+The distractor type should be: ${d.type === 'phonetic-trap' ? 'non-synonym' : d.type}
+- wrong-letters: consonant pattern slightly off from a plausible word
+- non-synonym: valid word in same category but not a synonym
 
-      navigator.clipboard.writeText(fullOutput).then(() => {
-        alert('Copied to clipboard!');
+Avoid these words: ${existingWords.join(', ')}
+Return ONLY the single word in UPPERCASE, nothing else.`;
+          const response = await callServer(prompt);
+          let newWord = response.trim().toUpperCase().replace(/[^A-Z]/g, '');
+          // Validate it's not the answer or prompt
+          if (newWord === q.answer.word || newWord === q.prompt.toUpperCase()) {
+            throw new Error('AI suggested the answer/prompt. Try again.');
+          }
+          d.word = newWord;
+          d.disguise = generateDisguise(d.word);
+        }
+        renderQuestions();
+      } catch (e) {
+        alert('Reshuffle failed: ' + e.message);
+      }
+
+      btn.disabled = false;
+      btn.textContent = '🔄';
+    }
+
+    async function reshuffleAllDistractors(qIndex) {
+      const q = quiz.questions[qIndex];
+      q.rejectedDistractors.push(...q.distractors.map(d => d.word));
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      try {
+        if (currentProvider === 'rules') {
+          q.distractors = [
+            { word: `NEW${qIndex}A`, disguise: generateDisguise(`NEW${qIndex}A`), type: 'wrong-letters' },
+            { word: `NEW${qIndex}B`, disguise: generateDisguise(`NEW${qIndex}B`), type: 'non-synonym' },
+            { word: `NEW${qIndex}C`, disguise: generateDisguise(`NEW${qIndex}C`), type: 'phonetic-trap' },
+          ];
+        } else {
+          const prompt = `Generate 3 distractor words for a synonym quiz.
+The prompt is "${q.prompt}" and the answer is "${q.answer.word}".
+
+Provide exactly 3 distractors with types (use ONLY these two types):
+1. wrong-letters: consonant pattern slightly off from a plausible word
+2. non-synonym: valid word in same category but not a synonym
+Mix of types is fine. Use whichever fits best for each distractor.
+
+Avoid these words: ${[q.answer.word, q.prompt.toUpperCase(), ...q.rejectedDistractors].join(', ')}
+
+Format as JSON array: [{"word": "WORD", "type": "type"}]
+Return ONLY the JSON array.`;
+          const response = await callServer(prompt);
+          const jsonMatch = response.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            const forbidden = [q.answer.word, q.prompt.toUpperCase()];
+            q.distractors = parsed.slice(0, 3)
+              .map(d => ({
+                word: (d.word || '').toUpperCase(),
+                disguise: generateDisguise(d.word || ''),
+                type: d.type || 'non-synonym'
+              }))
+              .filter(d => !forbidden.includes(d.word));
+            // Pad if some were filtered
+            while (q.distractors.length < 3) {
+              q.distractors.push({ word: 'EDIT_ME', disguise: 'dtm', type: 'non-synonym' });
+            }
+          }
+        }
+        renderQuestions();
+      } catch (e) {
+        alert('Reshuffle failed: ' + e.message);
+      }
+
+      btn.disabled = false;
+      btn.textContent = '🔄 All';
+    }
+
+    // Build output JSON
+    function buildQuizJSON() {
+      const pubDate = document.getElementById('pubDate').value;
+      return {
+        theme: quiz.theme,
+        publicationDate: pubDate,
+        questions: quiz.questions.map(q => ({
+          prompt: q.prompt,
+          answer: q.answer.word,
+          answerDisguise: q.answer.disguise,
+          distractors: q.distractors.map(d => ({
+            word: d.word,
+            disguise: d.disguise,
+            type: d.type
+          }))
+        }))
+      };
+    }
+
+    // Export to clipboard
+    function exportQuiz() {
+      const output = buildQuizJSON();
+      const json = JSON.stringify(output, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        alert('Quiz JSON copied to clipboard!');
       }).catch(() => {
-        prompt('Copy this:', fullOutput);
+        prompt('Copy this JSON:', json);
       });
     }
 
-    function startOver() {
-      currentChain = [];
-      currentDisguises = {};
-      setStep(1);
-      document.getElementById('brainstorm-section').classList.remove('hidden');
-      document.getElementById('disguise-section').classList.add('hidden');
-      document.getElementById('validate-section').classList.add('hidden');
-      document.getElementById('chainPreview').classList.add('hidden');
-      document.getElementById('brainstormResult').classList.remove('show');
-      document.getElementById('brainstormInput').value = '';
-    }
+    // Save to filesystem
+    async function saveQuiz() {
+      const pubDate = document.getElementById('pubDate').value;
+      if (!pubDate) {
+        alert('Please set a publication date');
+        return;
+      }
 
-    // Rule-based implementations
-    function ruleBasedBrainstorm(input) {
-      const strict = document.getElementById('strictConsistency').checked;
+      const output = buildQuizJSON();
 
-      // Strict mode: all items in same category
-      const strictThemes = {
-        'ocean': ['WHALE', 'SHARK', 'DOLPHIN', 'OCTOPUS', 'JELLYFISH', 'SEAHORSE'],
-        'sports': ['TENNIS', 'SOCCER', 'BASEBALL', 'HOCKEY', 'GOLF', 'RUGBY'],
-        'kitchen': ['KNIFE', 'WHISK', 'SPATULA', 'GRATER', 'PEELER', 'TONGS'],
-        'music': ['PIANO', 'GUITAR', 'VIOLIN', 'DRUMS', 'TRUMPET', 'FLUTE'],
-        'tools': ['HAMMER', 'WRENCH', 'SCREWDRIVER', 'PLIERS', 'SAW', 'DRILL'],
-      };
+      try {
+        const response = await fetch('/api/save-puzzle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(output)
+        });
 
-      // Open mode: chains flow between categories
-      const openThemes = {
-        'ocean': ['WHALE', 'WAVE', 'ANCHOR', 'SHIP', 'PORT', 'HARBOR'],
-        'sports': ['BALL', 'GOAL', 'POST', 'FLAG', 'POLE', 'VAULT'],
-        'kitchen': ['KNIFE', 'CUT', 'STEAK', 'CATTLE', 'RANCH', 'HOUSE'],
-        'music': ['PIANO', 'KEYS', 'LOCK', 'SAFE', 'VAULT', 'JUMP'],
-        'tools': ['HAMMER', 'NAIL', 'FINGER', 'POINT', 'SCORE', 'MUSIC'],
-      };
-
-      const themes = strict ? strictThemes : openThemes;
-      const lowerInput = input.toLowerCase();
-
-      for (const [theme, chain] of Object.entries(themes)) {
-        if (lowerInput.includes(theme) || chain.some(w => w.toLowerCase() === lowerInput)) {
-          const modeNote = strict
-            ? '🔒 STRICT MODE: All words are within the same category.'
-            : '🔓 OPEN MODE: Chain flows between related categories.';
-          return `💡 CHAIN SUGGESTION for "${input}":\n\n${chain.map((w, i) => `${i + 1}. ${w}`).join('\n')}\n\n${modeNote}\n\n🔗 CONNECTIONS:\n1→2: Similar characteristics\n2→3: Related function\n3→4: Material or location\n4→5: Homophone or related concept\n5→6: Final connection`;
+        const result = await response.json();
+        if (response.ok) {
+          alert(`Saved to ${result.filename}`);
+        } else {
+          alert('Save failed: ' + result.error);
         }
+      } catch (e) {
+        alert('Save failed: ' + e.message);
       }
-
-      const modeHint = strict
-        ? `All 6 words should be examples of "${input}" (same category).`
-        : `Chain can flow from "${input}" to related concepts.`;
-
-      return `💡 CHAIN BUILDING TIPS for "${input}":\n\n${modeHint}\n\n1. ${input.toUpperCase()}\n2. (next word)\n3. (next word)\n4. (next word)\n5. (next word)\n6. (final word)\n\nUse an AI provider for better suggestions!`;
     }
 
-    function createPhoneticVariants(word) {
-      const variants = [];
-      const lower = word.toLowerCase();
-
-      let variant1 = lower.replace(/[aeiou]/gi, '');
-      if (variant1.length < 3) variant1 = lower.replace(/[aeiou](?!$)/gi, '');
-      variants.push(variant1);
-
-      let variant2 = lower.replace(/[aou]/gi, '');
-      variants.push(variant2);
-
-      let variant3 = lower.replace(/(.)\1+/g, '$1').replace(/[aeiou]/gi, '');
-      variants.push(variant3);
-
-      let variant4 = lower.slice(0, 4).replace(/[aeiou]/gi, '');
-      if (variant4.length >= 2) variants.push(variant4);
-
-      return [...new Set(variants)].filter(v => v.length >= 2).slice(0, 4);
-    }
-
-    function ruleBasedValidate(input) {
-      const words = input.split('\n').filter(w => w.trim()).map(w => w.trim().toUpperCase());
-
-      if (words.length !== 6) {
-        return `⚠️ VALIDATION WARNING:\nExpected 6 words, found ${words.length}.\n\nA puzzle chain typically has 6 links.`;
+    function clearQuiz() {
+      if (confirm('Clear all questions?')) {
+        quiz = { theme: '', questions: [] };
+        document.getElementById('themeInput').value = '';
+        document.getElementById('questionsContainer').innerHTML = `
+          <div class="empty-state">
+            <h3>No quiz generated yet</h3>
+            <p>Enter a theme above and click "Generate 6 Questions"</p>
+          </div>
+        `;
+        document.getElementById('exportSection').classList.add('hidden');
       }
-
-      let result = `✅ CHAIN VALIDATION:\n${words.join(' → ')}\n\n`;
-      result += '📊 ANALYSIS:\n';
-      result += `✓ Length: ${words.length} words\n`;
-      result += `✓ Word lengths: ${words.map(w => w.length).join(', ')}\n`;
-      result += `✓ Unique words: ${new Set(words).size === words.length ? 'Yes' : 'No (duplicates!)'}\n\n`;
-
-      result += '💭 CONNECTIONS TO DEFINE:\n';
-      words.forEach((word, i) => {
-        if (i < words.length - 1) {
-          result += `${i + 1}. ${word} → ${words[i + 1]}: ?\n`;
-        }
-      });
-
-      return result;
     }
 
-    // AI-based implementations
-    async function aiBrainstorm(input) {
-      const strict = document.getElementById('strictConsistency').checked;
-      let prompt;
-
-      if (strict) {
-        prompt = `You are helping create a word chain puzzle. Generate a 6-word chain where ALL words belong to the category "${input}". Every word must be a specific example within this category - do not drift to related categories.
-
-For example, if the category is "kitchen tools", all 6 words should be kitchen tools (knife, whisk, spatula, etc.), NOT foods or cooking actions.
-
-Format as a numbered list:
-1. WORD
-2. WORD
-...
-
-Then briefly explain the connection between each adjacent pair (they should share properties, uses, or characteristics while staying in the same category).`;
-      } else {
-        prompt = `You are helping create a word chain puzzle. Generate a 6-word chain starting with or related to "${input}". Each word should connect to the next with a clear logical relationship - the chain can flow naturally between related categories.
-
-For example, "kitchen tools" might lead to: KNIFE → CUT → STEAK → CATTLE → RANCH → HOUSE
-
-Format as a numbered list:
-1. WORD
-2. WORD
-...
-
-Then briefly explain each connection.`;
-      }
-      return await callServer(prompt);
-    }
-
-    async function aiDisguise(input) {
-      const prompt = `Create phonetic disguises for these words by removing vowels and simplifying spelling while keeping them pronounceable:\n\n${input}\n\nFor each word, provide 3-4 variants. Format: WORD: var1, var2, var3`;
-      return await callServer(prompt);
-    }
-
-    async function aiValidate(input) {
-      const prompt = `Validate this word puzzle chain. Check if:\n1. Each connection is logical and discoverable\n2. Difficulty is appropriate\n3. Words work well for phonetic disguises\n\nChain:\n${input}\n\nProvide specific feedback on each connection.`;
-      return await callServer(prompt);
-    }
-
+    // API call
     async function callServer(prompt) {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -1068,7 +923,7 @@ Then briefly explain each connection.`;
 
       const data = await response.json();
       if (!response.ok || data.error) {
-        throw new Error(data.error || `Server error: ${response.statusText}`);
+        throw new Error(data.error || 'Server error');
       }
       return data.content;
     }

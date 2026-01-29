@@ -31,69 +31,32 @@
     const { useState, useRef } = React;
 
     // ============================================
-    // PUZZLE DATA - Update this for each new puzzle
+    // PUZZLE DATA - Auto-updated by GitHub Action
     // ============================================
-    // TO RELEASE A NEW PUZZLE:
-    // 1. Update 'number' (increment by 1)
-    // 2. Update 'date' (day name or full date)
-    // 3. Replace all 6 'links' with new puzzle chain
-    // 4. Commit and push to deploy
+    // DO NOT EDIT MANUALLY - This is replaced by the
+    // publish-puzzle workflow with each day's puzzle
     // ============================================
-
+    // __PUZZLE_DATA_START__
     const CHAIN_DATA = {
-      number: 47,
-      date: "Wednesday",
-      links: [
-        {
-          category: "Ocean animal",
-          options: ["shrk", "cml", "frg", "lbrtr"],
-          answer: "shrk",
-          decoded: "SHARK",
-          emoji: "🦈",
-          bridge: "Has sharp teeth..."
-        },
-        {
-          category: "Dentist's tool",
-          options: ["drl", "hmrtn", "skrw", "pncl"],
-          answer: "drl",
-          decoded: "DRILL",
-          emoji: "🛠️",
-          bridge: "Makes holes..."
-        },
-        {
-          category: "Oil rig equipment",
-          options: ["drik", "pump", "fns", "bskt"],
-          answer: "drik",
-          decoded: "DERRICK",
-          emoji: "🗼",
-          bridge: "Tall tower..."
-        },
-        {
-          category: "Parisian landmark",
-          options: ["efl", "lvr", "notr", "mprs"],
-          answer: "efl",
-          decoded: "EIFFEL",
-          emoji: "🗼",
-          bridge: "Made of iron..."
-        },
-        {
-          category: "Golf club type",
-          options: ["irn", "wdg", "putr", "drvr"],
-          answer: "irn",
-          decoded: "IRON",
-          emoji: "⛳",
-          bridge: "Pressed flat..."
-        },
-        {
-          category: "Dress shirt part",
-          options: ["colr", "slf", "cuf", "bttn"],
-          answer: "colr",
-          decoded: "COLLAR",
-          emoji: "👔",
-          bridge: null
-        }
-      ]
+          "number": 397,
+          "date": "Friday",
+          "links": [
+                {
+                      "category": "Shed",
+                      "options": [
+                            "brn",
+                            "grj",
+                            "chk",
+                            "prch"
+                      ],
+                      "answer": "grj",
+                      "decoded": "GARAGE",
+                      "emoji": "🏢",
+                      "bridge": null
+                }
+          ]
     };
+    // __PUZZLE_DATA_END__
 
     // Audio feedback using Web Audio API
     const useAudio = () => {

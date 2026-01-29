@@ -1,13 +1,28 @@
-# CNMN - Word Chain Puzzle Game
+# cnmn - Word Puzzle Game
 
-A daily word puzzle game where players decode phonetically compressed words and connect them in a chain.
+A word puzzle game where players decode phonetically disguised words and identify synonyms. Inspired by the MLAT language aptitude test.
 
 ## Game Concept
 
-Inspired by Part III of the Modern Language Aptitude Test (MLAT), players:
-1. Decode disguised spellings (e.g., `shrk` → SHARK)
-2. Find connections between words in a chain
-3. Complete 6 linked puzzles per day
+Inspired by [Part III of the Modern Language Aptitude Test (MLAT)](https://lltf.net/mlat-sample-items/mlat-part-iii/), players decode phonetically disguised words and identify synonyms.
+
+### MLAT Part III: Spelling Clues
+
+The MLAT is a standardized test measuring language learning aptitude. Part III ("Spelling Clues") presents words in non-standard phonetic spellings, and test-takers must identify the meaning from multiple choices — in just 6 seconds per question.
+
+**Official MLAT examples:**
+
+| Disguised | Decoded | Answer Choices | Correct |
+|-----------|---------|----------------|---------|
+| kloz | clothes | attire, nearby, stick, giant, relatives | **attire** |
+| restrnt | restraint | food, self-control, sleep, space explorer, drug | **self-control** |
+| prezns | presents | kings, explanations, dates, gifts, forecasts | **gifts** |
+| grbj | garbage | car port, seize, boat, boast, waste | **waste** |
+
+cnmn builds on this concept by adding:
+- Multiple-choice distractors (wrong decodings, non-synonyms, phonetic traps)
+- Themed quiz sets
+- A playful, game-like experience
 
 See `cnmn-checkpoint1.md` for full game design details.
 
@@ -39,26 +54,14 @@ The puzzle uses three types of "almost right" distractors:
 
 This creates a layered challenge: decoding skill alone isn't enough — players must also verify meaning.
 
-### Chain Mode
+### Quiz Generator
 
-The game extends beyond single puzzles into **chain mode**, where each answer becomes the prompt for the next puzzle. A daily chain consists of 6 linked puzzles:
+The `puzzle-ai-assistant.html` tool helps create themed quizzes by:
+- Generating synonym pairs for a given theme (buildings, emotions, weather, etc.)
+- Creating phonetic disguises for answer words
+- Reviewing quiz quality before export
 
-```
-SHED → garage → VEHICLE → ... → [final word]
-       ↑                ↑
-    answer #1       prompt #2
-```
-
-This creates a satisfying flow where solving one puzzle unlocks the next, and players can use the emerging theme to help decode trickier words later in the chain.
-
-### Puzzle Builder
-
-The `puzzle-generator.html` tool helps admins create these chains by:
-- Defining each link's answer, options, and distractors
-- Setting bridge hints that connect adjacent words
-- Validating that the chain flows logically
-
-The `puzzle-ai-assistant.html` provides AI-powered help for brainstorming chains, generating plausible distractors, and validating puzzle quality.
+The `puzzle-generator.html` tool provides a form-based interface for manually building puzzles.
 
 ## Project Structure
 

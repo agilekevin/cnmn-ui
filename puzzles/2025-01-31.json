@@ -1,0 +1,28 @@
+{
+  "publicationDate": "2025-01-31",
+  "theme": "buildings",
+  "questions": [
+    {
+      "prompt": "shed",
+      "answer": "GARAGE",
+      "answerDisguise": "grj",
+      "distractors": [
+        {
+          "word": "PORCH",
+          "disguise": "prch",
+          "type": "non-synonym"
+        },
+        {
+          "word": "BARN",
+          "disguise": "brn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "SHACK",
+          "disguise": "chk",
+          "type": "wrong-letters"
+        }
+      ]
+    }
+  ]
+}

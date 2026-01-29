@@ -9,6 +9,8 @@ Usage:
 """
 
 import os
+import json
+import re
 from flask import Flask, jsonify, request, send_from_directory
 from dotenv import load_dotenv
 import requests
@@ -51,6 +53,33 @@ def get_providers():
         'openai': is_key_valid(OPENAI_API_KEY, 'sk-'),
         'anthropic': is_key_valid(ANTHROPIC_API_KEY)
     })
+
+
+@app.route('/api/save-puzzle', methods=['POST'])
+def save_puzzle():
+    """Save puzzle JSON to the puzzles directory."""
+    data = request.json
+
+    pub_date = data.get('publicationDate')
+    if not pub_date:
+        return jsonify({'error': 'No publication date provided'}), 400
+
+    # Validate date format (YYYY-MM-DD)
+    if not re.match(r'^\d{4}-\d{2}-\d{2}$', pub_date):
+        return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+
+    # Ensure puzzles directory exists
+    puzzles_dir = os.path.join(os.path.dirname(__file__), 'puzzles')
+    os.makedirs(puzzles_dir, exist_ok=True)
+
+    # Write file
+    filename = f'{pub_date}.json'
+    filepath = os.path.join(puzzles_dir, filename)
+
+    with open(filepath, 'w') as f:
+        json.dump(data, f, indent=2)
+
+    return jsonify({'success': True, 'filename': f'puzzles/{filename}'})
 
 
 @app.route('/api/chat', methods=['POST'])
