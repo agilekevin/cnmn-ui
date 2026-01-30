@@ -1,0 +1,138 @@
+{
+  "theme": "Kitchen Tools",
+  "publicationDate": "2026-01-29",
+  "questions": [
+    {
+      "prompt": "knife",
+      "answer": "BLADE",
+      "answerDisguise": "bld",
+      "distractors": [
+        {
+          "word": "BLAPE",
+          "disguise": "blp",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "SPOON",
+          "disguise": "spn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "FORK",
+          "disguise": "frk",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "spoon",
+      "answer": "LADLE",
+      "answerDisguise": "ldl",
+      "distractors": [
+        {
+          "word": "LADEN",
+          "disguise": "ldn",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "CHOPSTICK",
+          "disguise": "chpstk",
+          "type": "non-synonym"
+        },
+        {
+          "word": "TONGS",
+          "disguise": "tngs",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "pot",
+      "answer": "PAN",
+      "answerDisguise": "pn",
+      "distractors": [
+        {
+          "word": "LID",
+          "disguise": "ld",
+          "type": "phonetic-trap"
+        },
+        {
+          "word": "SPATULA",
+          "disguise": "sptl",
+          "type": "non-synonym"
+        },
+        {
+          "word": "GRATER",
+          "disguise": "grtr",
+          "type": "phonetic-trap"
+        }
+      ]
+    },
+    {
+      "prompt": "oven",
+      "answer": "STOVE",
+      "answerDisguise": "stv",
+      "distractors": [
+        {
+          "word": "FREEZER",
+          "disguise": "frzr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "FRIDGE",
+          "disguise": "frj",
+          "type": "non-synonym"
+        },
+        {
+          "word": "MICROWAVE",
+          "disguise": "mcrwv",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "plate",
+      "answer": "DISH",
+      "answerDisguise": "dsh",
+      "distractors": [
+        {
+          "word": "PLOTE",
+          "disguise": "plt",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "BOWL",
+          "disguise": "bwl",
+          "type": "non-synonym"
+        },
+        {
+          "word": "CUP",
+          "disguise": "cp",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "fridge",
+      "answer": "REFRIGERATOR",
+      "answerDisguise": "rfrgrtr",
+      "distractors": [
+        {
+          "word": "FRIGDE",
+          "disguise": "frgd",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "MICROWAFE",
+          "disguise": "mcrwf",
+          "type": "phonetic-trap"
+        },
+        {
+          "word": "DISHWASHER",
+          "disguise": "dshwshr",
+          "type": "non-synonym"
+        }
+      ]
+    }
+  ]
+}
