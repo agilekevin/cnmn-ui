@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cnmn - Word Chain Puzzle</title>
+  <title>cnmn - Synonym Puzzle</title>
   <style>
     body {
       margin: 0;
@@ -28,7 +28,7 @@
 
   <!-- Your React Component -->
   <script type="text/babel">
-    const { useState, useRef } = React;
+    const { useState, useRef, useEffect } = React;
 
     // ============================================
     // PUZZLE DATA - Auto-updated by GitHub Action
@@ -212,6 +212,61 @@
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    function LocalBadge() {
+      return (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100px',
+          height: '100px',
+          overflow: 'hidden',
+          zIndex: 9999,
+          pointerEvents: 'none',
+        }}>
+          {/* Folded corner */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 0,
+            height: 0,
+            borderStyle: 'solid',
+            borderWidth: '70px 70px 0 0',
+            borderColor: '#e8c49a transparent transparent transparent',
+            filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))',
+          }} />
+          {/* Fold shadow */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 0,
+            height: 0,
+            borderStyle: 'solid',
+            borderWidth: '70px 70px 0 0',
+            borderColor: 'rgba(0,0,0,0.08) transparent transparent transparent',
+            transform: 'translate(3px, 3px)',
+          }} />
+          {/* Text */}
+          <div style={{
+            position: 'absolute',
+            top: '18px',
+            left: '6px',
+            fontSize: '11px',
+            fontWeight: '700',
+            color: '#6b3410',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            transform: 'rotate(-45deg)',
+            transformOrigin: 'center',
+          }}>local</div>
+        </div>
+      );
+    }
+
     function CNMN() {
       const [currentLink, setCurrentLink] = useState(0);
       const [eliminated, setEliminated] = useState([]);
@@ -224,6 +279,14 @@
       const [shakeOption, setShakeOption] = useState(null);
       const [copied, setCopied] = useState(false);
       const [solvedLinks, setSolvedLinks] = useState([]);
+      const [showHelp, setShowHelp] = useState(() => {
+        return localStorage.getItem('cnmn-help-dismissed') !== 'true';
+      });
+
+      const dismissHelp = () => {
+        localStorage.setItem('cnmn-help-dismissed', 'true');
+        setShowHelp(false);
+      };
 
       const { playCorrect, playWrong, playComplete } = useAudio();
 
@@ -269,7 +332,7 @@
           missedLinks.includes(i) ? '○' : '●'
         ).join('');
 
-        return `cnmn #${chain.number} 🔗\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed`;
+        return `cnmn #${chain.number}\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed`;
       };
 
       const handleShare = async () => {
@@ -291,6 +354,7 @@
       if (solved) {
         return (
           <div style={styles.container}>
+            {isLocalhost && <LocalBadge />}
             <div style={styles.resultsCard}>
               <div style={styles.resultsHeader}>
                 <span style={styles.logo}>cnmn</span>
@@ -333,8 +397,8 @@
                 {copied ? 'Copied!' : 'Share'}
               </button>
 
-              <div style={styles.chainReview}>
-                <div style={styles.reviewTitle}>The Chain</div>
+              <div style={styles.answersReview}>
+                <div style={styles.reviewTitle}>Answers</div>
                 <div style={styles.reviewStartCategory}>{chain.links[0].category}</div>
                 {chain.links.map((l, i) => (
                   <div key={i} style={styles.reviewItem}>
@@ -351,12 +415,38 @@
       // Game screen
       return (
         <div style={styles.container}>
+          {isLocalhost && <LocalBadge />}
           <div style={styles.header}>
             <span style={styles.logo}>cnmn</span>
-            <span style={styles.puzzleInfo}>#{chain.number} · {chain.date}</span>
+            <div style={styles.headerRight}>
+              <span style={styles.puzzleInfo}>#{chain.number} · {chain.date}</span>
+              <button
+                style={styles.helpButton}
+                onClick={() => setShowHelp(!showHelp)}
+                title="How to play"
+              >?</button>
+            </div>
           </div>
 
-          {/* Image chain progress */}
+          {/* How to Play */}
+          {showHelp && (
+            <div style={styles.helpBox}>
+              <div style={styles.helpTitle}>How to Play</div>
+              <div style={styles.helpText}>
+                Find the synonym! Answers are disguised as phonetic codes—sound them out.
+              </div>
+              <div style={styles.helpExample}>
+                <span style={styles.helpPrompt}>shed</span>
+                <span style={styles.helpArrow}>→</span>
+                <span style={styles.helpCode}>grj</span>
+                <span style={styles.helpArrow}>=</span>
+                <span style={styles.helpAnswer}>GARAGE</span>
+              </div>
+              <button style={styles.helpDismiss} onClick={dismissHelp}>Got it!</button>
+            </div>
+          )}
+
+          {/* Progress */}
           <div style={styles.imageChain}>
             {solvedLinks.map((linkIdx) => (
               <React.Fragment key={linkIdx}>
@@ -466,8 +556,102 @@
         color: '#8b6340',
         letterSpacing: '0.5px',
       },
+      headerRight: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      },
+      helpButton: {
+        width: '28px',
+        height: '28px',
+        borderRadius: '50%',
+        border: '2px solid #c4a574',
+        backgroundColor: 'transparent',
+        color: '#8b6340',
+        fontSize: '14px',
+        fontWeight: '700',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0,
+        boxShadow: 'none',
+      },
 
-      // Image chain at top
+      // How to Play
+      helpBox: {
+        width: '100%',
+        maxWidth: '420px',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '14px',
+        padding: '20px',
+        marginBottom: '20px',
+        border: '2px solid #c4a574',
+        boxShadow: '0 4px 16px rgba(107, 52, 16, 0.12)',
+        textAlign: 'center',
+      },
+      helpTitle: {
+        fontSize: '14px',
+        fontWeight: '700',
+        color: '#6b3410',
+        textTransform: 'uppercase',
+        letterSpacing: '2px',
+        marginBottom: '12px',
+      },
+      helpText: {
+        fontSize: '14px',
+        color: '#8b6340',
+        lineHeight: '1.5',
+        marginBottom: '16px',
+      },
+      helpExample: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '10px',
+        marginBottom: '16px',
+        flexWrap: 'wrap',
+      },
+      helpPrompt: {
+        fontSize: '16px',
+        fontStyle: 'italic',
+        color: '#6b3410',
+      },
+      helpArrow: {
+        fontSize: '14px',
+        color: '#b8956d',
+      },
+      helpAnswer: {
+        fontSize: '16px',
+        fontWeight: '600',
+        fontFamily: "'IBM Plex Mono', monospace",
+        color: '#6b3410',
+        letterSpacing: '1px',
+      },
+      helpCode: {
+        fontSize: '18px',
+        fontWeight: '600',
+        fontFamily: "'IBM Plex Mono', monospace",
+        color: '#6b3410',
+        backgroundColor: '#f5e6d3',
+        padding: '4px 10px',
+        borderRadius: '6px',
+        letterSpacing: '1px',
+      },
+      helpDismiss: {
+        padding: '10px 24px',
+        fontSize: '13px',
+        fontFamily: "'Libre Baskerville', Georgia, serif",
+        fontWeight: '600',
+        backgroundColor: '#6b3410',
+        color: '#fdfbf7',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        letterSpacing: '1px',
+      },
+
+      // Progress at top
       imageChain: {
         display: 'flex',
         alignItems: 'center',
@@ -743,7 +927,7 @@
         boxShadow: '0 5px 0 #4a2309, 0 8px 24px rgba(107, 52, 16, 0.3)',
         transition: 'all 0.2s ease',
       },
-      chainReview: {
+      answersReview: {
         textAlign: 'left',
         padding: '28px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',

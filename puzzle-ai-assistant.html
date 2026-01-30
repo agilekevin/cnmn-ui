@@ -236,6 +236,23 @@
       text-align: center;
     }
 
+    .disguise-input {
+      font-family: 'Courier New', monospace;
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      width: 70px;
+      text-align: center;
+      border: 2px solid #2d2d2d;
+    }
+
+    .disguise-input:focus {
+      border-color: #6b3410;
+      outline: none;
+    }
+
     .type-badge {
       font-size: 10px;
       padding: 2px 6px;
@@ -321,6 +338,184 @@
       color: #6b3410;
       margin-bottom: 8px;
     }
+
+    /* Emoji picker */
+    .emoji-picker-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .emoji-btn {
+      width: 40px;
+      height: 36px;
+      font-size: 20px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border: 2px solid #c4a574;
+      color: #6b3410;
+    }
+
+    .emoji-btn:hover {
+      background: #f5e6d3;
+    }
+
+    .emoji-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 100;
+      background: white;
+      border: 2px solid #c4a574;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      width: 340px;
+      flex-direction: column;
+    }
+
+    .emoji-dropdown.open {
+      display: flex;
+    }
+
+    .emoji-search {
+      padding: 10px;
+      border-bottom: 1px solid #ecdbc8;
+    }
+
+    .emoji-search input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 2px solid #ecdbc8;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .emoji-search input:focus {
+      border-color: #c4a574;
+    }
+
+    .emoji-tabs {
+      display: flex;
+      border-bottom: 1px solid #ecdbc8;
+      padding: 0 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .emoji-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .emoji-tab {
+      padding: 8px 6px;
+      font-size: 18px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .emoji-tab:hover {
+      opacity: 0.8;
+    }
+
+    .emoji-tab.active {
+      opacity: 1;
+      border-bottom-color: #6b3410;
+    }
+
+    .emoji-grid-container {
+      height: 200px;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .emoji-section-label {
+      font-size: 11px;
+      color: #8b6340;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 4px 8px;
+      font-weight: 600;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 2px;
+    }
+
+    .emoji-option {
+      width: 34px;
+      height: 34px;
+      font-size: 22px;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: all 0.15s;
+    }
+
+    .emoji-option:hover {
+      background: #f5e6d3;
+      transform: scale(1.15);
+    }
+
+    .emoji-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-top: 1px solid #ecdbc8;
+      background: #faf7f2;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .emoji-clear {
+      background: #ecdbc8;
+      color: #6b3410;
+      font-size: 11px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .emoji-clear:hover {
+      background: #dcc9a8;
+    }
+
+    .emoji-no-results {
+      text-align: center;
+      padding: 30px;
+      color: #8b6340;
+      font-size: 13px;
+    }
+
+    .emoji-direct-input {
+      width: 90px;
+      padding: 5px 8px;
+      border: 2px solid #ecdbc8;
+      border-radius: 4px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .emoji-direct-input:focus {
+      border-color: #c4a574;
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -390,6 +585,7 @@
     // Question structure:
     // {
     //   prompt: "shed",
+    //   emoji: "🏠",
     //   rejectedPrompts: [],
     //   answer: { word: "GARAGE", disguise: "grj" },
     //   rejectedAnswers: [],
@@ -400,6 +596,55 @@
     //   ],
     //   rejectedDistractors: []
     // }
+
+    // Comprehensive emoji data organized by category
+    const emojiCategories = {
+      'Smileys': {
+        icon: '😀',
+        emojis: ['😀','😃','😄','😁','😅','😂','🤣','😊','😇','🙂','😉','😌','😍','🥰','😘','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','😮‍💨','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖']
+      },
+      'People': {
+        icon: '👋',
+        emojis: ['👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄','👶','🧒','👦','👧','🧑','👱','👨','🧔','👩','🧓','👴','👵','🙍','🙎','🙅','🙆','💁','🙋','🧏','🙇','🤦','🤷','👮','🕵️','💂','🥷','👷','🤴','👸','👳','👲','🧕','🤵','👰','🤰','🫃','🫄','🤱','👼','🎅','🤶','🦸','🦹','🧙','🧚','🧛','🧜','🧝','🧞','🧟','💆','💇','🚶','🧍','🧎','🏃','💃','🕺','🕴️','👯','🧖','🧗','🤸','🏌️','🏇','⛷️','🏂','🏋️','🤼','🤽','🤾','🤺','⛹️','🏊','🚣','🧘','🛀','🛌']
+      },
+      'Animals': {
+        icon: '🐾',
+        emojis: ['🐶','🐕','🦮','🐕‍🦺','🐩','🐺','🦊','🦝','🐱','🐈','🐈‍⬛','🦁','🐯','🐅','🐆','🐴','🐎','🦄','🦓','🦌','🦬','🐮','🐂','🐃','🐄','🐷','🐖','🐗','🐽','🐏','🐑','🐐','🐪','🐫','🦙','🦒','🐘','🦣','🦏','🦛','🐭','🐁','🐀','🐹','🐰','🐇','🐿️','🦫','🦔','🦇','🐻','🐻‍❄️','🐨','🐼','🦥','🦦','🦨','🦘','🦡','🐾','🦃','🐔','🐓','🐣','🐤','🐥','🐦','🐧','🕊️','🦅','🦆','🦢','🦉','🦤','🪶','🦩','🦚','🦜','🐸','🐊','🐢','🦎','🐍','🐲','🐉','🦕','🦖','🐳','🐋','🐬','🦭','🐟','🐠','🐡','🦈','🐙','🐚','🐌','🦋','🐛','🐜','🐝','🪲','🐞','🦗','🪳','🕷️','🕸️','🦂','🦟','🪰','🪱','🦠']
+      },
+      'Nature': {
+        icon: '🌿',
+        emojis: ['💐','🌸','💮','🏵️','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🌾','🌿','☘️','🍀','🍁','🍂','🍃','🍇','🍈','🍉','🍊','🍋','🍌','🍍','🥭','🍎','🍏','🍐','🍑','🍒','🍓','🫐','🥝','🍅','🫒','🥥','🥑','🍆','🥔','🥕','🌽','🌶️','🫑','🥒','🥬','🥦','🧄','🧅','🍄','🥜','🌰','🍞','🥐','🥖','🫓','🥨','🥯','🥞','🧇','🧀','🍖','🍗','🥩','🥓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🫔','🥙','🧆','🥚','🍳','🥘','🍲','🫕','🥣','🥗','🍿','🧈','🧂','🥫','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🥡','🦀','🦞','🦐','🦑','🦪','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','🥛','☕','🫖','🍵','🍶','🍾','🍷','🍸','🍹','🍺','🍻','🥂','🥃','🥤','🧋','🧃','🧉','🧊']
+      },
+      'Travel': {
+        icon: '✈️',
+        emojis: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🏍️','🛵','🚲','🛴','🛹','🛼','🚏','🛣️','🛤️','🛢️','⛽','🚨','🚥','🚦','🛑','🚧','⚓','⛵','🛶','🚤','🛳️','⛴️','🛥️','🚢','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🛎️','🧳','⌛','⏳','⌚','⏰','⏱️','⏲️','🕰️','🌡️','🗺️','🧭','🏔️','⛰️','🌋','🗻','🏕️','🏖️','🏜️','🏝️','🏞️','🏟️','🏛️','🏗️','🧱','🪨','🪵','🛖','🏘️','🏚️','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','🛕','🕍','⛩️','🕋','⛲','⛺','🌁','🌃','🏙️','🌄','🌅','🌆','🌇','🌉','🎠','🎡','🎢','💈','🎪']
+      },
+      'Activities': {
+        icon: '⚽',
+        emojis: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛷','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','🤺','⛹️','🤾','🏌️','🏇','⛸️','🏊','🚴','🚵','🧗','🤽','🎖️','🏆','🥇','🥈','🥉','🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎋','🎍','🎎','🎏','🎐','🎑','🧧','🎀','🎁','🎗️','🎟️','🎫','🎠','🎡','🎢','🎪','🎭','🖼️','🎨','🧵','🪡','🧶','🪢']
+      },
+      'Objects': {
+        icon: '💡',
+        emojis: ['⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💽','💾','💿','📀','📼','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏲️','⏰','🕰️','⌛','⏳','📡','🔋','🔌','💡','🔦','🕯️','🪔','🧯','🛢️','💸','💵','💴','💶','💷','🪙','💰','💳','💎','⚖️','🪜','🧰','🪛','🔧','🔨','⚒️','🛠️','⛏️','🪚','🔩','⚙️','🪤','🧱','⛓️','🧲','🔫','💣','🧨','🪓','🔪','🗡️','⚔️','🛡️','🚬','⚰️','🪦','⚱️','🏺','🔮','📿','🧿','💈','⚗️','🔭','🔬','🕳️','🩹','🩺','💊','💉','🩸','🧬','🦠','🧫','🧪','🌡️','🧹','🪠','🧺','🧻','🚽','🚰','🚿','🛁','🛀','🧼','🪥','🪒','🧽','🪣','🧴','🛎️','🔑','🗝️','🚪','🪑','🛋️','🛏️','🛌','🧸','🪆','🖼️','🪞','🪟','🛒','🎁','🎈','🎏','🎀','🪄','🪅','🎊','🎉','🎎','🏮','🎐','🧧','✉️','📩','📨','📧','💌','📥','📤','📦','🏷️','📪','📫','📬','📭','📮','📯','📜','📃','📄','📑','🧾','📊','📈','📉','🗒️','🗓️','📆','📅','🗑️','📇','🗃️','🗳️','🗄️','📋','📁','📂','🗂️','🗞️','📰','📓','📔','📒','📕','📗','📘','📙','📚','📖','🔖','🧷','🔗','📎','🖇️','📐','📏','🧮','📌','📍','✂️','🖊️','🖋️','✒️','🖌️','🖍️','📝','✏️','🔍','🔎','🔏','🔐','🔒','🔓']
+      },
+      'Symbols': {
+        icon: '❤️',
+        emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','⚧️','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆖','🆗','🆙','🆒','🆕','🆓','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','🔢','#️⃣','*️⃣','⏏️','▶️','⏸️','⏯️','⏹️','⏺️','⏭️','⏮️','⏩','⏪','⏫','⏬','◀️','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','↪️','↩️','⤴️','⤵️','🔀','🔁','🔂','🔄','🔃','➿','🔚','🔙','🔛','🔝','🔜','✔️','☑️','🔘','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🔺','🔻','🔸','🔹','🔶','🔷','🔳','🔲','▪️','▫️','◾','◽','◼️','◻️','🟥','🟧','🟨','🟩','🟦','🟪','⬛','⬜','🟫','🔈','🔇','🔉','🔊','🔔','🔕','📣','📢','👁️‍🗨️','💬','💭','🗯️','♠️','♣️','♥️','♦️','🃏','🎴','🀄']
+      },
+      'Weather': {
+        icon: '☀️',
+        emojis: ['☀️','🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','🌬️','💨','🌪️','🌫️','🌈','☔','⚡','❄️','🔥','💧','🌊','⭐','🌟','✨','💫','🌙','🌛','🌜','🌝','🌞','🪐','⚡','☄️','🌍','🌎','🌏','🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘']
+      },
+      'Flags': {
+        icon: '🏳️',
+        emojis: ['🏳️','🏴','🏴‍☠️','🏁','🚩','🎌','🏳️‍🌈','🏳️‍⚧️','🇺🇸','🇬🇧','🇨🇦','🇦🇺','🇫🇷','🇩🇪','🇮🇹','🇪🇸','🇯🇵','🇰🇷','🇨🇳','🇮🇳','🇧🇷','🇲🇽','🇷🇺','🇿🇦','🇳🇱','🇧🇪','🇨🇭','🇦🇹','🇸🇪','🇳🇴','🇩🇰','🇫🇮','🇵🇱','🇮🇪','🇵🇹','🇬🇷','🇹🇷','🇪🇬','🇮🇱','🇸🇦','🇦🇪','🇹🇭','🇻🇳','🇮🇩','🇵🇭','🇲🇾','🇸🇬','🇳🇿','🇦🇷','🇨🇱','🇨🇴','🇵🇪','🇻🇪']
+      }
+    };
+
+    // Track recently used emojis
+    let recentEmojis = JSON.parse(localStorage.getItem('cnmn-recent-emojis') || '[]');
+    let currentEmojiCategory = 'Smileys';
+    let emojiSearchQuery = '';
 
     // Load providers
     async function loadProviders() {
@@ -545,6 +790,7 @@
 
       return data.map(q => ({
         prompt: q.prompt,
+        emoji: '',
         rejectedPrompts: [],
         answer: { word: q.answer, disguise: generateDisguise(q.answer) },
         rejectedAnswers: [],
@@ -602,6 +848,7 @@ Return ONLY the JSON array, no other text.`;
 
       return parsed.slice(0, 6).map(q => ({
         prompt: q.prompt || '',
+        emoji: '',
         rejectedPrompts: [],
         answer: {
           word: (q.answer || '').toUpperCase(),
@@ -631,6 +878,26 @@ Return ONLY the JSON array, no other text.`;
 
           <div class="field-row">
             <label>Prompt:</label>
+            <div class="emoji-picker-container">
+              <button type="button" class="emoji-btn" onclick="toggleEmojiPicker(${index})">${q.emoji || '➕'}</button>
+              <div class="emoji-dropdown" id="emoji-dropdown-${index}">
+                <div class="emoji-search">
+                  <input type="text" placeholder="Search emojis..." oninput="filterEmojis(${index}, this.value)" id="emoji-search-${index}">
+                </div>
+                <div class="emoji-tabs" id="emoji-tabs-${index}">
+                  ${Object.entries(emojiCategories).map(([name, cat]) =>
+                    `<button type="button" class="emoji-tab ${name === currentEmojiCategory ? 'active' : ''}" onclick="switchEmojiCategory(${index}, '${name}')" title="${name}">${cat.icon}</button>`
+                  ).join('')}
+                </div>
+                <div class="emoji-grid-container" id="emoji-grid-${index}">
+                  ${renderEmojiGrid(index)}
+                </div>
+                <div class="emoji-footer">
+                  <button type="button" class="emoji-clear" onclick="selectEmoji(${index}, '')">Clear</button>
+                  <input type="text" class="emoji-direct-input" placeholder="Paste any emoji" id="emoji-direct-${index}" onkeydown="handleDirectEmoji(event, ${index})" maxlength="2">
+                </div>
+              </div>
+            </div>
             <input type="text" value="${q.prompt}" onchange="updatePrompt(${index}, this.value)" />
             <button class="small" onclick="reshufflePrompt(${index})">🔄</button>
           </div>
@@ -638,7 +905,7 @@ Return ONLY the JSON array, no other text.`;
           <div class="field-row">
             <label>Answer:</label>
             <input type="text" value="${q.answer.word}" onchange="updateAnswer(${index}, this.value)" />
-            <span class="disguise-preview">${q.answer.disguise}</span>
+            <input type="text" class="disguise-input" value="${q.answer.disguise}" onchange="updateAnswerDisguise(${index}, this.value)" title="Edit clue" />
             <button class="small" onclick="reshuffleAnswer(${index})">🔄</button>
           </div>
 
@@ -650,7 +917,7 @@ Return ONLY the JSON array, no other text.`;
             ${q.distractors.map((d, di) => `
               <div class="field-row">
                 <input type="text" value="${d.word}" onchange="updateDistractor(${index}, ${di}, this.value)" style="flex:1" />
-                <span class="disguise-preview">${d.disguise}</span>
+                <input type="text" class="disguise-input" value="${d.disguise}" onchange="updateDistractorDisguise(${index}, ${di}, this.value)" title="Edit clue" />
                 <span class="type-badge clickable ${d.type}" onclick="cycleType(${index}, ${di})" title="Click to change type">${d.type}</span>
                 <button class="small" onclick="reshuffleDistractor(${index}, ${di})">🔄</button>
               </div>
@@ -659,6 +926,136 @@ Return ONLY the JSON array, no other text.`;
         </div>
       `;
     }
+
+    // Emoji picker functions
+    function renderEmojiGrid(qIndex, searchQuery = '') {
+      if (searchQuery) {
+        // Search across all categories
+        const results = [];
+        Object.values(emojiCategories).forEach(cat => {
+          cat.emojis.forEach(e => {
+            if (results.length < 64) results.push(e);
+          });
+        });
+        // Filter by search - for simplicity, just show all emojis and let user scroll
+        // A real implementation would use emoji names/keywords
+        const filtered = results.slice(0, 64);
+        if (filtered.length === 0) {
+          return '<div class="emoji-no-results">No emojis found</div>';
+        }
+        return `
+          <div class="emoji-grid">
+            ${filtered.map(e => `<button type="button" class="emoji-option" onclick="selectEmoji(${qIndex}, '${e}')">${e}</button>`).join('')}
+          </div>
+        `;
+      }
+
+      // Show recent emojis if any
+      let html = '';
+      if (recentEmojis.length > 0) {
+        html += `
+          <div class="emoji-section-label">Recent</div>
+          <div class="emoji-grid">
+            ${recentEmojis.slice(0, 16).map(e => `<button type="button" class="emoji-option" onclick="selectEmoji(${qIndex}, '${e}')">${e}</button>`).join('')}
+          </div>
+        `;
+      }
+
+      // Show current category
+      const cat = emojiCategories[currentEmojiCategory];
+      if (cat) {
+        html += `
+          <div class="emoji-section-label">${currentEmojiCategory}</div>
+          <div class="emoji-grid">
+            ${cat.emojis.map(e => `<button type="button" class="emoji-option" onclick="selectEmoji(${qIndex}, '${e}')">${e}</button>`).join('')}
+          </div>
+        `;
+      }
+
+      return html;
+    }
+
+    function toggleEmojiPicker(qIndex) {
+      // Close any other open pickers
+      document.querySelectorAll('.emoji-dropdown.open').forEach(el => {
+        if (el.id !== `emoji-dropdown-${qIndex}`) {
+          el.classList.remove('open');
+        }
+      });
+      const dropdown = document.getElementById(`emoji-dropdown-${qIndex}`);
+      const isOpening = !dropdown.classList.contains('open');
+      dropdown.classList.toggle('open');
+
+      // Reset search when opening
+      if (isOpening) {
+        const searchInput = document.getElementById(`emoji-search-${qIndex}`);
+        if (searchInput) {
+          searchInput.value = '';
+          emojiSearchQuery = '';
+        }
+        updateEmojiGrid(qIndex);
+      }
+    }
+
+    function switchEmojiCategory(qIndex, category) {
+      currentEmojiCategory = category;
+      // Update active tab
+      const tabsContainer = document.getElementById(`emoji-tabs-${qIndex}`);
+      tabsContainer.querySelectorAll('.emoji-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      // Clear search
+      const searchInput = document.getElementById(`emoji-search-${qIndex}`);
+      if (searchInput) searchInput.value = '';
+      emojiSearchQuery = '';
+      // Update grid
+      updateEmojiGrid(qIndex);
+    }
+
+    function filterEmojis(qIndex, query) {
+      emojiSearchQuery = query.toLowerCase();
+      updateEmojiGrid(qIndex);
+    }
+
+    function updateEmojiGrid(qIndex) {
+      const gridContainer = document.getElementById(`emoji-grid-${qIndex}`);
+      if (gridContainer) {
+        gridContainer.innerHTML = renderEmojiGrid(qIndex, emojiSearchQuery);
+      }
+    }
+
+    function selectEmoji(qIndex, emoji) {
+      quiz.questions[qIndex].emoji = emoji;
+      document.getElementById(`emoji-dropdown-${qIndex}`).classList.remove('open');
+
+      // Add to recent emojis
+      if (emoji) {
+        recentEmojis = [emoji, ...recentEmojis.filter(e => e !== emoji)].slice(0, 16);
+        localStorage.setItem('cnmn-recent-emojis', JSON.stringify(recentEmojis));
+      }
+
+      renderQuestions();
+    }
+
+    function handleDirectEmoji(event, qIndex) {
+      if (event.key === 'Enter') {
+        const input = document.getElementById(`emoji-direct-${qIndex}`);
+        const emoji = input.value.trim();
+        if (emoji) {
+          selectEmoji(qIndex, emoji);
+        }
+      }
+    }
+
+    // Close emoji picker when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.emoji-picker-container')) {
+        document.querySelectorAll('.emoji-dropdown.open').forEach(el => {
+          el.classList.remove('open');
+        });
+      }
+    });
 
     // Update functions
     function updatePrompt(qIndex, value) {
@@ -679,6 +1076,14 @@ Return ONLY the JSON array, no other text.`;
       quiz.questions[qIndex].distractors[dIndex].word = word;
       quiz.questions[qIndex].distractors[dIndex].disguise = generateDisguise(word);
       renderQuestions();
+    }
+
+    function updateAnswerDisguise(qIndex, value) {
+      quiz.questions[qIndex].answer.disguise = value.toLowerCase();
+    }
+
+    function updateDistractorDisguise(qIndex, dIndex, value) {
+      quiz.questions[qIndex].distractors[dIndex].disguise = value.toLowerCase();
     }
 
     function cycleType(qIndex, dIndex) {
@@ -849,6 +1254,7 @@ Return ONLY the JSON array.`;
         publicationDate: pubDate,
         questions: quiz.questions.map(q => ({
           prompt: q.prompt,
+          emoji: q.emoji || '',
           answer: q.answer.word,
           answerDisguise: q.answer.disguise,
           distractors: q.distractors.map(d => ({

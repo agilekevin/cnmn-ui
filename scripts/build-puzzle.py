@@ -14,25 +14,7 @@ import re
 import sys
 from datetime import datetime
 
-# Emoji mapping for common themes/words (can be expanded)
-EMOJI_MAP = {
-    'building': '🏢', 'house': '🏠', 'home': '🏠', 'garage': '🏗️',
-    'hotel': '🏨', 'castle': '🏰', 'church': '⛪', 'tower': '🗼',
-    'emotion': '😊', 'happy': '😊', 'sad': '😢', 'angry': '😠',
-    'weather': '🌤️', 'rain': '🌧️', 'sun': '☀️', 'storm': '⛈️',
-    'animal': '🐾', 'dog': '🐕', 'cat': '🐱', 'bird': '🐦',
-    'default': '❓'
-}
-
-def get_emoji(word, theme=''):
-    """Get an emoji for a word or theme."""
-    word_lower = word.lower()
-    theme_lower = theme.lower()
-
-    for key, emoji in EMOJI_MAP.items():
-        if key in word_lower or key in theme_lower:
-            return emoji
-    return EMOJI_MAP['default']
+MISSING_EMOJI = '❓'
 
 def transform_quiz_to_chain(quiz_data):
     """Transform our quiz JSON format to the CHAIN_DATA format."""
@@ -72,7 +54,7 @@ def transform_quiz_to_chain(quiz_data):
             'options': options[:4],  # Max 4 options
             'answer': answer_disguise,
             'decoded': q.get('answer', ''),
-            'emoji': get_emoji(q.get('answer', ''), theme),
+            'emoji': q.get('emoji') or MISSING_EMOJI,
             'bridge': None  # No chaining in quiz mode
         }
         links.append(link)
