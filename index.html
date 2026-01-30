@@ -473,22 +473,8 @@
             ) : (
               <>
                 <div style={styles.categoryContainer}>
-                  {currentLink === 0 ? (
-                    <>
-                      <div style={styles.categoryLabel}>Find the</div>
-                      <div style={styles.category}>{link.category}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={styles.categoryLabel}>What connects to...</div>
-                      <div style={{...styles.previousEmojiContainer, ...styles.emojiContainer}}>
-                        <span style={styles.emojiMedium}>{chain.links[currentLink - 1].emoji}</span>
-                      </div>
-                      <div style={styles.previousAnswer}>
-                        {chain.links[currentLink - 1].decoded}
-                      </div>
-                    </>
-                  )}
+                  <div style={styles.categoryLabel}>Find the synonym</div>
+                  <div style={styles.category}>{link.category}</div>
                 </div>
 
                 <div style={styles.options}>
