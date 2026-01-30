@@ -130,6 +130,7 @@
       font-style: italic;
     }
 
+
     /* Provider selection */
     .provider-bar {
       display: flex;
@@ -689,11 +690,104 @@
       });
     }
 
-    // Disguise generation (rule-based)
-    function generateDisguise(word) {
+    // ============================================
+    // DISGUISE GENERATION & VALIDATION
+    // ============================================
+
+    // Validation guardrails for disguises
+    const DisguiseValidator = {
+      // Check basic format requirements
+      isValidFormat(disguise) {
+        if (!disguise || typeof disguise !== 'string') return { valid: false, reason: 'Empty or invalid' };
+        const d = disguise.toLowerCase().trim();
+        if (d.length < 2) return { valid: false, reason: 'Too short (< 2 chars)' };
+        if (d.length > 10) return { valid: false, reason: 'Too long (> 10 chars)' };
+        if (!/^[a-z]+$/.test(d)) return { valid: false, reason: 'Contains non-letter characters' };
+        return { valid: true };
+      },
+
+      // Check if disguise is too similar to original word
+      isTooSimilarToWord(disguise, word) {
+        const d = disguise.toLowerCase();
+        const w = word.toLowerCase();
+        if (d === w) return { valid: false, reason: 'Identical to original word' };
+        if (w.includes(d) && d.length > 2) return { valid: false, reason: 'Word contains disguise as substring' };
+        if (d.includes(w)) return { valid: false, reason: 'Disguise contains word as substring' };
+        return { valid: true };
+      },
+
+      // Check answer disguise
+      validateAnswerDisguise(disguise, word) {
+        const formatCheck = this.isValidFormat(disguise);
+        if (!formatCheck.valid) return formatCheck;
+
+        const similarCheck = this.isTooSimilarToWord(disguise, word);
+        if (!similarCheck.valid) return similarCheck;
+
+        return { valid: true };
+      },
+
+      // Check distractor disguise
+      validateDistractor(distractor, answerDisguise, answerWord, prompt, allDisguises = []) {
+        const formatCheck = this.isValidFormat(distractor);
+        if (!formatCheck.valid) return formatCheck;
+
+        const d = distractor.toLowerCase();
+        const ans = answerDisguise.toLowerCase();
+        const ansWord = answerWord.toLowerCase();
+        const p = prompt.toLowerCase();
+
+        // Can't match the answer disguise
+        if (d === ans) return { valid: false, reason: 'Identical to answer disguise' };
+
+        // Can't be the answer word's consonants exactly
+        const ansConsonants = ansWord.replace(/[aeiou]/g, '');
+        if (d === ansConsonants) return { valid: false, reason: 'Matches answer consonant pattern' };
+
+        // Can't be the prompt's consonants
+        const promptConsonants = p.replace(/[aeiou]/g, '');
+        if (d === promptConsonants) return { valid: false, reason: 'Matches prompt consonant pattern' };
+
+        // Can't duplicate another distractor
+        if (allDisguises.some(existing => existing.toLowerCase() === d)) {
+          return { valid: false, reason: 'Duplicate of another option' };
+        }
+
+        // Length should be within ±3 of answer disguise
+        if (Math.abs(d.length - ans.length) > 3) {
+          return { valid: false, reason: `Length too different from answer (${d.length} vs ${ans.length})` };
+        }
+
+        return { valid: true };
+      },
+
+      // Validate all options together
+      validateOptionSet(answerDisguise, distractors) {
+        const all = [answerDisguise, ...distractors].map(d => d.toLowerCase());
+
+        // Check for duplicates
+        const unique = new Set(all);
+        if (unique.size !== all.length) {
+          return { valid: false, reason: 'Duplicate disguises in option set' };
+        }
+
+        // Check no option is substring of another
+        for (let i = 0; i < all.length; i++) {
+          for (let j = 0; j < all.length; j++) {
+            if (i !== j && all[j].includes(all[i]) && all[i].length > 2) {
+              return { valid: false, reason: `"${all[i]}" is substring of "${all[j]}"` };
+            }
+          }
+        }
+
+        return { valid: true };
+      }
+    };
+
+    // Rule-based disguise (fallback)
+    function generateDisguiseRuleBased(word) {
       if (!word) return '';
       const lower = word.toLowerCase();
-      // Remove vowels, apply phonetic simplifications
       let disguise = lower
         .replace(/tion$/i, 'shn')
         .replace(/sion$/i, 'zhn')
@@ -707,11 +801,136 @@
         .replace(/kn/g, 'n')
         .replace(/[aeiou]/g, '');
 
-      // Ensure minimum length
       if (disguise.length < 2) {
         disguise = lower.replace(/[aeiou](?=[aeiou])/g, '').replace(/[aeiou]$/g, '');
       }
       return disguise || lower.substring(0, 3);
+    }
+
+    // LLM-based disguise generation with validation
+    async function generateDisguiseLLM(word, existingDisguises = [], maxRetries = 3) {
+      const prompt = `Create a phonetic "disguise" for the word "${word}".
+
+Rules:
+- Remove or reduce vowels
+- Use phonetic shortcuts (tion→shn, ph→f, ck→k, etc.)
+- Result should SOUND like the word when read aloud
+- Keep it 2-8 characters, lowercase letters only
+- Example: "garage" → "grj", "phone" → "fon", "knight" → "nyt"
+
+${existingDisguises.length > 0 ? `Avoid these existing disguises: ${existingDisguises.join(', ')}` : ''}
+
+Return ONLY the disguise, nothing else.`;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const response = await callServer(prompt);
+          const disguise = response.trim().toLowerCase().replace(/[^a-z]/g, '');
+
+          const validation = DisguiseValidator.validateAnswerDisguise(disguise, word);
+          if (validation.valid && !existingDisguises.includes(disguise)) {
+            return disguise;
+          }
+          console.log(`Disguise attempt ${attempt + 1} rejected: ${disguise} - ${validation.reason || 'duplicate'}`);
+        } catch (e) {
+          console.log(`Disguise generation failed: ${e.message}`);
+        }
+      }
+
+      // Fallback to rule-based
+      return generateDisguiseRuleBased(word);
+    }
+
+    // Generate distractors with validation
+    async function generateDistractorsLLM(prompt, answerWord, answerDisguise, maxRetries = 3) {
+      const llmPrompt = `Generate 3 distractor disguises for a word puzzle.
+
+The prompt is "${prompt}" and the correct answer is "${answerWord}" (disguised as "${answerDisguise}").
+
+Create 3 WRONG answers that:
+1. Look similar to plausible word disguises
+2. Are NOT the correct answer or its synonyms
+3. Are tempting but wrong guesses
+4. Are 2-8 lowercase letters each
+
+For each, provide the disguise and what fake word it might represent.
+
+Format as JSON array:
+[{"disguise": "xyz", "fakeWord": "SOMEWORD", "type": "wrong-letters"},...]
+
+Types: "wrong-letters" (plausible but decodes wrong), "non-synonym" (real word, not a synonym)
+
+Return ONLY the JSON array.`;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const response = await callServer(llmPrompt);
+          const jsonMatch = response.match(/\[[\s\S]*\]/);
+          if (!jsonMatch) continue;
+
+          const parsed = JSON.parse(jsonMatch[0]);
+          const validDistractors = [];
+          const usedDisguises = [answerDisguise];
+
+          for (const d of parsed) {
+            if (validDistractors.length >= 3) break;
+            const disguise = (d.disguise || '').toLowerCase().replace(/[^a-z]/g, '');
+
+            const validation = DisguiseValidator.validateDistractor(
+              disguise, answerDisguise, answerWord, prompt, usedDisguises
+            );
+
+            if (validation.valid) {
+              validDistractors.push({
+                word: (d.fakeWord || 'UNKNOWN').toUpperCase(),
+                disguise: disguise,
+                type: d.type || 'non-synonym'
+              });
+              usedDisguises.push(disguise);
+            } else {
+              console.log(`Distractor rejected: ${disguise} - ${validation.reason}`);
+            }
+          }
+
+          if (validDistractors.length >= 3) {
+            // Final validation of the complete set
+            const setValidation = DisguiseValidator.validateOptionSet(
+              answerDisguise,
+              validDistractors.map(d => d.disguise)
+            );
+            if (setValidation.valid) {
+              return validDistractors;
+            }
+            console.log(`Option set rejected: ${setValidation.reason}`);
+          }
+        } catch (e) {
+          console.log(`Distractor generation attempt ${attempt + 1} failed: ${e.message}`);
+        }
+      }
+
+      // Fallback: generate rule-based distractors
+      return generateDistractorsFallback(answerWord, answerDisguise);
+    }
+
+    // Fallback distractor generation
+    function generateDistractorsFallback(answerWord, answerDisguise) {
+      const variations = [
+        answerDisguise.split('').reverse().join(''),
+        answerDisguise.slice(0, -1) + 'x',
+        'x' + answerDisguise.slice(1),
+        answerDisguise.replace(/./g, (c, i) => i === Math.floor(answerDisguise.length/2) ? 'z' : c)
+      ].filter(d => d !== answerDisguise && d.length >= 2);
+
+      return variations.slice(0, 3).map((d, i) => ({
+        word: 'EDIT_ME',
+        disguise: d,
+        type: ['wrong-letters', 'non-synonym', 'wrong-letters'][i]
+      }));
+    }
+
+    // Main disguise function (synchronous, rule-based)
+    function generateDisguise(word) {
+      return generateDisguiseRuleBased(word);
     }
 
     // Generate full quiz
@@ -846,22 +1065,31 @@ Return ONLY the JSON array, no other text.`;
         throw new Error('Failed to parse AI response. Try again or use Rule-Based mode.');
       }
 
-      return parsed.slice(0, 6).map(q => ({
-        prompt: q.prompt || '',
-        emoji: '',
-        rejectedPrompts: [],
-        answer: {
-          word: (q.answer || '').toUpperCase(),
-          disguise: generateDisguise(q.answer || '')
-        },
-        rejectedAnswers: [],
-        distractors: (q.distractors || []).slice(0, 3).map(d => ({
-          word: (d.word || '').toUpperCase(),
-          disguise: generateDisguise(d.word || ''),
-          type: d.type || 'non-synonym'
-        })),
-        rejectedDistractors: []
-      }));
+      const questions = [];
+
+      for (const q of parsed.slice(0, 6)) {
+        const answerWord = (q.answer || '').toUpperCase();
+        const promptWord = q.prompt || '';
+
+        // Use LLM for smarter disguises with validation
+        const answerDisguise = await generateDisguiseLLM(answerWord);
+        const distractors = await generateDistractorsLLM(promptWord, answerWord, answerDisguise);
+
+        questions.push({
+          prompt: promptWord,
+          emoji: '',
+          rejectedPrompts: [],
+          answer: {
+            word: answerWord,
+            disguise: answerDisguise
+          },
+          rejectedAnswers: [],
+          distractors: distractors,
+          rejectedDistractors: []
+        });
+      }
+
+      return questions;
     }
 
     // Render all questions

@@ -1,0 +1,144 @@
+{
+  "theme": "animals",
+  "publicationDate": "2026-01-30",
+  "questions": [
+    {
+      "prompt": "cat",
+      "emoji": "",
+      "answer": "FELINE",
+      "answerDisguise": "fln",
+      "distractors": [
+        {
+          "word": "CANINE",
+          "disguise": "cn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "REPTILIAN",
+          "disguise": "rtnl",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "AVIAN",
+          "disguise": "avn",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "dog",
+      "emoji": "",
+      "answer": "CANINE",
+      "answerDisguise": "knyn",
+      "distractors": [
+        {
+          "word": "CASIN",
+          "disguise": "cain",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "KITTY",
+          "disguise": "kty",
+          "type": "non-synonym"
+        },
+        {
+          "word": "KINET",
+          "disguise": "knet",
+          "type": "wrong-letters"
+        }
+      ]
+    },
+    {
+      "prompt": "fish",
+      "emoji": "",
+      "answer": "AQUATIC",
+      "answerDisguise": "aqtik",
+      "distractors": [
+        {
+          "word": "AQUATIC",
+          "disguise": "aqwtc",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "OCEAN",
+          "disguise": "ocn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "MARINE",
+          "disguise": "mriin",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "bird",
+      "emoji": "",
+      "answer": "AVIAN",
+      "answerDisguise": "avn",
+      "distractors": [
+        {
+          "word": "BAND",
+          "disguise": "bnd",
+          "type": "non-synonym"
+        },
+        {
+          "word": "FEATHER",
+          "disguise": "fthr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "FLIGHT",
+          "disguise": "flght",
+          "type": "wrong-letters"
+        }
+      ]
+    },
+    {
+      "prompt": "snake",
+      "emoji": "",
+      "answer": "SERPENT",
+      "answerDisguise": "srpnt",
+      "distractors": [
+        {
+          "word": "SPRINT",
+          "disguise": "srnt",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "SPENT",
+          "disguise": "spnt",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "SILENT",
+          "disguise": "slnt",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "horse",
+      "emoji": "",
+      "answer": "EQUINE",
+      "answerDisguise": "ekwn",
+      "distractors": [
+        {
+          "word": "OSIER",
+          "disguise": "oqsei",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "INKED",
+          "disguise": "eqkni",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "QUIET",
+          "disguise": "qniue",
+          "type": "non-synonym"
+        }
+      ]
+    }
+  ]
+}
