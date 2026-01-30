@@ -6,12 +6,19 @@ Reads API keys from .env and proxies requests to AI providers.
 Usage:
     pip install flask python-dotenv requests
     python server.py
+
+Environment variables:
+    OPENAI_API_KEY      - OpenAI API key
+    ANTHROPIC_API_KEY   - Anthropic API key (optional)
+    AUTH_USERNAME       - Basic auth username (optional, for deployment)
+    AUTH_PASSWORD       - Basic auth password (optional, for deployment)
 """
 
 import os
 import json
 import re
-from flask import Flask, jsonify, request, send_from_directory
+from functools import wraps
+from flask import Flask, jsonify, request, send_from_directory, Response
 from dotenv import load_dotenv
 import requests
 
@@ -23,6 +30,39 @@ app = Flask(__name__, static_folder='.')
 # Get API keys from environment
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+
+# Basic auth credentials (optional)
+AUTH_USERNAME = os.getenv('AUTH_USERNAME', '')
+AUTH_PASSWORD = os.getenv('AUTH_PASSWORD', '')
+
+
+def check_auth(username, password):
+    """Check if username/password combination is valid."""
+    return username == AUTH_USERNAME and password == AUTH_PASSWORD
+
+
+def authenticate():
+    """Send 401 response to trigger basic auth."""
+    return Response(
+        'Authentication required.\n',
+        401,
+        {'WWW-Authenticate': 'Basic realm="cnmn Quiz Generator"'}
+    )
+
+
+def requires_auth(f):
+    """Decorator to require HTTP Basic Auth if credentials are configured."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Skip auth if no credentials configured
+        if not AUTH_USERNAME or not AUTH_PASSWORD:
+            return f(*args, **kwargs)
+
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 
 def is_key_valid(key, prefix=''):
@@ -37,16 +77,19 @@ def is_key_valid(key, prefix=''):
 
 
 @app.route('/')
+@requires_auth
 def index():
     return send_from_directory('.', 'puzzle-ai-assistant.html')
 
 
 @app.route('/<path:filename>')
+@requires_auth
 def serve_static(filename):
     return send_from_directory('.', filename)
 
 
 @app.route('/api/providers')
+@requires_auth
 def get_providers():
     """Return which AI providers are available."""
     return jsonify({
@@ -56,6 +99,7 @@ def get_providers():
 
 
 @app.route('/api/save-puzzle', methods=['POST'])
+@requires_auth
 def save_puzzle():
     """Save puzzle JSON to the puzzles directory."""
     data = request.json
@@ -83,6 +127,7 @@ def save_puzzle():
 
 
 @app.route('/api/chat', methods=['POST'])
+@requires_auth
 def chat():
     """Proxy chat requests to the appropriate AI provider."""
     data = request.json
@@ -154,10 +199,11 @@ def call_anthropic(prompt):
 
 
 if __name__ == '__main__':
-    print("\n🤖 cnmn AI Puzzle Assistant Server")
+    print("\n🤖 cnmn Quiz Generator Server")
     print("=" * 40)
     print(f"OpenAI:    {'✓ configured' if is_key_valid(OPENAI_API_KEY, 'sk-') else '✗ not configured'}")
     print(f"Anthropic: {'✓ configured' if is_key_valid(ANTHROPIC_API_KEY) else '✗ not configured'}")
+    print(f"Auth:      {'✓ enabled' if AUTH_USERNAME and AUTH_PASSWORD else '✗ disabled (open access)'}")
     print("=" * 40)
     print("Open http://localhost:5000 in your browser\n")
     app.run(debug=True, port=5000, host='0.0.0.0')

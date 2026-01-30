@@ -1,0 +1,18 @@
+# Render deployment configuration
+# See: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: cnmn-quiz-generator
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn server:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in dashboard
+      - key: AUTH_USERNAME
+        sync: false  # Set manually in dashboard
+      - key: AUTH_PASSWORD
+        sync: false  # Set manually in dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
