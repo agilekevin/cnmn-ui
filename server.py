@@ -50,11 +50,37 @@ def authenticate():
     )
 
 
+def is_production():
+    """Check if running in production (Render, etc.)."""
+    return os.getenv('RENDER') == 'true' or os.getenv('PRODUCTION') == 'true'
+
+
+def auth_not_configured_error():
+    """Return error page when auth is required but not configured."""
+    return Response(
+        '''<!DOCTYPE html>
+<html>
+<head><title>Configuration Error</title></head>
+<body style="font-family: sans-serif; padding: 40px; text-align: center;">
+  <h1>⚠️ Authentication Not Configured</h1>
+  <p>This app requires AUTH_USERNAME and AUTH_PASSWORD environment variables to be set.</p>
+  <p>Please configure these in your Render dashboard and redeploy.</p>
+</body>
+</html>''',
+        500,
+        {'Content-Type': 'text/html'}
+    )
+
+
 def requires_auth(f):
     """Decorator to require HTTP Basic Auth if credentials are configured."""
     @wraps(f)
     def decorated(*args, **kwargs):
-        # Skip auth if no credentials configured
+        # In production, require auth to be configured
+        if is_production() and (not AUTH_USERNAME or not AUTH_PASSWORD):
+            return auth_not_configured_error()
+
+        # Skip auth check if no credentials configured (local dev)
         if not AUTH_USERNAME or not AUTH_PASSWORD:
             return f(*args, **kwargs)
 
