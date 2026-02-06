@@ -517,6 +517,31 @@
       border-color: #c4a574;
       outline: none;
     }
+
+    .emoji-ai-suggest {
+      background: #6b3410;
+      color: white;
+      font-size: 11px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .emoji-ai-suggest:hover:not(:disabled) {
+      background: #8b4513;
+    }
+
+    .emoji-ai-suggest:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .emoji-option.suggested {
+      box-shadow: 0 0 0 2px #c4a574;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
@@ -646,6 +671,17 @@
     let recentEmojis = JSON.parse(localStorage.getItem('cnmn-recent-emojis') || '[]');
     let currentEmojiCategory = 'Smileys';
     let emojiSearchQuery = '';
+    let emojiKeywords = null;
+
+    // Load emoji keyword data from CDN
+    async function loadEmojiData() {
+      try {
+        const resp = await fetch('https://cdn.jsdelivr.net/npm/emojilib@4.0.2/dist/emoji-en-US.json');
+        if (resp.ok) emojiKeywords = await resp.json();
+      } catch (e) {
+        console.warn('Failed to load emoji data:', e);
+      }
+    }
 
     // Load providers
     async function loadProviders() {
@@ -952,6 +988,13 @@ Return ONLY the JSON array.`;
         } else {
           quiz.questions = await generateAIQuiz(theme);
         }
+        // Auto-suggest emojis for questions that don't have one
+        for (const q of quiz.questions) {
+          if (!q.emoji) {
+            const matches = findEmojiForWord(q.prompt);
+            if (matches.length > 0) q.emoji = matches[0];
+          }
+        }
         renderQuestions();
         document.getElementById('exportSection').classList.remove('hidden');
       } catch (error) {
@@ -1122,6 +1165,7 @@ Return ONLY the JSON array, no other text.`;
                 </div>
                 <div class="emoji-footer">
                   <button type="button" class="emoji-clear" onclick="selectEmoji(${index}, '')">Clear</button>
+                  <button type="button" class="emoji-ai-suggest" id="emoji-ai-btn-${index}" onclick="suggestEmojiAI(${index})" ${currentProvider === 'rules' ? 'disabled title="Not available with rule-based provider"' : ''}>Ask AI</button>
                   <input type="text" class="emoji-direct-input" placeholder="Paste any emoji" id="emoji-direct-${index}" onkeydown="handleDirectEmoji(event, ${index})" maxlength="2">
                 </div>
               </div>
@@ -1155,31 +1199,61 @@ Return ONLY the JSON array, no other text.`;
       `;
     }
 
+    // Find emojis matching a word using emojilib keywords
+    function findEmojiForWord(word) {
+      if (!emojiKeywords || !word) return [];
+      const lower = word.toLowerCase().replace(/[^a-z]/g, '');
+      if (!lower) return [];
+      const exact = [];
+      const partial = [];
+      for (const [emoji, keywords] of Object.entries(emojiKeywords)) {
+        for (const kw of keywords) {
+          if (kw === lower) { exact.push(emoji); break; }
+          if (kw.includes(lower) || lower.includes(kw)) { partial.push(emoji); break; }
+        }
+      }
+      return [...exact, ...partial.filter(e => !exact.includes(e))];
+    }
+
     // Emoji picker functions
     function renderEmojiGrid(qIndex, searchQuery = '') {
       if (searchQuery) {
-        // Search across all categories
+        if (!emojiKeywords) {
+          return '<div class="emoji-no-results">Search loading\u2026</div>';
+        }
+        const q = searchQuery.toLowerCase();
         const results = [];
-        Object.values(emojiCategories).forEach(cat => {
-          cat.emojis.forEach(e => {
-            if (results.length < 64) results.push(e);
-          });
-        });
-        // Filter by search - for simplicity, just show all emojis and let user scroll
-        // A real implementation would use emoji names/keywords
-        const filtered = results.slice(0, 64);
-        if (filtered.length === 0) {
+        for (const [emoji, keywords] of Object.entries(emojiKeywords)) {
+          if (results.length >= 64) break;
+          if (keywords.some(kw => kw.includes(q))) results.push(emoji);
+        }
+        if (results.length === 0) {
           return '<div class="emoji-no-results">No emojis found</div>';
         }
         return `
           <div class="emoji-grid">
-            ${filtered.map(e => `<button type="button" class="emoji-option" onclick="selectEmoji(${qIndex}, '${e}')">${e}</button>`).join('')}
+            ${results.map(e => `<button type="button" class="emoji-option" onclick="selectEmoji(${qIndex}, '${e}')">${e}</button>`).join('')}
           </div>
         `;
       }
 
-      // Show recent emojis if any
       let html = '';
+
+      // Show suggested emojis based on the question's prompt word
+      if (quiz && quiz.questions && quiz.questions[qIndex]) {
+        const promptWord = quiz.questions[qIndex].prompt;
+        const suggested = findEmojiForWord(promptWord).slice(0, 8);
+        if (suggested.length > 0) {
+          html += `
+            <div class="emoji-section-label">Suggested</div>
+            <div class="emoji-grid">
+              ${suggested.map(e => `<button type="button" class="emoji-option suggested" onclick="selectEmoji(${qIndex}, '${e}')">${e}</button>`).join('')}
+            </div>
+          `;
+        }
+      }
+
+      // Show recent emojis if any
       if (recentEmojis.length > 0) {
         html += `
           <div class="emoji-section-label">Recent</div>
@@ -1273,6 +1347,26 @@ Return ONLY the JSON array, no other text.`;
         if (emoji) {
           selectEmoji(qIndex, emoji);
         }
+      }
+    }
+
+    async function suggestEmojiAI(qIndex) {
+      const btn = document.getElementById(`emoji-ai-btn-${qIndex}`);
+      if (!btn || btn.disabled) return;
+      const q = quiz.questions[qIndex];
+      btn.disabled = true;
+      btn.textContent = 'Thinking\u2026';
+      try {
+        const result = await callServer(
+          `Reply with ONLY a single emoji (no text) that best represents the word "${q.prompt}" (synonym: ${q.answer.word}).`
+        );
+        const emoji = result.trim().replace(/[^\p{Emoji}]/gu, '').slice(0, 2);
+        if (emoji) selectEmoji(qIndex, emoji);
+      } catch (e) {
+        console.warn('AI emoji suggestion failed:', e);
+      } finally {
+        btn.disabled = currentProvider === 'rules';
+        btn.textContent = 'Ask AI';
       }
     }
 
@@ -1564,6 +1658,7 @@ Return ONLY the JSON array.`;
 
     // Initialize
     loadProviders();
+    loadEmojiData();
   </script>
 </body>
 </html>

@@ -1,0 +1,144 @@
+{
+  "theme": "Bulidings",
+  "publicationDate": "2026-02-07",
+  "questions": [
+    {
+      "prompt": "mansion",
+      "emoji": "\ud83c\udfe9",
+      "answer": "ESTATE",
+      "answerDisguise": "st8",
+      "distractors": [
+        {
+          "word": "PARTY",
+          "disguise": "rty",
+          "type": "non-synonym"
+        },
+        {
+          "word": "HOUSE",
+          "disguise": "hse",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "PLACE",
+          "disguise": "plc",
+          "type": "wrong-letters"
+        }
+      ]
+    },
+    {
+      "prompt": "cabin",
+      "emoji": "\ud83d\udc41\ufe0f\u200d\ud83d\udde8\ufe0f",
+      "answer": "HUT",
+      "answerDisguise": "ht",
+      "distractors": [
+        {
+          "word": "BOT",
+          "disguise": "otb",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "TIN",
+          "disguise": "nt",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "TIP",
+          "disguise": "pit",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "tower",
+      "emoji": "\ud83c\udfe2",
+      "answer": "SKYSCRAPER",
+      "answerDisguise": "skiskpr",
+      "distractors": [
+        {
+          "word": "BUILDING",
+          "disguise": "bldg",
+          "type": "non-synonym"
+        },
+        {
+          "word": "HIGHRISE",
+          "disguise": "hghsr",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "CONDO",
+          "disguise": "cnd",
+          "type": "non-synonym"
+        }
+      ]
+    },
+    {
+      "prompt": "church",
+      "emoji": "\ud83d\udc92",
+      "answer": "CHAPEL",
+      "answerDisguise": "chpl",
+      "distractors": [
+        {
+          "word": "CONVERT",
+          "disguise": "cnvr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "PRAYER",
+          "disguise": "pryr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "CHAPEN",
+          "disguise": "chpn",
+          "type": "wrong-letters"
+        }
+      ]
+    },
+    {
+      "prompt": "fort",
+      "emoji": "\ud83c\udff0",
+      "answer": "CASTLE",
+      "answerDisguise": "kssl",
+      "distractors": [
+        {
+          "word": "TOWER",
+          "disguise": "trw",
+          "type": "non-synonym"
+        },
+        {
+          "word": "MANSION",
+          "disguise": "mnsn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "PLACE",
+          "disguise": "plc",
+          "type": "wrong-letters"
+        }
+      ]
+    },
+    {
+      "prompt": "warehouse",
+      "emoji": "\ud83d\ude15",
+      "answer": "DEPOT",
+      "answerDisguise": "dpo",
+      "distractors": [
+        {
+          "word": "STAGE",
+          "disguise": "stg",
+          "type": "non-synonym"
+        },
+        {
+          "word": "TERMINAL",
+          "disguise": "trmn",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "SHELF",
+          "disguise": "shlf",
+          "type": "non-synonym"
+        }
+      ]
+    }
+  ]
+}
