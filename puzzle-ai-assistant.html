@@ -131,46 +131,45 @@
     }
 
 
-    /* Provider selection */
-    .provider-bar {
+    /* Model selector */
+    .model-bar {
       display: flex;
-      gap: 8px;
+      gap: 12px;
+      align-items: center;
       margin-bottom: 16px;
       padding-bottom: 16px;
       border-bottom: 2px solid #ecdbc8;
     }
 
-    .provider-btn {
-      padding: 8px 16px;
+    .model-bar label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .model-select {
+      flex: 1;
+      max-width: 300px;
+      padding: 8px 12px;
       border: 2px solid #c4a574;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
       background: white;
       color: #6b3410;
-      border-radius: 6px;
       cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
+      transition: border-color 0.2s;
     }
 
-    .provider-btn:hover {
+    .model-select:focus {
+      outline: none;
       border-color: #6b3410;
     }
 
-    .provider-btn.selected {
-      background: #6b3410;
-      color: white;
-      border-color: #6b3410;
-    }
-
-    .provider-btn.unavailable {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    .provider-status {
+    .model-status {
       font-size: 12px;
       color: #8b6340;
       margin-left: auto;
-      align-self: center;
+      white-space: nowrap;
     }
 
     /* Question cards */
@@ -549,13 +548,14 @@
     <h1>cnmn Quiz Generator</h1>
     <p class="subtitle">Generate themed synonym puzzles with phonetic disguises</p>
 
-    <!-- Provider Selection -->
+    <!-- Model Selection -->
     <div class="panel">
-      <div class="provider-bar">
-        <button class="provider-btn selected" data-provider="openai" onclick="selectProvider('openai')">OpenAI</button>
-        <button class="provider-btn" data-provider="anthropic" onclick="selectProvider('anthropic')">Anthropic</button>
-        <button class="provider-btn" data-provider="rules" onclick="selectProvider('rules')">Rule-Based</button>
-        <span class="provider-status" id="providerStatus">Checking...</span>
+      <div class="model-bar">
+        <label>Model:</label>
+        <select class="model-select" id="modelSelect" onchange="selectModel()">
+          <option value="">Loading...</option>
+        </select>
+        <span class="model-status" id="modelStatus">Checking...</span>
       </div>
 
       <div class="form-row">
@@ -593,8 +593,7 @@
 
   <script>
     // State
-    let currentProvider = 'openai';
-    let availableProviders = { openai: false, anthropic: false };
+    let currentModel = '';
     let quiz = {
       theme: '',
       publicationDate: '',
@@ -683,47 +682,49 @@
       }
     }
 
-    // Load providers
-    async function loadProviders() {
-      const status = document.getElementById('providerStatus');
+    // Load models from server
+    async function loadModels() {
+      const status = document.getElementById('modelStatus');
+      const select = document.getElementById('modelSelect');
       try {
-        const response = await fetch('/api/providers');
-        availableProviders = await response.json();
+        const response = await fetch('/api/models');
+        const data = await response.json();
 
-        document.querySelectorAll('.provider-btn').forEach(btn => {
-          const provider = btn.dataset.provider;
-          if (provider === 'rules') return;
-          if (!availableProviders[provider]) {
-            btn.classList.add('unavailable');
-          }
-        });
+        select.innerHTML = '';
 
-        const available = [];
-        if (availableProviders.openai) available.push('OpenAI');
-        if (availableProviders.anthropic) available.push('Anthropic');
+        // Add AI models
+        const modelEntries = Object.entries(data.models || {});
+        for (const [id, meta] of modelEntries) {
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = meta.name;
+          select.appendChild(opt);
+        }
 
-        if (available.length > 0) {
-          status.textContent = `Available: ${available.join(', ')}`;
-          if (availableProviders.openai) selectProvider('openai');
-          else if (availableProviders.anthropic) selectProvider('anthropic');
-          else selectProvider('rules');
+        // Always add rule-based option at the end
+        const rulesOpt = document.createElement('option');
+        rulesOpt.value = 'rules';
+        rulesOpt.textContent = 'Rule-Based (no AI)';
+        select.appendChild(rulesOpt);
+
+        if (modelEntries.length > 0) {
+          currentModel = modelEntries[0][0];
+          select.value = currentModel;
+          status.textContent = data.portkey ? 'via Portkey' : '';
         } else {
-          status.textContent = 'No AI configured - using rules';
-          selectProvider('rules');
+          currentModel = 'rules';
+          select.value = 'rules';
+          status.textContent = 'No AI configured — using rules';
         }
       } catch (e) {
-        status.textContent = 'Server offline - using rules';
-        document.querySelector('[data-provider="openai"]').classList.add('unavailable');
-        document.querySelector('[data-provider="anthropic"]').classList.add('unavailable');
-        selectProvider('rules');
+        select.innerHTML = '<option value="rules">Rule-Based (no AI)</option>';
+        currentModel = 'rules';
+        status.textContent = 'Server offline — using rules';
       }
     }
 
-    function selectProvider(provider) {
-      currentProvider = provider;
-      document.querySelectorAll('.provider-btn').forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.provider === provider);
-      });
+    function selectModel() {
+      currentModel = document.getElementById('modelSelect').value;
     }
 
     // ============================================
@@ -983,7 +984,7 @@ Return ONLY the JSON array.`;
       document.getElementById('exportSection').classList.add('hidden');
 
       try {
-        if (currentProvider === 'rules') {
+        if (currentModel === 'rules') {
           quiz.questions = generateRuleBasedQuiz(theme);
         } else {
           quiz.questions = await generateAIQuiz(theme);
@@ -1165,7 +1166,7 @@ Return ONLY the JSON array, no other text.`;
                 </div>
                 <div class="emoji-footer">
                   <button type="button" class="emoji-clear" onclick="selectEmoji(${index}, '')">Clear</button>
-                  <button type="button" class="emoji-ai-suggest" id="emoji-ai-btn-${index}" onclick="suggestEmojiAI(${index})" ${currentProvider === 'rules' ? 'disabled title="Not available with rule-based provider"' : ''}>Ask AI</button>
+                  <button type="button" class="emoji-ai-suggest" id="emoji-ai-btn-${index}" onclick="suggestEmojiAI(${index})" ${currentModel === 'rules' ? 'disabled title="Not available with rule-based provider"' : ''}>Ask AI</button>
                   <input type="text" class="emoji-direct-input" placeholder="Paste any emoji" id="emoji-direct-${index}" onkeydown="handleDirectEmoji(event, ${index})" maxlength="2">
                 </div>
               </div>
@@ -1365,7 +1366,7 @@ Return ONLY the JSON array, no other text.`;
       } catch (e) {
         console.warn('AI emoji suggestion failed:', e);
       } finally {
-        btn.disabled = currentProvider === 'rules';
+        btn.disabled = currentModel === 'rules';
         btn.textContent = 'Ask AI';
       }
     }
@@ -1426,7 +1427,7 @@ Return ONLY the JSON array, no other text.`;
       btn.textContent = '...';
 
       try {
-        if (currentProvider === 'rules') {
+        if (currentModel === 'rules') {
           q.prompt = `newprompt${qIndex + 1}`;
         } else {
           const prompt = `Give me ONE different word related to "${quiz.theme}" that could be used as a quiz prompt.
@@ -1453,7 +1454,7 @@ Return ONLY the single word, nothing else.`;
       btn.textContent = '...';
 
       try {
-        if (currentProvider === 'rules') {
+        if (currentModel === 'rules') {
           q.answer = { word: `NEWANS${qIndex + 1}`, disguise: generateDisguise(`NEWANS${qIndex + 1}`) };
         } else {
           const prompt = `Give me ONE synonym for "${q.prompt}".
@@ -1482,7 +1483,7 @@ Return ONLY the single word in UPPERCASE, nothing else.`;
       btn.textContent = '...';
 
       try {
-        if (currentProvider === 'rules') {
+        if (currentModel === 'rules') {
           d.word = `NEWDIST${qIndex}${dIndex}`;
           d.disguise = generateDisguise(d.word);
         } else {
@@ -1522,7 +1523,7 @@ Return ONLY the single word in UPPERCASE, nothing else.`;
       btn.textContent = '...';
 
       try {
-        if (currentProvider === 'rules') {
+        if (currentModel === 'rules') {
           q.distractors = [
             { word: `NEW${qIndex}A`, disguise: generateDisguise(`NEW${qIndex}A`), type: 'wrong-letters' },
             { word: `NEW${qIndex}B`, disguise: generateDisguise(`NEW${qIndex}B`), type: 'non-synonym' },
@@ -1646,7 +1647,7 @@ Return ONLY the JSON array.`;
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: currentProvider, prompt })
+        body: JSON.stringify({ model: currentModel, prompt })
       });
 
       const data = await response.json();
@@ -1657,7 +1658,7 @@ Return ONLY the JSON array.`;
     }
 
     // Initialize
-    loadProviders();
+    loadModels();
     loadEmojiData();
   </script>
 </body>

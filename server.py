@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """
 Flask server for cnmn AI Puzzle Assistant.
-Reads API keys from .env and proxies requests to AI providers.
+Routes LLM requests through Portkey AI Gateway.
 
 Usage:
     pip install flask python-dotenv requests
     python server.py
 
 Environment variables:
-    OPENAI_API_KEY      - OpenAI API key
-    ANTHROPIC_API_KEY   - Anthropic API key (optional)
-    AUTH_USERNAME       - Basic auth username (optional, for deployment)
-    AUTH_PASSWORD       - Basic auth password (optional, for deployment)
+    PORTKEY_API_KEY          - Portkey AI Gateway API key (required for AI features)
+    PORTKEY_SLUG_ANTHROPIC   - Portkey provider slug for Anthropic
+    PORTKEY_SLUG_OPENAI      - Portkey provider slug for OpenAI
+    PORTKEY_SLUG_GOOGLE      - Portkey provider slug for Google
+    AUTH_USERNAME            - Basic auth username (optional, for deployment)
+    AUTH_PASSWORD            - Basic auth password (optional, for deployment)
 """
 
 import os
@@ -28,12 +30,30 @@ load_dotenv()
 app = Flask(__name__, static_folder='.')
 
 # Get API keys from environment
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
-ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+PORTKEY_API_KEY = os.getenv('PORTKEY_API_KEY', '')
 
 # Basic auth credentials (optional)
 AUTH_USERNAME = os.getenv('AUTH_USERNAME', '')
 AUTH_PASSWORD = os.getenv('AUTH_PASSWORD', '')
+
+# Model registry: model ID -> metadata
+MODELS = {
+    'claude-opus-4-6':             {'provider': 'anthropic', 'name': 'Claude Opus 4.6'},
+    'claude-sonnet-4-5-20250929':  {'provider': 'anthropic', 'name': 'Claude Sonnet 4.5'},
+    'claude-haiku-4-5-20251001':   {'provider': 'anthropic', 'name': 'Claude Haiku 4.5'},
+    'gpt-4o':                      {'provider': 'openai',    'name': 'GPT-4o'},
+    'gpt-4o-mini':                 {'provider': 'openai',    'name': 'GPT-4o Mini'},
+    'o3-mini':                     {'provider': 'openai',    'name': 'o3 Mini'},
+    'gemini-2.0-flash':            {'provider': 'google',    'name': 'Gemini 2.0 Flash'},
+}
+
+# Per-provider Portkey slugs (from Model Catalog)
+# e.g. PORTKEY_SLUG_ANTHROPIC=my-anthropic -> {'anthropic': 'my-anthropic'}
+PROVIDER_SLUGS = {
+    k.replace('PORTKEY_SLUG_', '').lower(): v
+    for k, v in os.environ.items()
+    if k.startswith('PORTKEY_SLUG_') and v
+}
 
 
 def check_auth(username, password):
@@ -114,13 +134,28 @@ def serve_static(filename):
     return send_from_directory('.', filename)
 
 
-@app.route('/api/providers')
+def provider_has_slug(provider):
+    """Check if a provider has a Portkey slug configured."""
+    return provider in PROVIDER_SLUGS
+
+
+@app.route('/api/models')
 @requires_auth
-def get_providers():
-    """Return which AI providers are available."""
+def get_models():
+    """Return available models and gateway status.
+
+    Only includes models whose provider has a slug configured.
+    """
+    portkey_configured = is_key_valid(PORTKEY_API_KEY)
+    models = {}
+    if portkey_configured:
+        for model_id, meta in MODELS.items():
+            if provider_has_slug(meta['provider']):
+                models[model_id] = meta
     return jsonify({
-        'openai': is_key_valid(OPENAI_API_KEY, 'sk-'),
-        'anthropic': is_key_valid(ANTHROPIC_API_KEY)
+        'models': models,
+        'portkey': portkey_configured,
+        'rules': True,
     })
 
 
@@ -155,80 +190,75 @@ def save_puzzle():
 @app.route('/api/chat', methods=['POST'])
 @requires_auth
 def chat():
-    """Proxy chat requests to the appropriate AI provider."""
+    """Proxy chat requests through Portkey AI Gateway."""
     data = request.json
-    provider = data.get('provider')
+    model = data.get('model')
     prompt = data.get('prompt')
 
     if not prompt:
         return jsonify({'error': 'No prompt provided'}), 400
 
-    if provider == 'openai':
-        if not is_key_valid(OPENAI_API_KEY, 'sk-'):
-            return jsonify({'error': 'OpenAI API key not configured'}), 400
-        return call_openai(prompt)
+    if not model or model not in MODELS:
+        return jsonify({'error': f'Unknown model: {model}'}), 400
 
-    elif provider == 'anthropic':
-        if not is_key_valid(ANTHROPIC_API_KEY):
-            return jsonify({'error': 'Anthropic API key not configured'}), 400
-        return call_anthropic(prompt)
+    if not is_key_valid(PORTKEY_API_KEY):
+        return jsonify({'error': 'Portkey API key not configured'}), 400
 
-    else:
-        return jsonify({'error': f'Unknown provider: {provider}'}), 400
+    provider = MODELS[model]['provider']
+    if not provider_has_slug(provider):
+        return jsonify({
+            'error': f'No Portkey slug configured for {provider}. '
+                     f'Set PORTKEY_SLUG_{provider.upper()} in .env'
+        }), 400
+
+    return call_portkey(model, prompt)
 
 
-def call_openai(prompt):
-    """Call OpenAI API."""
+def portkey_model_name(model):
+    """Build the @slug/model format for Portkey Model Catalog.
+
+    e.g. 'claude-haiku-4-5-20251001' with slug 'anthropic'
+         -> '@anthropic/claude-haiku-4-5-20251001'
+    """
+    provider = MODELS[model]['provider']
+    slug = PROVIDER_SLUGS[provider]
+    return f'@{slug}/{model}'
+
+
+def call_portkey(model, prompt):
+    """Call LLM via Portkey AI Gateway using Model Catalog slugs."""
+    headers = {
+        'Content-Type': 'application/json',
+        'x-portkey-api-key': PORTKEY_API_KEY,
+    }
+
     try:
         response = requests.post(
-            'https://api.openai.com/v1/chat/completions',
-            headers={
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {OPENAI_API_KEY}'
-            },
+            'https://api.portkey.ai/v1/chat/completions',
+            headers=headers,
             json={
-                'model': 'gpt-4',
+                'model': portkey_model_name(model),
                 'messages': [{'role': 'user', 'content': prompt}],
-                'temperature': 0.7
+                'max_tokens': 1024,
+                'temperature': 0.7,
             },
-            timeout=60
+            timeout=60,
         )
         response.raise_for_status()
         data = response.json()
         return jsonify({'content': data['choices'][0]['message']['content']})
     except requests.exceptions.RequestException as e:
-        return jsonify({'error': f'OpenAI API error: {str(e)}'}), 500
-
-
-def call_anthropic(prompt):
-    """Call Anthropic API."""
-    try:
-        response = requests.post(
-            'https://api.anthropic.com/v1/messages',
-            headers={
-                'Content-Type': 'application/json',
-                'x-api-key': ANTHROPIC_API_KEY,
-                'anthropic-version': '2023-06-01'
-            },
-            json={
-                'model': 'claude-3-5-sonnet-20241022',
-                'max_tokens': 1024,
-                'messages': [{'role': 'user', 'content': prompt}]
-            },
-            timeout=60
-        )
-        response.raise_for_status()
-        data = response.json()
-        return jsonify({'content': data['content'][0]['text']})
-    except requests.exceptions.RequestException as e:
-        return jsonify({'error': f'Anthropic API error: {str(e)}'}), 500
+        return jsonify({'error': f'Portkey API error: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
     print("\n🤖 cnmn Quiz Generator Server")
     print("=" * 40)
-    print(f"OpenAI:    {'✓ configured' if is_key_valid(OPENAI_API_KEY, 'sk-') else '✗ not configured'}")
-    print(f"Anthropic: {'✓ configured' if is_key_valid(ANTHROPIC_API_KEY) else '✗ not configured'}")
+    print(f"Portkey:   {'✓ configured' if is_key_valid(PORTKEY_API_KEY) else '✗ not configured'}")
+    if PROVIDER_SLUGS:
+        print(f"Providers: {', '.join(f'{p} (@{s})' for p, s in PROVIDER_SLUGS.items())}")
+    else:
+        print("Providers: none (set PORTKEY_SLUG_ANTHROPIC etc. in .env)")
     print(f"Auth:      {'✓ enabled' if AUTH_USERNAME and AUTH_PASSWORD else '✗ disabled (open access)'}")
     print("=" * 40)
     print("Open http://localhost:5000 in your browser\n")
