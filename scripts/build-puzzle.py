@@ -55,7 +55,7 @@ def transform_quiz_to_chain(quiz_data):
             'answer': answer_disguise,
             'decoded': q.get('answer', ''),
             'emoji': q.get('emoji') or MISSING_EMOJI,
-            'bridge': None  # No chaining in quiz mode
+            'bridge': None
         }
 
         # Pass through Unsplash image data if present

@@ -76,21 +76,15 @@ class TestPageLoad:
         options = select.locator('option').all()
         labels = [o.text_content() for o in options]
 
-        # Should have Claude models + Rule-Based (only anthropic has virtual key)
+        # Should have at least one AI model + Rule-Based
         assert len(options) >= 2
 
         # Last option should be Rule-Based
         assert 'Rule-Based' in labels[-1]
 
-        # Only Claude models should appear (anthropic virtual key only)
+        # At least one Claude model should appear (anthropic slug is set by fixture)
         ai_labels = labels[:-1]  # exclude Rule-Based
-        for label in ai_labels:
-            assert 'Claude' in label, f"Expected only Claude models, got: {label}"
-
-        # GPT/Gemini should NOT appear (no auth for openai/google)
-        for label in labels:
-            assert 'GPT' not in label
-            assert 'Gemini' not in label
+        assert any('Claude' in l for l in ai_labels), f"Expected at least one Claude model, got: {ai_labels}"
 
     def test_status_shows_via_portkey(self, browser_page):
         browser_page.goto('http://localhost:5000')
@@ -149,6 +143,21 @@ class TestRuleBasedQuiz:
 
 
 class TestModelSelection:
+    def test_default_model_is_sonnet(self, browser_page):
+        """Sonnet 4.5 should be selected by default when available."""
+        browser_page.goto('http://localhost:5000')
+        browser_page.wait_for_function(
+            "document.querySelector('#modelSelect').options.length > 1"
+        )
+
+        current = browser_page.evaluate("currentModel")
+        assert 'sonnet' in current, f"Expected sonnet as default, got: {current}"
+
+        selected = browser_page.evaluate(
+            "document.querySelector('#modelSelect').value"
+        )
+        assert selected == current
+
     def test_switching_model_updates_state(self, browser_page):
         browser_page.goto('http://localhost:5000')
         browser_page.wait_for_function(

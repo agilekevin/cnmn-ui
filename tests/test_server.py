@@ -7,7 +7,8 @@ import requests_mock as rmock
 
 # Patch env before importing server
 for var in ('PORTKEY_API_KEY', 'PORTKEY_SLUG_ANTHROPIC', 'PORTKEY_SLUG_OPENAI',
-            'PORTKEY_SLUG_GOOGLE', 'AUTH_USERNAME', 'AUTH_PASSWORD'):
+            'PORTKEY_SLUG_GOOGLE', 'UNSPLASH_ACCESS_KEY', 'AUTH_USERNAME',
+            'AUTH_PASSWORD'):
     os.environ.pop(var, None)
 
 
@@ -15,12 +16,12 @@ for var in ('PORTKEY_API_KEY', 'PORTKEY_SLUG_ANTHROPIC', 'PORTKEY_SLUG_OPENAI',
 def _clean_env(monkeypatch):
     """Ensure a clean env for every test."""
     for var in ('PORTKEY_API_KEY', 'PORTKEY_SLUG_ANTHROPIC', 'PORTKEY_SLUG_OPENAI',
-                'PORTKEY_SLUG_GOOGLE', 'AUTH_USERNAME', 'AUTH_PASSWORD',
-                'RENDER', 'PRODUCTION'):
+                'PORTKEY_SLUG_GOOGLE', 'UNSPLASH_ACCESS_KEY', 'AUTH_USERNAME',
+                'AUTH_PASSWORD', 'RENDER', 'PRODUCTION'):
         monkeypatch.delenv(var, raising=False)
 
 
-def _make_app(monkeypatch, portkey_key='', slugs=None):
+def _make_app(monkeypatch, portkey_key='', slugs=None, unsplash_key=''):
     """Create a fresh Flask test client with the given env config.
 
     slugs: dict mapping provider -> slug, e.g. {'anthropic': 'my-anthropic'}
@@ -29,6 +30,7 @@ def _make_app(monkeypatch, portkey_key='', slugs=None):
 
     monkeypatch.setattr(server, 'PORTKEY_API_KEY', portkey_key)
     monkeypatch.setattr(server, 'PROVIDER_SLUGS', slugs if slugs else {})
+    monkeypatch.setattr(server, 'UNSPLASH_ACCESS_KEY', unsplash_key)
     monkeypatch.setattr(server, 'AUTH_USERNAME', '')
     monkeypatch.setattr(server, 'AUTH_PASSWORD', '')
 
@@ -235,6 +237,66 @@ class TestChatPortkeyCall:
             assert body['max_tokens'] == 1024
             assert body['temperature'] == 0.7
 
+    def test_custom_max_tokens(self, monkeypatch):
+        """Client can specify max_tokens in the request body."""
+        client, _ = _make_app(monkeypatch,
+                              portkey_key=FAKE_PORTKEY_KEY,
+                              slugs={'anthropic': 'my-ant'})
+
+        with rmock.Mocker() as m:
+            m.post(PORTKEY_URL, json={
+                'choices': [{'message': {'content': 'ok'}}]
+            })
+
+            client.post('/api/chat', json={
+                'model': 'claude-haiku-4-5-20251001',
+                'prompt': 'test',
+                'max_tokens': 4096,
+            })
+
+            body = m.last_request.json()
+            assert body['max_tokens'] == 4096
+
+    def test_max_tokens_capped_at_8192(self, monkeypatch):
+        """max_tokens is capped at 8192."""
+        client, _ = _make_app(monkeypatch,
+                              portkey_key=FAKE_PORTKEY_KEY,
+                              slugs={'anthropic': 'my-ant'})
+
+        with rmock.Mocker() as m:
+            m.post(PORTKEY_URL, json={
+                'choices': [{'message': {'content': 'ok'}}]
+            })
+
+            client.post('/api/chat', json={
+                'model': 'claude-haiku-4-5-20251001',
+                'prompt': 'test',
+                'max_tokens': 99999,
+            })
+
+            body = m.last_request.json()
+            assert body['max_tokens'] == 8192
+
+    def test_max_tokens_invalid_uses_default(self, monkeypatch):
+        """Invalid max_tokens falls back to 1024."""
+        client, _ = _make_app(monkeypatch,
+                              portkey_key=FAKE_PORTKEY_KEY,
+                              slugs={'anthropic': 'my-ant'})
+
+        with rmock.Mocker() as m:
+            m.post(PORTKEY_URL, json={
+                'choices': [{'message': {'content': 'ok'}}]
+            })
+
+            client.post('/api/chat', json={
+                'model': 'claude-haiku-4-5-20251001',
+                'prompt': 'test',
+                'max_tokens': 'not-a-number',
+            })
+
+            body = m.last_request.json()
+            assert body['max_tokens'] == 1024
+
 
 # ------------------------------------------------------------------
 # portkey_model_name unit tests
@@ -257,3 +319,133 @@ class TestPortkeyModelName:
         assert srv.provider_has_slug('anthropic') is True
         assert srv.provider_has_slug('openai') is False
         assert srv.provider_has_slug('google') is False
+
+
+# ------------------------------------------------------------------
+# /api/unsplash/search
+# ------------------------------------------------------------------
+
+UNSPLASH_SEARCH_URL = 'https://api.unsplash.com/search/photos'
+FAKE_UNSPLASH_KEY = 'test-unsplash-key-123'
+
+FAKE_UNSPLASH_RESPONSE = {
+    'total': 1,
+    'results': [{
+        'id': 'abc123',
+        'urls': {
+            'thumb': 'https://images.unsplash.com/photo-abc?w=200',
+            'small': 'https://images.unsplash.com/photo-abc?w=400',
+            'regular': 'https://images.unsplash.com/photo-abc?w=1080',
+        },
+        'alt_description': 'a sunset over mountains',
+        'user': {
+            'name': 'Jane Doe',
+            'username': 'janedoe',
+            'links': {'html': 'https://unsplash.com/@janedoe'},
+        },
+    }],
+}
+
+
+class TestUnsplashSearch:
+    def test_search_returns_results(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+
+        with rmock.Mocker() as m:
+            m.get(UNSPLASH_SEARCH_URL, json=FAKE_UNSPLASH_RESPONSE)
+
+            resp = client.get('/api/unsplash/search?query=sunset')
+            data = resp.get_json()
+
+            assert resp.status_code == 200
+            assert data['total'] == 1
+            assert len(data['results']) == 1
+            result = data['results'][0]
+            assert result['id'] == 'abc123'
+            assert result['thumb'] == 'https://images.unsplash.com/photo-abc?w=200'
+            assert result['credit']['name'] == 'Jane Doe'
+            assert result['credit']['username'] == 'janedoe'
+
+    def test_search_sends_auth_header(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+
+        with rmock.Mocker() as m:
+            m.get(UNSPLASH_SEARCH_URL, json=FAKE_UNSPLASH_RESPONSE)
+
+            client.get('/api/unsplash/search?query=sunset')
+
+            assert m.last_request.headers['Authorization'] == f'Client-ID {FAKE_UNSPLASH_KEY}'
+
+    def test_search_no_query_returns_400(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+        resp = client.get('/api/unsplash/search')
+        assert resp.status_code == 400
+        assert 'No query' in resp.get_json()['error']
+
+    def test_search_no_key_returns_400(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key='')
+        resp = client.get('/api/unsplash/search?query=sunset')
+        assert resp.status_code == 400
+        assert 'not configured' in resp.get_json()['error']
+
+    def test_search_per_page_capped_at_30(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+
+        with rmock.Mocker() as m:
+            m.get(UNSPLASH_SEARCH_URL, json={'total': 0, 'results': []})
+
+            client.get('/api/unsplash/search?query=sunset&per_page=100')
+
+            assert m.last_request.qs['per_page'] == ['30']
+
+    def test_search_api_error(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+
+        with rmock.Mocker() as m:
+            m.get(UNSPLASH_SEARCH_URL, status_code=500)
+
+            resp = client.get('/api/unsplash/search?query=sunset')
+            assert resp.status_code == 500
+            assert 'Unsplash API error' in resp.get_json()['error']
+
+
+# ------------------------------------------------------------------
+# /api/unsplash/download
+# ------------------------------------------------------------------
+
+class TestUnsplashDownload:
+    def test_download_trigger_success(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+
+        with rmock.Mocker() as m:
+            m.get('https://api.unsplash.com/photos/abc123/download', json={})
+
+            resp = client.post('/api/unsplash/download',
+                               json={'photo_id': 'abc123'})
+            assert resp.status_code == 200
+            assert resp.get_json()['ok'] is True
+            assert m.called
+
+    def test_download_no_photo_id_returns_400(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+        resp = client.post('/api/unsplash/download', json={'photo_id': ''})
+        assert resp.status_code == 400
+
+    def test_download_no_key_returns_400(self, monkeypatch):
+        client, _ = _make_app(monkeypatch, unsplash_key='')
+        resp = client.post('/api/unsplash/download',
+                           json={'photo_id': 'abc123'})
+        assert resp.status_code == 400
+
+    def test_download_api_failure_still_returns_ok(self, monkeypatch):
+        """Download trigger is best-effort; API failure doesn't block the user."""
+        client, _ = _make_app(monkeypatch, unsplash_key=FAKE_UNSPLASH_KEY)
+
+        with rmock.Mocker() as m:
+            m.get('https://api.unsplash.com/photos/abc123/download',
+                  exc=Exception('network error'))
+
+            resp = client.post('/api/unsplash/download',
+                               json={'photo_id': 'abc123'})
+            assert resp.status_code == 200
+            assert resp.get_json()['ok'] is True
