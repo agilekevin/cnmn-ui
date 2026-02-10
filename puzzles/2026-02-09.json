@@ -1,0 +1,156 @@
+{
+  "theme": "Farming",
+  "publicationDate": "2026-02-09",
+  "questions": [
+    {
+      "prompt": "soil",
+      "emoji": "\ud83d\ude15",
+      "answer": "DIRT",
+      "answerDisguise": "drt",
+      "distractors": [
+        {
+          "word": "FENCE",
+          "disguise": "fnc",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "BUCKET",
+          "disguise": "bkt",
+          "type": "non-synonym"
+        },
+        {
+          "word": "LADDER",
+          "disguise": "lddr",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Dirt"
+    },
+    {
+      "prompt": "harvest",
+      "emoji": "\ud83c\udf91",
+      "answer": "CROP",
+      "answerDisguise": "crp",
+      "distractors": [
+        {
+          "word": "SHOVEL",
+          "disguise": "shvl",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "WEATHER",
+          "disguise": "wthr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "MORNING",
+          "disguise": "mrnng",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Crop"
+    },
+    {
+      "prompt": "plant",
+      "emoji": "\ud83d\udc90",
+      "answer": "SOW",
+      "answerDisguise": "sw",
+      "distractors": [
+        {
+          "word": "TRACTOR",
+          "disguise": "trctr",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "RAINFALL",
+          "disguise": "rnfll",
+          "type": "non-synonym"
+        },
+        {
+          "word": "SUNRISE",
+          "disguise": "snrs",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Sow"
+    },
+    {
+      "prompt": "farmer",
+      "emoji": "\ud83e\uddd1\u200d\ud83c\udf3e",
+      "answer": "GROWER",
+      "answerDisguise": "grwr",
+      "distractors": [
+        {
+          "word": "PITCHFORK",
+          "disguise": "ptchfrk",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "ORCHARD",
+          "disguise": "rchrd",
+          "type": "non-synonym"
+        },
+        {
+          "word": "COMPOST",
+          "disguise": "cmpst",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Grower"
+    },
+    {
+      "prompt": "cultivate",
+      "emoji": "\ud83d\udc41\ufe0f\u200d\ud83d\udde8\ufe0f",
+      "answer": "TILL",
+      "answerDisguise": "tl",
+      "distractors": [
+        {
+          "word": "LIVESTOCK",
+          "disguise": "lvstk",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "IRRIGATION",
+          "disguise": "rrgshn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "PASTURE",
+          "disguise": "pstr",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Till"
+    },
+    {
+      "prompt": "produce",
+      "emoji": "\ud83c\udfea",
+      "answer": "YIELD",
+      "answerDisguise": "yld",
+      "distractors": [
+        {
+          "word": "WIELD",
+          "disguise": "wld",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "WINDMILL",
+          "disguise": "wndmll",
+          "type": "non-synonym"
+        },
+        {
+          "word": "FURROW",
+          "disguise": "frrw",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Yield"
+    }
+  ]
+}

@@ -211,7 +211,14 @@ def chat():
                      f'Set PORTKEY_SLUG_{provider.upper()} in .env'
         }), 400
 
-    return call_portkey(model, prompt)
+    max_tokens = data.get('max_tokens', 1024)
+    try:
+        max_tokens = int(max_tokens)
+    except (TypeError, ValueError):
+        max_tokens = 1024
+    max_tokens = max(1, min(max_tokens, 8192))
+
+    return call_portkey(model, prompt, max_tokens=max_tokens)
 
 
 def portkey_model_name(model):
@@ -225,7 +232,7 @@ def portkey_model_name(model):
     return f'@{slug}/{model}'
 
 
-def call_portkey(model, prompt):
+def call_portkey(model, prompt, max_tokens=1024):
     """Call LLM via Portkey AI Gateway using Model Catalog slugs."""
     headers = {
         'Content-Type': 'application/json',
@@ -239,7 +246,7 @@ def call_portkey(model, prompt):
             json={
                 'model': portkey_model_name(model),
                 'messages': [{'role': 'user', 'content': prompt}],
-                'max_tokens': 1024,
+                'max_tokens': max_tokens,
                 'temperature': 0.7,
             },
             timeout=60,

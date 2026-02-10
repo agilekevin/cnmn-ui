@@ -235,6 +235,66 @@ class TestChatPortkeyCall:
             assert body['max_tokens'] == 1024
             assert body['temperature'] == 0.7
 
+    def test_custom_max_tokens(self, monkeypatch):
+        """Client can specify max_tokens in the request body."""
+        client, _ = _make_app(monkeypatch,
+                              portkey_key=FAKE_PORTKEY_KEY,
+                              slugs={'anthropic': 'my-ant'})
+
+        with rmock.Mocker() as m:
+            m.post(PORTKEY_URL, json={
+                'choices': [{'message': {'content': 'ok'}}]
+            })
+
+            client.post('/api/chat', json={
+                'model': 'claude-haiku-4-5-20251001',
+                'prompt': 'test',
+                'max_tokens': 4096,
+            })
+
+            body = m.last_request.json()
+            assert body['max_tokens'] == 4096
+
+    def test_max_tokens_capped_at_8192(self, monkeypatch):
+        """max_tokens is capped at 8192."""
+        client, _ = _make_app(monkeypatch,
+                              portkey_key=FAKE_PORTKEY_KEY,
+                              slugs={'anthropic': 'my-ant'})
+
+        with rmock.Mocker() as m:
+            m.post(PORTKEY_URL, json={
+                'choices': [{'message': {'content': 'ok'}}]
+            })
+
+            client.post('/api/chat', json={
+                'model': 'claude-haiku-4-5-20251001',
+                'prompt': 'test',
+                'max_tokens': 99999,
+            })
+
+            body = m.last_request.json()
+            assert body['max_tokens'] == 8192
+
+    def test_max_tokens_invalid_uses_default(self, monkeypatch):
+        """Invalid max_tokens falls back to 1024."""
+        client, _ = _make_app(monkeypatch,
+                              portkey_key=FAKE_PORTKEY_KEY,
+                              slugs={'anthropic': 'my-ant'})
+
+        with rmock.Mocker() as m:
+            m.post(PORTKEY_URL, json={
+                'choices': [{'message': {'content': 'ok'}}]
+            })
+
+            client.post('/api/chat', json={
+                'model': 'claude-haiku-4-5-20251001',
+                'prompt': 'test',
+                'max_tokens': 'not-a-number',
+            })
+
+            body = m.last_request.json()
+            assert body['max_tokens'] == 1024
+
 
 # ------------------------------------------------------------------
 # portkey_model_name unit tests

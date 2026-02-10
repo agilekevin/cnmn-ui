@@ -541,6 +541,21 @@
       box-shadow: 0 0 0 2px #c4a574;
       border-radius: 6px;
     }
+
+    /* Difficulty badges */
+    .difficulty-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .difficulty-badge.easy { background: #e8f5e9; color: #2e7d32; }
+    .difficulty-badge.medium { background: #fff3e0; color: #e65100; }
+    .difficulty-badge.hard { background: #ffebee; color: #c62828; }
+
   </style>
 </head>
 <body>
@@ -561,7 +576,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Theme</label>
-          <input type="text" id="themeInput" placeholder="e.g., Buildings, Emotions, Weather, Animals">
+          <input type="text" id="themeInput" placeholder="e.g., Buildings, Emotions, Weather, Animals" autofocus onkeydown="if(event.key==='Enter')generateQuiz()">
         </div>
         <div class="form-group" style="max-width: 180px;">
           <label>Publication Date</label>
@@ -569,7 +584,7 @@
         </div>
         <button onclick="generateQuiz()" id="generateBtn">Generate 6 Questions</button>
       </div>
-      <p class="hint">Enter a theme and publication date to generate 6 synonym quiz questions.</p>
+      <p class="hint">Enter a theme and publication date to generate 6 synonym quiz questions with increasing difficulty.</p>
     </div>
 
     <!-- Questions -->
@@ -708,7 +723,9 @@
         select.appendChild(rulesOpt);
 
         if (modelEntries.length > 0) {
-          currentModel = modelEntries[0][0];
+          // Prefer Sonnet 4.5 as default, fall back to first available
+          const preferredModel = modelEntries.find(([id]) => id.includes('sonnet'));
+          currentModel = preferredModel ? preferredModel[0] : modelEntries[0][0];
           select.value = currentModel;
           status.textContent = data.portkey ? 'via Portkey' : '';
         } else {
@@ -987,7 +1004,7 @@ Return ONLY the JSON array.`;
         if (currentModel === 'rules') {
           quiz.questions = generateRuleBasedQuiz(theme);
         } else {
-          quiz.questions = await generateAIQuiz(theme);
+          quiz.questions = await generateChainQuiz(theme);
         }
         // Auto-suggest emojis for questions that don't have one
         for (const q of quiz.questions) {
@@ -1136,6 +1153,126 @@ Return ONLY the JSON array, no other text.`;
       return questions;
     }
 
+    // Single-call AI quiz generation with difficulty scaling
+    async function generateChainQuiz(theme) {
+      const chainPrompt = `You are a puzzle designer for **CNMN**, a daily word puzzle game. Generate 6 puzzles on the theme "${theme}" with increasing difficulty.
+
+### How It Works
+
+Each puzzle has:
+- A **prompt**: a SINGLE WORD related to the theme (e.g., for theme "weather": "rain", "wind", "storm")
+- A **hidden answer word**: a SINGLE WORD that is a synonym of the prompt (e.g., prompt "rain" → answer "SHOWER")
+- A **compressed clue**: the answer word with vowels removed / phonetically shortened (e.g., "SHOWER" → "shwr")
+- **3 distractors**: SINGLE WORDS that are **NOT synonyms of the prompt** — they should be words from a different part of the theme or unrelated words
+
+The player sees the prompt and 4 compressed options. Only one decodes to a synonym of the prompt. The other 3 decode to words that are NOT synonyms of the prompt.
+
+### CRITICAL RULES
+
+1. **Prompts and answers must be SINGLE WORDS** — never phrases. "rain" ✅, "farming tasks" ❌, "sowing seeds" ❌
+2. **The answer must be a true synonym of the prompt.** prompt "happy" → answer "JOYFUL" ✅
+3. **The answer is NEVER the prompt word itself.** prompt "rain" → answer "RAIN" ❌
+4. **Distractors must NOT be synonyms of the prompt.** If the prompt is "rain", distractors cannot be "drizzle", "downpour", "shower" — those are all correct answers! Distractors should be unrelated words like "BREEZE", "FLAME", "PEBBLE".
+5. **Every compressed clue must be unambiguous** — only one common English word matches.
+
+### Compression Rules
+
+Phonetic shorthand — not just vowel removal:
+- Remove most vowels, keep sonically essential ones (\`kloz\` for "clothes")
+- Phonetic substitutions: \`ph\`→\`f\`, \`ght\`→\`t\`, \`tion\`→\`shn\`, \`ck\`→\`k\`
+- Drop silent letters: "knife" → \`nif\`
+
+Examples: clothes→\`kloz\`, cinnamon→\`cnmn\`, garbage→\`grbj\`, happy→\`hpy\`
+
+### Difficulty Scaling
+
+**Questions 1–2 (easy):** Common words, simple vowel removal, distractors obviously wrong
+**Questions 3–4 (medium):** Compressed clue looks like multiple words; specific letters disambiguate
+**Questions 5–6 (hard):** Phonetic spelling + extreme compression
+
+### Output Format (return ONLY this JSON, no other text):
+
+\`\`\`json
+{
+  "chain": [
+    {
+      "link": 1,
+      "difficulty": "easy",
+      "category": "rain",
+      "compressed": "shwr",
+      "answer_word": "shower",
+      "correct_option": "Shower",
+      "distractors": ["Breeze", "Flame", "Pebble"]
+    }
+  ]
+}
+\`\`\`
+
+- "category" = the single-word prompt shown to the player
+- "answer_word" = the single word the compressed clue decodes to (must be a synonym of category)
+- "correct_option" = the answer as shown to the player (same word, can be capitalized)
+- "distractors" = 3 single words that are NOT synonyms of the category
+
+Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
+
+      const response = await callServer(chainPrompt, { maxTokens: 4096 });
+
+      // Parse JSON from response
+      let parsed;
+      try {
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (e) {
+        console.error('Failed to parse chain response:', response);
+        throw new Error('Failed to parse AI response. Try again or use Rule-Based mode.');
+      }
+
+      const chain = parsed.chain;
+      if (!chain || !Array.isArray(chain) || chain.length === 0) {
+        throw new Error('Invalid format in AI response. Try again.');
+      }
+
+      const questions = [];
+      for (const link of chain.slice(0, 6)) {
+        const answerWord = (link.answer_word || '').toUpperCase();
+        const answerDisguise = (link.compressed || '').toLowerCase();
+        const distractorWords = link.distractors || [];
+
+        // Generate disguises for each distractor using rule-based compression
+        const distractors = distractorWords.slice(0, 3).map((word, i) => ({
+          word: (word || '').toUpperCase(),
+          disguise: generateDisguiseRuleBased(word || ''),
+          type: ['wrong-letters', 'non-synonym', 'non-synonym'][i % 3]
+        }));
+
+        // Pad if fewer than 3 distractors
+        while (distractors.length < 3) {
+          distractors.push({ word: 'EDIT_ME', disguise: 'dtm', type: 'non-synonym' });
+        }
+
+        questions.push({
+          prompt: (link.category || '').toLowerCase(),
+          emoji: '',
+          rejectedPrompts: [],
+          answer: {
+            word: answerWord,
+            disguise: answerDisguise
+          },
+          rejectedAnswers: [],
+          distractors: distractors,
+          rejectedDistractors: [],
+          correctOption: link.correct_option || null,
+          difficulty: link.difficulty || null,
+        });
+      }
+
+      return questions;
+    }
+
     // Render all questions
     function renderQuestions() {
       const container = document.getElementById('questionsContainer');
@@ -1144,9 +1281,13 @@ Return ONLY the JSON array, no other text.`;
 
     // Render single question card
     function renderQuestionCard(q, index) {
+      const difficultyBadge = q.difficulty
+        ? `<span class="difficulty-badge ${q.difficulty}">${q.difficulty}</span>`
+        : '';
+
       return `
         <div class="question-card" id="question-${index}">
-          <h3><span class="num">${index + 1}</span> Question</h3>
+          <h3><span class="num">${index + 1}</span> Question ${difficultyBadge}</h3>
 
           <div class="field-row">
             <label>Prompt:</label>
@@ -1584,7 +1725,9 @@ Return ONLY the JSON array.`;
             word: d.word,
             disguise: d.disguise,
             type: d.type
-          }))
+          })),
+          ...(q.difficulty && { difficulty: q.difficulty }),
+          ...(q.correctOption && { correctOption: q.correctOption }),
         }))
       };
     }
@@ -1643,11 +1786,14 @@ Return ONLY the JSON array.`;
     }
 
     // API call
-    async function callServer(prompt) {
+    async function callServer(prompt, { maxTokens } = {}) {
+      const body = { model: currentModel, prompt };
+      if (maxTokens) body.max_tokens = maxTokens;
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: currentModel, prompt })
+        body: JSON.stringify(body)
       });
 
       const data = await response.json();
