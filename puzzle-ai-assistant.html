@@ -541,6 +541,156 @@
       box-shadow: 0 0 0 2px #c4a574;
       border-radius: 6px;
     }
+
+    /* Image picker (Unsplash) */
+    .image-picker-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 4px;
+    }
+
+    .image-picker-toggle button {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 2px solid #c4a574;
+      background: #faf7f2;
+      color: #8b6340;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .image-picker-toggle button:first-child {
+      border-radius: 6px 0 0 6px;
+    }
+
+    .image-picker-toggle button:last-child {
+      border-radius: 0 6px 6px 0;
+    }
+
+    .image-picker-toggle button.active {
+      background: #6b3410;
+      color: white;
+      border-color: #6b3410;
+    }
+
+    .image-picker-toggle button:hover:not(.active) {
+      background: #f0e4d3;
+    }
+
+    .unsplash-search-row {
+      display: flex;
+      gap: 6px;
+      padding: 10px;
+      border-bottom: 1px solid #ecdbc8;
+    }
+
+    .unsplash-search-row input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid #ecdbc8;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .unsplash-search-row input:focus {
+      border-color: #c4a574;
+    }
+
+    .unsplash-search-row button {
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+
+    .unsplash-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 8px;
+      height: 240px;
+      overflow-y: auto;
+    }
+
+    .unsplash-thumb {
+      position: relative;
+      cursor: pointer;
+      border-radius: 6px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      border: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .unsplash-thumb:hover {
+      border-color: #6b3410;
+      transform: scale(1.03);
+    }
+
+    .unsplash-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .unsplash-thumb .credit {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      font-size: 9px;
+      padding: 2px 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .unsplash-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #8b6340;
+      font-size: 13px;
+      grid-column: 1 / -1;
+    }
+
+    .unsplash-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-top: 1px solid #ecdbc8;
+      background: #faf7f2;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .unsplash-footer a {
+      font-size: 10px;
+      color: #8b6340;
+      text-decoration: none;
+    }
+
+    .image-preview {
+      width: 40px;
+      height: 36px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 2px solid #c4a574;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      cursor: pointer;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   </style>
 </head>
 <body>
@@ -1151,23 +1301,47 @@ Return ONLY the JSON array, no other text.`;
           <div class="field-row">
             <label>Prompt:</label>
             <div class="emoji-picker-container">
-              <button type="button" class="emoji-btn" onclick="toggleEmojiPicker(${index})">${q.emoji || '➕'}</button>
+              ${q.imageUrl
+                ? `<div class="image-preview" onclick="toggleEmojiPicker(${index})"><img src="${q.imageUrl}" alt=""></div>`
+                : `<button type="button" class="emoji-btn" onclick="toggleEmojiPicker(${index})">${q.emoji || '➕'}</button>`
+              }
               <div class="emoji-dropdown" id="emoji-dropdown-${index}">
-                <div class="emoji-search">
-                  <input type="text" placeholder="Search emojis..." oninput="filterEmojis(${index}, this.value)" id="emoji-search-${index}">
+                <div class="image-picker-toggle">
+                  <button type="button" class="${(pickerMode[index] || 'emoji') === 'emoji' ? 'active' : ''}" onclick="setPickerMode(${index}, 'emoji')">Emoji</button>
+                  <button type="button" class="${(pickerMode[index] || 'emoji') === 'image' ? 'active' : ''}" onclick="setPickerMode(${index}, 'image')">Image</button>
                 </div>
-                <div class="emoji-tabs" id="emoji-tabs-${index}">
-                  ${Object.entries(emojiCategories).map(([name, cat]) =>
-                    `<button type="button" class="emoji-tab ${name === currentEmojiCategory ? 'active' : ''}" onclick="switchEmojiCategory(${index}, '${name}')" title="${name}">${cat.icon}</button>`
-                  ).join('')}
+                <div id="picker-emoji-${index}" style="display:${(pickerMode[index] || 'emoji') === 'emoji' ? 'block' : 'none'}">
+                  <div class="emoji-search">
+                    <input type="text" placeholder="Search emojis..." oninput="filterEmojis(${index}, this.value)" id="emoji-search-${index}">
+                  </div>
+                  <div class="emoji-tabs" id="emoji-tabs-${index}">
+                    ${Object.entries(emojiCategories).map(([name, cat]) =>
+                      `<button type="button" class="emoji-tab ${name === currentEmojiCategory ? 'active' : ''}" onclick="switchEmojiCategory(${index}, '${name}')" title="${name}">${cat.icon}</button>`
+                    ).join('')}
+                  </div>
+                  <div class="emoji-grid-container" id="emoji-grid-${index}">
+                    ${renderEmojiGrid(index)}
+                  </div>
+                  <div class="emoji-footer">
+                    <button type="button" class="emoji-clear" onclick="selectEmoji(${index}, '')">Clear</button>
+                    <button type="button" class="emoji-ai-suggest" id="emoji-ai-btn-${index}" onclick="suggestEmojiAI(${index})" ${currentModel === 'rules' ? 'disabled title="Not available with rule-based provider"' : ''}>Ask AI</button>
+                    <input type="text" class="emoji-direct-input" placeholder="Paste any emoji" id="emoji-direct-${index}" onkeydown="handleDirectEmoji(event, ${index})" maxlength="2">
+                  </div>
                 </div>
-                <div class="emoji-grid-container" id="emoji-grid-${index}">
-                  ${renderEmojiGrid(index)}
-                </div>
-                <div class="emoji-footer">
-                  <button type="button" class="emoji-clear" onclick="selectEmoji(${index}, '')">Clear</button>
-                  <button type="button" class="emoji-ai-suggest" id="emoji-ai-btn-${index}" onclick="suggestEmojiAI(${index})" ${currentModel === 'rules' ? 'disabled title="Not available with rule-based provider"' : ''}>Ask AI</button>
-                  <input type="text" class="emoji-direct-input" placeholder="Paste any emoji" id="emoji-direct-${index}" onkeydown="handleDirectEmoji(event, ${index})" maxlength="2">
+                <div id="picker-image-${index}" style="display:${(pickerMode[index] || 'emoji') === 'image' ? 'block' : 'none'}">
+                  <div class="unsplash-search-row">
+                    <input type="text" placeholder="Search photos..." id="unsplash-search-${index}"
+                      value="${q.prompt || ''}"
+                      onkeydown="if(event.key==='Enter'){searchUnsplash(${index});event.preventDefault()}">
+                    <button type="button" onclick="searchUnsplash(${index})">Search</button>
+                  </div>
+                  <div class="unsplash-grid" id="unsplash-grid-${index}">
+                    ${renderUnsplashGrid(index)}
+                  </div>
+                  <div class="unsplash-footer">
+                    <button type="button" class="emoji-clear" onclick="clearImage(${index})">Clear image</button>
+                    <a href="https://unsplash.com/?utm_source=cnmn&utm_medium=referral" target="_blank" rel="noopener noreferrer">Photos by Unsplash</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1380,6 +1554,99 @@ Return ONLY the JSON array, no other text.`;
       }
     });
 
+    // ============================================
+    // UNSPLASH IMAGE PICKER
+    // ============================================
+    let pickerMode = {};       // qIndex -> 'emoji' | 'image'
+    let unsplashResults = {};  // qIndex -> array of results
+
+    function setPickerMode(qIndex, mode) {
+      pickerMode[qIndex] = mode;
+      const emojiPanel = document.getElementById(`picker-emoji-${qIndex}`);
+      const imagePanel = document.getElementById(`picker-image-${qIndex}`);
+      if (emojiPanel) emojiPanel.style.display = mode === 'emoji' ? 'block' : 'none';
+      if (imagePanel) imagePanel.style.display = mode === 'image' ? 'block' : 'none';
+      // Update toggle buttons
+      const container = document.getElementById(`emoji-dropdown-${qIndex}`);
+      if (container) {
+        container.querySelectorAll('.image-picker-toggle button').forEach(btn => {
+          btn.classList.toggle('active', btn.textContent.toLowerCase() === mode);
+        });
+      }
+      // Auto-search when switching to image mode
+      if (mode === 'image' && !unsplashResults[qIndex]) {
+        searchUnsplash(qIndex);
+      }
+    }
+
+    async function searchUnsplash(qIndex) {
+      const input = document.getElementById(`unsplash-search-${qIndex}`);
+      const query = input ? input.value.trim() : '';
+      if (!query) return;
+
+      const grid = document.getElementById(`unsplash-grid-${qIndex}`);
+      if (grid) grid.innerHTML = '<div class="unsplash-empty">Searching...</div>';
+
+      try {
+        const resp = await fetch(`/api/unsplash/search?query=${encodeURIComponent(query)}&per_page=12`);
+        const data = await resp.json();
+        if (data.error) {
+          grid.innerHTML = `<div class="unsplash-empty">${data.error}</div>`;
+          return;
+        }
+        unsplashResults[qIndex] = data.results || [];
+        grid.innerHTML = renderUnsplashGrid(qIndex);
+      } catch (e) {
+        if (grid) grid.innerHTML = `<div class="unsplash-empty">Search failed: ${e.message}</div>`;
+      }
+    }
+
+    function renderUnsplashGrid(qIndex) {
+      const results = unsplashResults[qIndex];
+      if (!results || results.length === 0) {
+        return '<div class="unsplash-empty">Search for photos above</div>';
+      }
+      return results.map(photo => `
+        <div class="unsplash-thumb" onclick="selectUnsplashImage(${qIndex}, '${photo.id}')">
+          <img src="${photo.thumb}" alt="${(photo.alt || '').replace(/'/g, '&#39;')}" loading="lazy">
+          <div class="credit">${photo.credit.name}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectUnsplashImage(qIndex, photoId) {
+      const results = unsplashResults[qIndex] || [];
+      const photo = results.find(p => p.id === photoId);
+      if (!photo) return;
+
+      const q = quiz.questions[qIndex];
+      q.imageUrl = photo.small;
+      q.imageCredit = {
+        name: photo.credit.name,
+        username: photo.credit.username,
+        profileUrl: photo.credit.profileUrl,
+      };
+      q.emoji = '';  // Clear emoji when image is selected
+
+      // Trigger Unsplash download event (required by API guidelines)
+      fetch('/api/unsplash/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photo_id: photoId }),
+      }).catch(() => {});
+
+      document.getElementById(`emoji-dropdown-${qIndex}`).classList.remove('open');
+      renderQuestions();
+    }
+
+    function clearImage(qIndex) {
+      const q = quiz.questions[qIndex];
+      delete q.imageUrl;
+      delete q.imageCredit;
+      document.getElementById(`emoji-dropdown-${qIndex}`).classList.remove('open');
+      renderQuestions();
+    }
+
     // Update functions
     function updatePrompt(qIndex, value) {
       quiz.questions[qIndex].prompt = value.toLowerCase();
@@ -1575,17 +1842,24 @@ Return ONLY the JSON array.`;
       return {
         theme: quiz.theme,
         publicationDate: pubDate,
-        questions: quiz.questions.map(q => ({
-          prompt: q.prompt,
-          emoji: q.emoji || '',
-          answer: q.answer.word,
-          answerDisguise: q.answer.disguise,
-          distractors: q.distractors.map(d => ({
-            word: d.word,
-            disguise: d.disguise,
-            type: d.type
-          }))
-        }))
+        questions: quiz.questions.map(q => {
+          const out = {
+            prompt: q.prompt,
+            emoji: q.emoji || '',
+            answer: q.answer.word,
+            answerDisguise: q.answer.disguise,
+            distractors: q.distractors.map(d => ({
+              word: d.word,
+              disguise: d.disguise,
+              type: d.type
+            })),
+          };
+          if (q.imageUrl) {
+            out.imageUrl = q.imageUrl;
+            out.imageCredit = q.imageCredit;
+          }
+          return out;
+        })
       };
     }
 

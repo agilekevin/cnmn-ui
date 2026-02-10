@@ -293,6 +293,27 @@
       const chain = CHAIN_DATA;
       const link = chain.links[currentLink];
 
+      // Render image (Unsplash photo) or emoji fallback
+      const LinkImage = ({ link: l, size }) => {
+        const sizeMap = {
+          tiny:   { width: 44,  height: 44,  fontSize: '24px' },
+          small:  { width: 52,  height: 52,  fontSize: '28px' },
+          medium: { width: 100, height: 100, fontSize: '60px' },
+          large:  { width: 220, height: 220, fontSize: '120px' },
+        };
+        const s = sizeMap[size] || sizeMap.small;
+        if (l.imageUrl) {
+          return React.createElement('img', {
+            src: l.imageUrl,
+            alt: l.decoded || '',
+            style: { width: s.width, height: s.height, objectFit: 'cover', display: 'block' },
+          });
+        }
+        return React.createElement('span', {
+          style: { fontSize: s.fontSize, lineHeight: 1 },
+        }, l.emoji);
+      };
+
       const handleGuess = (option) => {
         if (eliminated.includes(option) || showReveal) return;
 
@@ -368,11 +389,11 @@
                       className="chainImageWrapperSmall"
                       style={{
                         ...styles.chainImageWrapperSmall,
-                        ...styles.emojiContainer,
+                        ...(l.imageUrl ? {} : styles.emojiContainer),
                         borderColor: missedLinks.includes(i) ? '#d4a574' : '#6b3410'
                       }}
                     >
-                      <span style={styles.emojiSmall}>{l.emoji}</span>
+                      <LinkImage link={l} size="small" />
                     </div>
                     {i < chain.links.length - 1 && (
                       <div style={styles.chainConnector}>→</div>
@@ -380,6 +401,29 @@
                   </React.Fragment>
                 ))}
               </div>
+              {chain.links.some(l => l.imageUrl && l.imageCredit) && (
+                <div style={styles.unsplashAttribution}>
+                  Photos by{' '}
+                  {chain.links
+                    .filter(l => l.imageUrl && l.imageCredit)
+                    .map((l, i, arr) => (
+                      <React.Fragment key={i}>
+                        <a href={l.imageCredit.profileUrl + '?utm_source=cnmn&utm_medium=referral'}
+                          target="_blank" rel="noopener noreferrer"
+                          style={styles.attributionLink}>
+                          {l.imageCredit.name}
+                        </a>
+                        {i < arr.length - 1 ? ', ' : ''}
+                      </React.Fragment>
+                    ))}
+                  {' on '}
+                  <a href="https://unsplash.com/?utm_source=cnmn&utm_medium=referral"
+                    target="_blank" rel="noopener noreferrer"
+                    style={styles.attributionLink}>
+                    Unsplash
+                  </a>
+                </div>
+              )}
 
               <div style={styles.statsRow}>
                 <div style={styles.stat}>
@@ -448,14 +492,17 @@
 
           {/* Progress */}
           <div style={styles.imageChain}>
-            {solvedLinks.map((linkIdx) => (
+            {solvedLinks.map((linkIdx) => {
+              const sl = chain.links[linkIdx];
+              return (
               <React.Fragment key={linkIdx}>
-                <div className="chainImageWrapperTiny" style={{...styles.chainImageWrapperTiny, ...styles.emojiContainer}}>
-                  <span style={styles.emojiTiny}>{chain.links[linkIdx].emoji}</span>
+                <div className="chainImageWrapperTiny" style={{...styles.chainImageWrapperTiny, ...(sl.imageUrl ? {} : styles.emojiContainer)}}>
+                  <LinkImage link={sl} size="tiny" />
                 </div>
                 <div style={styles.chainConnectorTiny}>→</div>
               </React.Fragment>
-            ))}
+              );
+            })}
             {solvedLinks.length < chain.links.length && (
               <div style={styles.chainPlaceholder}>?</div>
             )}
@@ -465,10 +512,26 @@
           <div style={styles.mainArea}>
             {showReveal ? (
               <div style={styles.revealContainer}>
-                <div style={{...styles.imageReveal, ...styles.emojiContainer}}>
-                  <span style={styles.emojiLarge}>{link.emoji}</span>
+                <div style={{...styles.imageReveal, ...(link.imageUrl ? {} : styles.emojiContainer)}}>
+                  <LinkImage link={link} size="large" />
                 </div>
                 <div style={styles.revealWord}>{link.decoded}</div>
+                {link.imageUrl && link.imageCredit && (
+                  <div style={styles.revealAttribution}>
+                    Photo by{' '}
+                    <a href={link.imageCredit.profileUrl + '?utm_source=cnmn&utm_medium=referral'}
+                      target="_blank" rel="noopener noreferrer"
+                      style={styles.attributionLink}>
+                      {link.imageCredit.name}
+                    </a>
+                    {' on '}
+                    <a href="https://unsplash.com/?utm_source=cnmn&utm_medium=referral"
+                      target="_blank" rel="noopener noreferrer"
+                      style={styles.attributionLink}>
+                      Unsplash
+                    </a>
+                  </div>
+                )}
               </div>
             ) : (
               <>
@@ -855,6 +918,24 @@
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#ffffff',
+      },
+      unsplashAttribution: {
+        fontSize: '11px',
+        color: '#b8956d',
+        textAlign: 'center',
+        marginTop: '8px',
+        lineHeight: '1.4',
+      },
+      revealAttribution: {
+        fontSize: '11px',
+        color: '#b8956d',
+        textAlign: 'center',
+        marginTop: '6px',
+        animation: 'fadeIn 0.4s ease 0.3s backwards',
+      },
+      attributionLink: {
+        color: '#8b6340',
+        textDecoration: 'none',
       },
       emojiSmall: {
         fontSize: '28px',

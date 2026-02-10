@@ -57,6 +57,12 @@ def transform_quiz_to_chain(quiz_data):
             'emoji': q.get('emoji') or MISSING_EMOJI,
             'bridge': None  # No chaining in quiz mode
         }
+
+        # Pass through Unsplash image data if present
+        if q.get('imageUrl'):
+            link['imageUrl'] = q['imageUrl']
+            link['imageCredit'] = q.get('imageCredit', {})
+
         links.append(link)
 
     return {
