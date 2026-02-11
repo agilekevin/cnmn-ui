@@ -282,6 +282,25 @@
 
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
+    // Streak tracking via localStorage
+    const getStreak = () => {
+      try {
+        return JSON.parse(localStorage.getItem('cnmn-streak') || '{}');
+      } catch { return {}; }
+    };
+
+    const recordPlay = (puzzleNumber) => {
+      const streak = getStreak();
+      if (streak.lastPuzzle === puzzleNumber) return streak; // already recorded
+
+      const isConsecutive = streak.lastPuzzle === puzzleNumber - 1;
+      const current = isConsecutive ? (streak.current || 0) + 1 : 1;
+      const best = Math.max(current, streak.best || 0);
+      const updated = { lastPuzzle: puzzleNumber, current, best };
+      localStorage.setItem('cnmn-streak', JSON.stringify(updated));
+      return updated;
+    };
+
     function LocalBadge() {
       return (
         <div style={{
@@ -350,6 +369,7 @@
       const revealTimerRef = useRef(null);
       const [reviewLink, setReviewLink] = useState(null);
       const eliminatedPerLink = useRef({});
+      const [streak, setStreak] = useState(() => getStreak());
 
       const advanceFromReveal = () => {
         if (!showReveal) return;
@@ -364,6 +384,7 @@
         } else {
           setEndTime(Date.now());
           setSolved(true);
+          setStreak(recordPlay(chain.number));
           playComplete();
         }
       };
@@ -424,6 +445,7 @@
               revealTimerRef.current = null;
               setEndTime(Date.now());
               setSolved(true);
+              setStreak(recordPlay(chain.number));
               playComplete();
             }, 3000);
           }
@@ -445,7 +467,8 @@
           missedLinks.includes(i) ? '○' : '●'
         ).join('');
 
-        return `cnmn #${chain.number}\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed\nhttps://cnmn.app`;
+        const streakText = streak.current > 1 ? ` | ${streak.current} day streak` : '';
+        return `cnmn #${chain.number}\n${chainVisual}\n${formatTime(elapsed)} | ${misses} missed${streakText}\nhttps://cnmn.app`;
       };
 
       const handleShare = async () => {
@@ -533,6 +556,13 @@
                   <div style={styles.statValue}>{misses}</div>
                   <div style={styles.statLabel}>missed</div>
                 </div>
+                {streak.current > 1 && <>
+                  <div style={styles.statDivider} />
+                  <div style={styles.stat}>
+                    <div style={styles.statValue}>{streak.current}</div>
+                    <div style={styles.statLabel}>streak</div>
+                  </div>
+                </>}
               </div>
 
               <button style={styles.shareButton} onClick={handleShare}>
