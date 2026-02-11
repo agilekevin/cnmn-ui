@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss version="2.0">
+  <channel>
+    <title>cnmn</title>
+    <link>https://cnmn.app</link>
+    <description>A free daily synonym puzzle. New puzzle every day.</description>
+    <language>en</language>
+    <lastBuildDate>Wed, 11 Feb 2026 06:00:00 +0000</lastBuildDate>
+    <item>
+      <title>cnmn #773: Emotions</title>
+      <link>https://cnmn.app</link>
+      <description>Today's theme: Emotions. Play now at cnmn.app!</description>
+      <guid isPermaLink="false">cnmn-2026-02-11</guid>
+      <pubDate>Wed, 11 Feb 2026 06:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>cnmn #771: Farming</title>
+      <link>https://cnmn.app</link>
+      <description>Today's theme: Farming. Play now at cnmn.app!</description>
+      <guid isPermaLink="false">cnmn-2026-02-09</guid>
+      <pubDate>Mon, 09 Feb 2026 06:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>cnmn #768: Bulidings</title>
+      <link>https://cnmn.app</link>
+      <description>Today's theme: Bulidings. Play now at cnmn.app!</description>
+      <guid isPermaLink="false">cnmn-2026-02-06</guid>
+      <pubDate>Fri, 06 Feb 2026 06:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>cnmn #761: animals</title>
+      <link>https://cnmn.app</link>
+      <description>Today's theme: animals. Play now at cnmn.app!</description>
+      <guid isPermaLink="false">cnmn-2026-01-30</guid>
+      <pubDate>Fri, 30 Jan 2026 06:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>cnmn #760: Kitchen Tools</title>
+      <link>https://cnmn.app</link>
+      <description>Today's theme: Kitchen Tools. Play now at cnmn.app!</description>
+      <guid isPermaLink="false">cnmn-2026-01-29</guid>
+      <pubDate>Thu, 29 Jan 2026 06:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>cnmn #397: buildings</title>
+      <link>https://cnmn.app</link>
+      <description>Today's theme: buildings. Play now at cnmn.app!</description>
+      <guid isPermaLink="false">cnmn-2025-01-31</guid>
+      <pubDate>Fri, 31 Jan 2025 06:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>cnmn #396: test</title>
+      <link>https://cnmn.app</link>
+      <description>Today's theme: test. Play now at cnmn.app!</description>
+      <guid isPermaLink="false">cnmn-2025-01-30</guid>
+      <pubDate>Thu, 30 Jan 2025 06:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>
