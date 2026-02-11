@@ -225,150 +225,6 @@
       gap: 15px;
     }
 
-    .image-source-toggle {
-      display: flex;
-      gap: 0;
-      margin-bottom: 8px;
-    }
-
-    .image-source-toggle button {
-      flex: 1;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      border: 2px solid #c4a574;
-      background: #faf7f2;
-      color: #8b6340;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .image-source-toggle button:first-child {
-      border-radius: 6px 0 0 6px;
-    }
-
-    .image-source-toggle button:last-child {
-      border-radius: 0 6px 6px 0;
-    }
-
-    .image-source-toggle button.active {
-      background: #6b3410;
-      color: white;
-      border-color: #6b3410;
-    }
-
-    .image-source-toggle button:hover:not(.active) {
-      background: #f0e4d3;
-    }
-
-    .unsplash-search-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .unsplash-search-row input {
-      flex: 1;
-      padding: 8px 10px;
-      border: 2px solid #c4a574;
-      border-radius: 8px;
-      font-size: 13px;
-    }
-
-    .unsplash-search-row input:focus {
-      outline: none;
-      border-color: #6b3410;
-    }
-
-    .unsplash-results {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .unsplash-results .thumb {
-      position: relative;
-      cursor: pointer;
-      border-radius: 8px;
-      overflow: hidden;
-      aspect-ratio: 1;
-      border: 2px solid transparent;
-      transition: all 0.15s;
-    }
-
-    .unsplash-results .thumb:hover {
-      border-color: #6b3410;
-      transform: scale(1.05);
-    }
-
-    .unsplash-results .thumb.selected {
-      border-color: #6b3410;
-      box-shadow: 0 0 0 2px #6b3410;
-    }
-
-    .unsplash-results .thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .unsplash-results .thumb .photo-credit {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.6);
-      color: white;
-      font-size: 9px;
-      padding: 2px 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .unsplash-status {
-      font-size: 12px;
-      color: #8b6340;
-      font-style: italic;
-      padding: 12px 0;
-      text-align: center;
-    }
-
-    .selected-image-preview {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      background: white;
-      border: 2px solid #c4a574;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-
-    .selected-image-preview img {
-      width: 48px;
-      height: 48px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
-
-    .selected-image-preview .info {
-      flex: 1;
-      font-size: 12px;
-      color: #6b3410;
-    }
-
-    .selected-image-preview .info .credit {
-      font-size: 11px;
-      color: #8b6340;
-    }
-
-    .selected-image-preview button {
-      padding: 4px 10px;
-      font-size: 11px;
-    }
   </style>
 </head>
 <body>
@@ -439,28 +295,9 @@
           </div>
 
           <div class="form-group">
-            <label>Visual</label>
-            <div class="image-source-toggle" id="imageToggle${index}">
-              <button type="button" class="active" onclick="setImageSource(${index}, 'emoji')">Emoji</button>
-              <button type="button" onclick="setImageSource(${index}, 'unsplash')">Unsplash</button>
-            </div>
-            <div id="emojiSection${index}">
-              <input type="text" id="link${index}_emoji" placeholder="🦈" maxlength="2">
-              <div class="emoji-picker" id="emojiPicker${index}"></div>
-            </div>
-            <div id="unsplashSection${index}" style="display:none">
-              <div class="unsplash-search-row">
-                <input type="text" id="link${index}_unsplash_query" placeholder="Search Unsplash photos..."
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();searchUnsplashForLink(${index})}">
-                <button type="button" onclick="searchUnsplashForLink(${index})">Search</button>
-              </div>
-              <div id="unsplashResults${index}"></div>
-              <div id="unsplashSelected${index}"></div>
-            </div>
-            <input type="hidden" id="link${index}_imageUrl" value="">
-            <input type="hidden" id="link${index}_imageCreditName" value="">
-            <input type="hidden" id="link${index}_imageCreditUsername" value="">
-            <input type="hidden" id="link${index}_imageCreditProfileUrl" value="">
+            <label>Emoji</label>
+            <input type="text" id="link${index}_emoji" placeholder="🦈" maxlength="2">
+            <div class="emoji-picker" id="emojiPicker${index}"></div>
           </div>
 
           <div class="form-group">
@@ -546,100 +383,6 @@
       });
     }
 
-    // Unsplash search and selection for puzzle generator
-    let unsplashResultsData = {};  // linkIndex -> results array
-
-    function setImageSource(index, source) {
-      const toggle = document.getElementById(`imageToggle${index}`);
-      toggle.querySelectorAll('button').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.toLowerCase() === source);
-      });
-      document.getElementById(`emojiSection${index}`).style.display = source === 'emoji' ? 'block' : 'none';
-      document.getElementById(`unsplashSection${index}`).style.display = source === 'unsplash' ? 'block' : 'none';
-
-      // Clear the other source when switching
-      if (source === 'emoji') {
-        document.getElementById(`link${index}_imageUrl`).value = '';
-        document.getElementById(`link${index}_imageCreditName`).value = '';
-        document.getElementById(`link${index}_imageCreditUsername`).value = '';
-        document.getElementById(`link${index}_imageCreditProfileUrl`).value = '';
-        document.getElementById(`unsplashSelected${index}`).innerHTML = '';
-      } else if (source === 'unsplash') {
-        document.getElementById(`link${index}_emoji`).value = '';
-      }
-    }
-
-    async function searchUnsplashForLink(index) {
-      const query = document.getElementById(`link${index}_unsplash_query`).value.trim();
-      if (!query) return;
-
-      const container = document.getElementById(`unsplashResults${index}`);
-      container.innerHTML = '<div class="unsplash-status">Searching...</div>';
-
-      try {
-        const resp = await fetch(`/api/unsplash/search?query=${encodeURIComponent(query)}&per_page=8`);
-        const data = await resp.json();
-        if (data.error) {
-          container.innerHTML = `<div class="unsplash-status">${data.error}</div>`;
-          return;
-        }
-
-        unsplashResultsData[index] = data.results || [];
-        if (data.results.length === 0) {
-          container.innerHTML = '<div class="unsplash-status">No photos found</div>';
-          return;
-        }
-
-        container.innerHTML = `<div class="unsplash-results">${data.results.map(photo => `
-          <div class="thumb" onclick="selectUnsplashPhoto(${index}, '${photo.id}')">
-            <img src="${photo.thumb}" alt="${(photo.alt || '').replace(/"/g, '&quot;')}" loading="lazy">
-            <div class="photo-credit">${photo.credit.name}</div>
-          </div>
-        `).join('')}</div>`;
-      } catch (e) {
-        container.innerHTML = `<div class="unsplash-status">Error: ${e.message}</div>`;
-      }
-    }
-
-    function selectUnsplashPhoto(index, photoId) {
-      const results = unsplashResultsData[index] || [];
-      const photo = results.find(p => p.id === photoId);
-      if (!photo) return;
-
-      document.getElementById(`link${index}_imageUrl`).value = photo.small;
-      document.getElementById(`link${index}_imageCreditName`).value = photo.credit.name;
-      document.getElementById(`link${index}_imageCreditUsername`).value = photo.credit.username;
-      document.getElementById(`link${index}_imageCreditProfileUrl`).value = photo.credit.profileUrl;
-      document.getElementById(`link${index}_emoji`).value = '';
-
-      // Show selected preview
-      document.getElementById(`unsplashSelected${index}`).innerHTML = `
-        <div class="selected-image-preview">
-          <img src="${photo.thumb}" alt="">
-          <div class="info">
-            Selected photo
-            <div class="credit">by ${photo.credit.name}</div>
-          </div>
-          <button type="button" onclick="clearUnsplashSelection(${index})">Clear</button>
-        </div>
-      `;
-
-      // Trigger download event
-      fetch('/api/unsplash/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photo_id: photoId }),
-      }).catch(() => {});
-    }
-
-    function clearUnsplashSelection(index) {
-      document.getElementById(`link${index}_imageUrl`).value = '';
-      document.getElementById(`link${index}_imageCreditName`).value = '';
-      document.getElementById(`link${index}_imageCreditUsername`).value = '';
-      document.getElementById(`link${index}_imageCreditProfileUrl`).value = '';
-      document.getElementById(`unsplashSelected${index}`).innerHTML = '';
-    }
-
     function generateCode() {
       const puzzleNumber = document.getElementById('puzzleNumber').value;
       const puzzleDate = document.getElementById('puzzleDate').value;
@@ -657,17 +400,6 @@
           ],
           answer: document.getElementById(`link${i}_answer`).value
         };
-
-        // Include image data if present
-        const imageUrl = document.getElementById(`link${i}_imageUrl`).value;
-        if (imageUrl) {
-          link.imageUrl = imageUrl;
-          link.imageCredit = {
-            name: document.getElementById(`link${i}_imageCreditName`).value,
-            username: document.getElementById(`link${i}_imageCreditUsername`).value,
-            profileUrl: document.getElementById(`link${i}_imageCreditProfileUrl`).value,
-          };
-        }
 
         if (i === 0) {
           link.category = document.getElementById(`link${i}_category`).value;
@@ -688,9 +420,7 @@ ${links.map((link, i) => `    {
 ${i === 0 ? `      category: "${link.category}",\n` : ''}      options: [${link.options.map(o => `"${o}"`).join(', ')}],
       answer: "${link.answer}",
       decoded: "${link.decoded}",
-      emoji: "${link.emoji}",${link.imageUrl ? `
-      imageUrl: "${link.imageUrl}",
-      imageCredit: { name: "${link.imageCredit.name}", profileUrl: "${link.imageCredit.profileUrl}" },` : ''}
+      emoji: "${link.emoji}",
       bridge: ${i < 5 ? `"${link.bridge}"` : 'null'}
     }`).join(',\n')}
   ]

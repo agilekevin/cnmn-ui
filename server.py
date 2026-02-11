@@ -12,7 +12,6 @@ Environment variables:
     PORTKEY_SLUG_ANTHROPIC   - Portkey provider slug for Anthropic
     PORTKEY_SLUG_OPENAI      - Portkey provider slug for OpenAI
     PORTKEY_SLUG_GOOGLE      - Portkey provider slug for Google
-    UNSPLASH_ACCESS_KEY      - Unsplash API access key (for image search)
     AUTH_USERNAME            - Basic auth username (optional, for deployment)
     AUTH_PASSWORD            - Basic auth password (optional, for deployment)
 """
@@ -32,8 +31,6 @@ app = Flask(__name__, static_folder='.')
 
 # Get API keys from environment
 PORTKEY_API_KEY = os.getenv('PORTKEY_API_KEY', '')
-UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY', '')
-
 # Basic auth credentials (optional)
 AUTH_USERNAME = os.getenv('AUTH_USERNAME', '')
 AUTH_PASSWORD = os.getenv('AUTH_PASSWORD', '')
@@ -260,74 +257,6 @@ def call_portkey(model, prompt, max_tokens=1024):
         return jsonify({'error': f'Portkey API error: {str(e)}'}), 500
 
 
-@app.route('/api/unsplash/search')
-@requires_auth
-def unsplash_search():
-    """Search Unsplash for photos by keyword."""
-    query = request.args.get('query', '').strip()
-    if not query:
-        return jsonify({'error': 'No query provided'}), 400
-
-    if not UNSPLASH_ACCESS_KEY:
-        return jsonify({'error': 'Unsplash API key not configured. Set UNSPLASH_ACCESS_KEY in .env'}), 400
-
-    per_page = min(int(request.args.get('per_page', 12)), 30)
-
-    try:
-        response = requests.get(
-            'https://api.unsplash.com/search/photos',
-            params={
-                'query': query,
-                'per_page': per_page,
-                'orientation': 'squarish',
-            },
-            headers={
-                'Authorization': f'Client-ID {UNSPLASH_ACCESS_KEY}',
-            },
-            timeout=10,
-        )
-        response.raise_for_status()
-        data = response.json()
-
-        results = []
-        for photo in data.get('results', []):
-            results.append({
-                'id': photo['id'],
-                'thumb': photo['urls']['thumb'],
-                'small': photo['urls']['small'],
-                'regular': photo['urls']['regular'],
-                'alt': photo.get('alt_description', ''),
-                'credit': {
-                    'name': photo['user']['name'],
-                    'username': photo['user']['username'],
-                    'profileUrl': photo['user']['links']['html'],
-                },
-            })
-
-        return jsonify({'results': results, 'total': data.get('total', 0)})
-    except requests.exceptions.RequestException as e:
-        return jsonify({'error': f'Unsplash API error: {str(e)}'}), 500
-
-
-@app.route('/api/unsplash/download', methods=['POST'])
-@requires_auth
-def unsplash_download_trigger():
-    """Trigger Unsplash download endpoint (required by API guidelines)."""
-    photo_id = request.json.get('photo_id', '').strip()
-    if not photo_id or not UNSPLASH_ACCESS_KEY:
-        return jsonify({'ok': False}), 400
-
-    try:
-        requests.get(
-            f'https://api.unsplash.com/photos/{photo_id}/download',
-            headers={'Authorization': f'Client-ID {UNSPLASH_ACCESS_KEY}'},
-            timeout=10,
-        )
-    except Exception:
-        pass  # Best-effort; don't block the user
-    return jsonify({'ok': True})
-
-
 if __name__ == '__main__':
     print("\n🤖 cnmn Quiz Generator Server")
     print("=" * 40)
@@ -336,7 +265,6 @@ if __name__ == '__main__':
         print(f"Providers: {', '.join(f'{p} (@{s})' for p, s in PROVIDER_SLUGS.items())}")
     else:
         print("Providers: none (set PORTKEY_SLUG_ANTHROPIC etc. in .env)")
-    print(f"Unsplash:  {'✓ configured' if UNSPLASH_ACCESS_KEY else '✗ not configured'}")
     print(f"Auth:      {'✓ enabled' if AUTH_USERNAME and AUTH_PASSWORD else '✗ disabled (open access)'}")
     print("=" * 40)
     print("Open http://localhost:5000 in your browser\n")

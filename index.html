@@ -350,7 +350,7 @@
       const chain = CHAIN_DATA;
       const link = chain.links[currentLink];
 
-      // Render image (Unsplash photo) or emoji fallback
+      // Render image or emoji fallback
       const LinkImage = ({ link: l, size }) => {
         const sizeMap = {
           tiny:   { width: 44,  height: 44,  fontSize: '24px' },
@@ -462,7 +462,7 @@
                 ))}
               </div>
               {chain.links.some(l => l.imageUrl && l.imageCredit) && (
-                <div style={styles.unsplashAttribution}>
+                <div style={styles.iconAttribution}>
                   Icons:{' '}
                   {[...new Set(chain.links
                     .filter(l => l.imageUrl && l.imageCredit)
@@ -1037,7 +1037,7 @@
         justifyContent: 'center',
         backgroundColor: '#ffffff',
       },
-      unsplashAttribution: {
+      iconAttribution: {
         fontSize: '11px',
         color: '#b8956d',
         textAlign: 'center',
