@@ -380,6 +380,7 @@
       const [reviewLink, setReviewLink] = useState(null);
       const eliminatedPerLink = useRef({});
       const [streak, setStreak] = useState(() => getStreak());
+      const [announcement, setAnnouncement] = useState('');
 
       const advanceFromReveal = () => {
         if (!showReveal) return;
@@ -439,6 +440,7 @@
 
         if (option === link.answer) {
           playCorrect();
+          setAnnouncement(`Correct! The answer is ${link.decoded}.`);
           eliminatedPerLink.current[currentLink] = [...eliminated];
           setSolvedLinks([...solvedLinks, currentLink]);
           setShowReveal(true);
@@ -461,6 +463,7 @@
           }
         } else {
           playWrong();
+          setAnnouncement(`Wrong. ${link.decodedOptions ? link.decodedOptions[option] + ' is not correct.' : 'Try again.'}`);
           setShakeOption(option);
           setEliminated([...eliminated, option]);
           setMisses(misses + 1);
@@ -509,9 +512,9 @@
         return (
           <div style={styles.container}>
             {isLocalhost && <LocalBadge />}
-            <div style={styles.resultsCard}>
+            <div style={styles.resultsCard} role="main">
               <div style={styles.resultsHeader}>
-                <span style={styles.logo}>cnmn</span>
+                <h1 style={{...styles.logo, margin: 0}}>cnmn</h1>
                 <span style={styles.puzzleNum}>#{chain.number}</span>
               </div>
 
@@ -575,7 +578,7 @@
                 </>}
               </div>
 
-              <button style={styles.shareButton} onClick={handleShare}>
+              <button style={styles.shareButton} onClick={handleShare} aria-label={copied ? 'Score copied to clipboard' : 'Share your score'}>
                 {copied ? 'Copied!' : 'Share'}
               </button>
 
@@ -592,6 +595,7 @@
                     name="email"
                     placeholder="you@email.com"
                     required
+                    aria-label="Email address for newsletter"
                     style={styles.newsletterInput}
                   />
                   <button type="submit" style={styles.newsletterButton}>Subscribe</button>
@@ -605,7 +609,7 @@
               </form>
 
               <div style={styles.answersReview}>
-                <div style={styles.reviewTitle}>Answers</div>
+                <h2 style={{...styles.reviewTitle, margin: 0}}>Answers</h2>
                 <div style={styles.reviewStartCategory}>{chain.links[0].category}</div>
                 {chain.links.map((l, i) => (
                   <div key={i} style={styles.reviewItem}>
@@ -621,16 +625,18 @@
 
       // Game screen
       return (
-        <div style={styles.container}>
+        <div style={styles.container} role="main">
           {isLocalhost && <LocalBadge />}
+          <div aria-live="polite" aria-atomic="true" style={{position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0,0,0,0)'}}>{announcement}</div>
           <div style={styles.header}>
-            <span style={styles.logo}>cnmn</span>
+            <h1 style={{...styles.logo, margin: 0}}>cnmn</h1>
             <div style={styles.headerRight}>
               <span style={styles.puzzleInfo}>#{chain.number} · {chain.date}</span>
               <button
                 style={styles.helpButton}
                 onClick={() => setShowHelp(!showHelp)}
-                title="How to play"
+                aria-label="How to play"
+                aria-expanded={showHelp}
               >?</button>
             </div>
           </div>
@@ -654,7 +660,7 @@
           )}
 
           {/* Progress */}
-          <div style={styles.imageChain}>
+          <div style={styles.imageChain} role="group" aria-label={`Progress: ${solvedLinks.length} of ${chain.links.length} solved`}>
             {solvedLinks.map((linkIdx) => {
               const sl = chain.links[linkIdx];
               return (
@@ -750,7 +756,7 @@
                   <div style={styles.category}>{link.category}</div>
                 </div>
 
-                <div style={styles.options}>
+                <div style={styles.options} role="group" aria-label={`Choose the synonym for ${link.category}`}>
                   {link.options.map((option) => {
                     const isEliminated = eliminated.includes(option);
                     const isShaking = shakeOption === option;
@@ -767,6 +773,7 @@
                         }}
                         onClick={() => handleGuess(option)}
                         disabled={isEliminated || showReveal}
+                        aria-label={`${option}${showDecoded ? ', ' + link.decodedOptions[option] + ', eliminated' : ''}`}
                       >
                         {option}
                         {showDecoded && (
@@ -1408,6 +1415,12 @@
 
       * {
         -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Visible focus ring for keyboard navigation */
+      button:focus-visible, input:focus-visible {
+        outline: 3px solid #6b3410;
+        outline-offset: 2px;
       }
 
       button:hover:not(:disabled) {
