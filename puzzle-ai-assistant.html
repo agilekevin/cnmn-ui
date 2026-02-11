@@ -313,6 +313,49 @@
       100% { transform: rotate(360deg); }
     }
 
+    .icon-retry-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ecdbc8;
+      border-top: 2px solid #6b3410;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    .emoji-btn.retrying {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .icon-retry-log-btn {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 8px;
+      background: #ecdbc8;
+      color: #6b3410;
+      border: 1px solid #c4a574;
+      cursor: pointer;
+      margin-left: 4px;
+      white-space: nowrap;
+    }
+
+    .icon-retry-log {
+      font-size: 11px;
+      background: #fdf6ec;
+      border: 1px solid #ecdbc8;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-top: 4px;
+      color: #5a3a1a;
+      line-height: 1.5;
+    }
+
+    .icon-retry-log .log-entry { margin: 2px 0; }
+    .icon-retry-log .log-ok { color: #2a7d2a; }
+    .icon-retry-log .log-fail { color: #a04030; }
+    .icon-retry-log .log-skip { color: #8b6340; }
+
     /* Hidden */
     .hidden {
       display: none !important;
@@ -1166,6 +1209,11 @@ Return ONLY the JSON array.`;
         const hint = document.getElementById('image-fetch-hint');
         if (hint) hint.remove();
         renderQuestions();
+
+        // Phase 3: LLM-assisted retry for failed icon searches
+        if (currentModel !== 'rules') {
+          await retryFailedIcons();
+        }
       } catch (error) {
         container.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${error.message}</p></div>`;
       }
@@ -1446,9 +1494,11 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
           <div class="field-row">
             <label>Prompt:</label>
             <div class="emoji-picker-container">
-              ${q.imageUrl
-                ? `<div class="image-preview" onclick="toggleEmojiPicker(${index})"><img src="${q.imageUrl}" alt=""></div>`
-                : `<button type="button" class="emoji-btn" onclick="toggleEmojiPicker(${index})">${q.emoji || '➕'}</button>`
+              ${q.iconRetrying
+                ? `<button type="button" class="emoji-btn retrying"><span class="icon-retry-spinner"></span></button>`
+                : q.imageUrl
+                  ? `<div class="image-preview" onclick="toggleEmojiPicker(${index})"><img src="${q.imageUrl}" alt=""></div>`
+                  : `<button type="button" class="emoji-btn" onclick="toggleEmojiPicker(${index})">${q.emoji || '➕'}</button>`
               }
               <div class="emoji-dropdown" id="emoji-dropdown-${index}">
                 <div class="image-picker-toggle">
@@ -1492,7 +1542,15 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
             </div>
             <input type="text" value="${q.prompt}" onchange="updatePrompt(${index}, this.value)" />
             <button class="small" onclick="reshufflePrompt(${index})">🔄</button>
+            ${q.iconRetryLog && q.iconRetryLog.length > 0
+              ? `<button type="button" class="icon-retry-log-btn" onclick="toggleRetryLog(${index})">log (${q.iconRetryLog.length})</button>`
+              : ''}
           </div>
+          ${q.iconRetryLog && q.iconRetryLog.length > 0
+            ? `<div class="icon-retry-log hidden" id="retry-log-${index}">${q.iconRetryLog.map(e =>
+                `<div class="log-entry ${e.ok ? 'log-ok' : e.skipped ? 'log-skip' : 'log-fail'}">${e.text}</div>`
+              ).join('')}</div>`
+            : ''}
 
           <div class="field-row">
             <label>Answer:</label>
@@ -1595,6 +1653,11 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
       }
 
       return html;
+    }
+
+    function toggleRetryLog(qIndex) {
+      const el = document.getElementById(`retry-log-${qIndex}`);
+      if (el) el.classList.toggle('hidden');
     }
 
     function toggleEmojiPicker(qIndex) {
@@ -1715,35 +1778,15 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
       'game-icons': 'Game Icons',
     };
 
-    // Auto-fetch Iconify icons for all quiz questions in parallel.
-    // Falls back to emoji if search fails or returns no results.
-    async function autoFetchIcons() {
-      const prefixes = ICON_SET_PRIORITY.join(',');
-      const fetches = quiz.questions.map((q, qIndex) => {
-        const query = q.iconSearch || q.prompt;
-        return fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&prefixes=${prefixes}&limit=32`)
-          .then(resp => resp.json())
-          .then(data => ({ qIndex, data }))
-          .catch(() => ({ qIndex, data: null }));
-      });
+    // Search Iconify API for icons matching a query.
+    // Returns { icons, best } or null if no results.
+    async function searchIconify(query) {
+      try {
+        const prefixes = ICON_SET_PRIORITY.join(',');
+        const resp = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&prefixes=${prefixes}&limit=32`);
+        const data = await resp.json();
+        if (!data.icons || data.icons.length === 0) return null;
 
-      const results = await Promise.allSettled(fetches);
-
-      for (const result of results) {
-        if (result.status !== 'fulfilled') continue;
-        const { qIndex, data } = result.value;
-
-        if (!data || !data.icons || data.icons.length === 0) {
-          // Fall back to emoji
-          const q = quiz.questions[qIndex];
-          if (!q.emoji) {
-            const matches = findEmojiForWord(q.prompt);
-            if (matches.length > 0) q.emoji = matches[0];
-          }
-          continue;
-        }
-
-        // Parse icon names and sort by preferred set
         const icons = data.icons.map(icon => {
           const colonIdx = icon.indexOf(':');
           return { prefix: icon.substring(0, colonIdx), name: icon.substring(colonIdx + 1) };
@@ -1754,12 +1797,39 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
         });
 
-        // Store results and auto-select first icon
-        iconResults[qIndex] = icons;
+        return { icons, best: icons[0] };
+      } catch {
+        return null;
+      }
+    }
+
+    // Auto-fetch Iconify icons for all quiz questions in parallel.
+    // Falls back to emoji if search fails or returns no results.
+    async function autoFetchIcons() {
+      const fetches = quiz.questions.map((q, qIndex) => {
+        const query = q.iconSearch || q.prompt;
+        return searchIconify(query).then(result => ({ qIndex, result }));
+      });
+
+      const results = await Promise.allSettled(fetches);
+
+      for (const settled of results) {
+        if (settled.status !== 'fulfilled') continue;
+        const { qIndex, result } = settled.value;
+        const q = quiz.questions[qIndex];
+
+        if (!result) {
+          if (!q.emoji) {
+            const matches = findEmojiForWord(q.prompt);
+            if (matches.length > 0) q.emoji = matches[0];
+          }
+          continue;
+        }
+
+        iconResults[qIndex] = result.icons;
         pickerMode[qIndex] = 'icon';
 
-        const best = icons[0];
-        const q = quiz.questions[qIndex];
+        const best = result.best;
         q.imageUrl = `https://api.iconify.design/${best.prefix}/${best.name}.svg?height=128`;
         q.imageCredit = {
           name: ICON_SET_NAMES[best.prefix] || best.prefix,
@@ -1767,6 +1837,84 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
           profileUrl: `https://icon-sets.iconify.design/${best.prefix}/`,
         };
         q.emoji = '';
+      }
+    }
+
+    // LLM-assisted icon retry: ask the LLM for better search terms for failed icons
+    async function retryFailedIcons() {
+      const failedIndices = quiz.questions
+        .map((q, i) => (!q.imageUrl ? i : -1))
+        .filter(i => i !== -1);
+
+      if (failedIndices.length === 0) return;
+
+      // Show spinners on failed cards and init logs
+      for (const i of failedIndices) {
+        const q = quiz.questions[i];
+        q.iconRetrying = true;
+        q.iconRetryLog = [{ text: `Initial search "${q.iconSearch || q.prompt}" — no results`, ok: false }];
+      }
+      renderQuestions();
+
+      // Retry all failed icons in parallel
+      await Promise.allSettled(
+        failedIndices.map(i => retryIconForQuestion(i, 3))
+      );
+
+      // Clear retry flags on any still-failed cards and re-render
+      for (const i of failedIndices) {
+        quiz.questions[i].iconRetrying = false;
+      }
+      renderQuestions();
+    }
+
+    // Sequential retry loop for one question's icon
+    async function retryIconForQuestion(qIndex, maxRetries) {
+      const q = quiz.questions[qIndex];
+      const log = q.iconRetryLog || [];
+      const triedTerms = [q.iconSearch || q.prompt];
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const newTerm = await suggestIconSearchTerm(q.prompt, triedTerms);
+        if (!newTerm) {
+          log.push({ text: `Retry ${attempt + 1}: LLM suggested nothing new`, skipped: true });
+          continue;
+        }
+
+        triedTerms.push(newTerm);
+        const result = await searchIconify(newTerm);
+        if (result) {
+          const best = result.best;
+          iconResults[qIndex] = result.icons;
+          pickerMode[qIndex] = 'icon';
+          q.imageUrl = `https://api.iconify.design/${best.prefix}/${best.name}.svg?height=128`;
+          q.imageCredit = {
+            name: ICON_SET_NAMES[best.prefix] || best.prefix,
+            username: best.prefix,
+            profileUrl: `https://icon-sets.iconify.design/${best.prefix}/`,
+          };
+          q.emoji = '';
+          q.iconRetrying = false;
+          log.push({ text: `Retry ${attempt + 1}: "${newTerm}" — found ${result.icons.length} icons`, ok: true });
+          renderQuestions();
+          return;
+        } else {
+          log.push({ text: `Retry ${attempt + 1}: "${newTerm}" — no results`, ok: false });
+        }
+      }
+    }
+
+    // Ask the LLM to suggest a concrete/visual search term for a concept
+    async function suggestIconSearchTerm(concept, triedTerms) {
+      try {
+        const prompt = `The word is "${concept}". These Iconify icon search terms found no results: ${triedTerms.join(', ')}.\nSuggest ONE different 1-3 word search term for a concrete, visual object or symbol that represents "${concept}". Reply with just the search term.`;
+        const reply = await callServer(prompt, { maxTokens: 30 });
+        const term = reply.trim().toLowerCase().replace(/['"]/g, '');
+        if (!term || term.length > 40 || term.split(/\s+/).length > 3) return null;
+        if (triedTerms.includes(term)) return null;
+        return term;
+      } catch {
+        return null;
       }
     }
 
