@@ -579,14 +579,14 @@
       background: #f0e4d3;
     }
 
-    .unsplash-search-row {
+    .icon-search-row {
       display: flex;
       gap: 6px;
       padding: 10px;
       border-bottom: 1px solid #ecdbc8;
     }
 
-    .unsplash-search-row input {
+    .icon-search-row input {
       flex: 1;
       padding: 8px 12px;
       border: 2px solid #ecdbc8;
@@ -595,61 +595,51 @@
       outline: none;
     }
 
-    .unsplash-search-row input:focus {
+    .icon-search-row input:focus {
       border-color: #c4a574;
     }
 
-    .unsplash-search-row button {
+    .icon-search-row button {
       padding: 8px 14px;
       font-size: 12px;
     }
 
-    .unsplash-grid {
+    .icon-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 6px;
       padding: 8px;
       height: 240px;
       overflow-y: auto;
     }
 
-    .unsplash-thumb {
-      position: relative;
+    .icon-thumb {
       cursor: pointer;
       border-radius: 6px;
-      overflow: hidden;
       aspect-ratio: 1;
       border: 2px solid transparent;
       transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      background: #faf7f2;
     }
 
-    .unsplash-thumb:hover {
+    .icon-thumb:hover {
       border-color: #6b3410;
-      transform: scale(1.03);
+      transform: scale(1.08);
+      background: #f0e6d6;
     }
 
-    .unsplash-thumb img {
+    .icon-thumb img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
     }
 
-    .unsplash-thumb .credit {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.6);
-      color: white;
-      font-size: 9px;
-      padding: 2px 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .unsplash-empty {
+    .icon-empty {
       text-align: center;
       padding: 40px 20px;
       color: #8b6340;
@@ -657,7 +647,7 @@
       grid-column: 1 / -1;
     }
 
-    .unsplash-footer {
+    .icon-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -667,10 +657,9 @@
       border-radius: 0 0 10px 10px;
     }
 
-    .unsplash-footer a {
+    .icon-footer span {
       font-size: 10px;
       color: #8b6340;
-      text-decoration: none;
     }
 
     .image-preview {
@@ -689,7 +678,7 @@
     .image-preview img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     /* Difficulty badges */
@@ -1155,7 +1144,12 @@ Return ONLY the JSON array.`;
         } else {
           quiz.questions = await generateChainQuiz(theme);
         }
-        // Auto-suggest emojis for questions that don't have one
+
+        // Reset picker state for new generation
+        pickerMode = {};
+        iconResults = {};
+
+        // Phase 1: Immediate render with emoji fallbacks (so UI isn't blocked)
         for (const q of quiz.questions) {
           if (!q.emoji) {
             const matches = findEmojiForWord(q.prompt);
@@ -1164,6 +1158,14 @@ Return ONLY the JSON array.`;
         }
         renderQuestions();
         document.getElementById('exportSection').classList.remove('hidden');
+
+        // Phase 2: Async icon fetch, then re-render with icons
+        container.insertAdjacentHTML('afterbegin',
+          '<div class="loading" id="image-fetch-hint" style="padding:8px;margin-bottom:8px"><div class="spinner"></div>Fetching icons...</div>');
+        await autoFetchIcons();
+        const hint = document.getElementById('image-fetch-hint');
+        if (hint) hint.remove();
+        renderQuestions();
       } catch (error) {
         container.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${error.message}</p></div>`;
       }
@@ -1348,6 +1350,7 @@ Examples: clothes→\`kloz\`, cinnamon→\`cnmn\`, garbage→\`grbj\`, happy→\
       "link": 1,
       "difficulty": "easy",
       "category": "rain",
+      "icon_search": "rain cloud",
       "compressed": "shwr",
       "answer_word": "shower",
       "correct_option": "Shower",
@@ -1358,6 +1361,7 @@ Examples: clothes→\`kloz\`, cinnamon→\`cnmn\`, garbage→\`grbj\`, happy→\
 \`\`\`
 
 - "category" = the single-word prompt shown to the player
+- "icon_search" = a 1-3 word search term to find a visual icon for this prompt. Use concrete, picturable nouns (e.g., for "scared" use "fearful face", for "inn" use "hotel building", for "swift" use "running cheetah"). Avoid abstract words.
 - "answer_word" = the single word the compressed clue decodes to (must be a synonym of category)
 - "correct_option" = the answer as shown to the player (same word, can be capitalized)
 - "distractors" = 3 single words that are NOT synonyms of the category
@@ -1406,6 +1410,7 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
         questions.push({
           prompt: (link.category || '').toLowerCase(),
           emoji: '',
+          iconSearch: link.icon_search || (link.category || '').toLowerCase(),
           rejectedPrompts: [],
           answer: {
             word: answerWord,
@@ -1447,10 +1452,10 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
               }
               <div class="emoji-dropdown" id="emoji-dropdown-${index}">
                 <div class="image-picker-toggle">
-                  <button type="button" class="${(pickerMode[index] || 'emoji') === 'emoji' ? 'active' : ''}" onclick="setPickerMode(${index}, 'emoji')">Emoji</button>
-                  <button type="button" class="${(pickerMode[index] || 'emoji') === 'image' ? 'active' : ''}" onclick="setPickerMode(${index}, 'image')">Image</button>
+                  <button type="button" class="${(pickerMode[index] || 'icon') === 'emoji' ? 'active' : ''}" onclick="setPickerMode(${index}, 'emoji')">Emoji</button>
+                  <button type="button" class="${(pickerMode[index] || 'icon') === 'icon' ? 'active' : ''}" onclick="setPickerMode(${index}, 'icon')">Icon</button>
                 </div>
-                <div id="picker-emoji-${index}" style="display:${(pickerMode[index] || 'emoji') === 'emoji' ? 'block' : 'none'}">
+                <div id="picker-emoji-${index}" style="display:${(pickerMode[index] || 'icon') === 'emoji' ? 'block' : 'none'}">
                   <div class="emoji-search">
                     <input type="text" placeholder="Search emojis..." oninput="filterEmojis(${index}, this.value)" id="emoji-search-${index}">
                   </div>
@@ -1468,19 +1473,19 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
                     <input type="text" class="emoji-direct-input" placeholder="Paste any emoji" id="emoji-direct-${index}" onkeydown="handleDirectEmoji(event, ${index})" maxlength="2">
                   </div>
                 </div>
-                <div id="picker-image-${index}" style="display:${(pickerMode[index] || 'emoji') === 'image' ? 'block' : 'none'}">
-                  <div class="unsplash-search-row">
-                    <input type="text" placeholder="Search photos..." id="unsplash-search-${index}"
-                      value="${q.prompt || ''}"
-                      onkeydown="if(event.key==='Enter'){searchUnsplash(${index});event.preventDefault()}">
-                    <button type="button" onclick="searchUnsplash(${index})">Search</button>
+                <div id="picker-icon-${index}" style="display:${(pickerMode[index] || 'icon') === 'icon' ? 'block' : 'none'}">
+                  <div class="icon-search-row">
+                    <input type="text" placeholder="Search icons..." id="icon-search-${index}"
+                      value="${q.iconSearch || q.prompt || ''}"
+                      onkeydown="if(event.key==='Enter'){searchIcons(${index});event.preventDefault()}">
+                    <button type="button" onclick="searchIcons(${index})">Search</button>
                   </div>
-                  <div class="unsplash-grid" id="unsplash-grid-${index}">
-                    ${renderUnsplashGrid(index)}
+                  <div class="icon-grid" id="icon-grid-${index}">
+                    ${renderIconGrid(index)}
                   </div>
-                  <div class="unsplash-footer">
-                    <button type="button" class="emoji-clear" onclick="clearImage(${index})">Clear image</button>
-                    <a href="https://unsplash.com/?utm_source=cnmn&utm_medium=referral" target="_blank" rel="noopener noreferrer">Photos by Unsplash</a>
+                  <div class="icon-footer">
+                    <button type="button" class="emoji-clear" onclick="clearImage(${index})">Clear icon</button>
+                    <span>Icons by Iconify</span>
                   </div>
                 </div>
               </div>
@@ -1695,17 +1700,82 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
     });
 
     // ============================================
-    // UNSPLASH IMAGE PICKER
+    // ICONIFY ICON PICKER
     // ============================================
-    let pickerMode = {};       // qIndex -> 'emoji' | 'image'
-    let unsplashResults = {};  // qIndex -> array of results
+    let pickerMode = {};     // qIndex -> 'emoji' | 'icon'
+    let iconResults = {};    // qIndex -> array of { prefix, name }
+
+    // Preferred icon set order (colored first, then monochrome)
+    const ICON_SET_PRIORITY = ['noto', 'twemoji', 'fluent-emoji-flat', 'fluent-emoji-high-contrast', 'game-icons'];
+    const ICON_SET_NAMES = {
+      'noto': 'Noto Emoji (Google)',
+      'twemoji': 'Twemoji (Twitter)',
+      'fluent-emoji-flat': 'Fluent Emoji (Microsoft)',
+      'fluent-emoji-high-contrast': 'Fluent Emoji HC',
+      'game-icons': 'Game Icons',
+    };
+
+    // Auto-fetch Iconify icons for all quiz questions in parallel.
+    // Falls back to emoji if search fails or returns no results.
+    async function autoFetchIcons() {
+      const prefixes = ICON_SET_PRIORITY.join(',');
+      const fetches = quiz.questions.map((q, qIndex) => {
+        const query = q.iconSearch || q.prompt;
+        return fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&prefixes=${prefixes}&limit=32`)
+          .then(resp => resp.json())
+          .then(data => ({ qIndex, data }))
+          .catch(() => ({ qIndex, data: null }));
+      });
+
+      const results = await Promise.allSettled(fetches);
+
+      for (const result of results) {
+        if (result.status !== 'fulfilled') continue;
+        const { qIndex, data } = result.value;
+
+        if (!data || !data.icons || data.icons.length === 0) {
+          // Fall back to emoji
+          const q = quiz.questions[qIndex];
+          if (!q.emoji) {
+            const matches = findEmojiForWord(q.prompt);
+            if (matches.length > 0) q.emoji = matches[0];
+          }
+          continue;
+        }
+
+        // Parse icon names and sort by preferred set
+        const icons = data.icons.map(icon => {
+          const colonIdx = icon.indexOf(':');
+          return { prefix: icon.substring(0, colonIdx), name: icon.substring(colonIdx + 1) };
+        });
+        icons.sort((a, b) => {
+          const ai = ICON_SET_PRIORITY.indexOf(a.prefix);
+          const bi = ICON_SET_PRIORITY.indexOf(b.prefix);
+          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+        });
+
+        // Store results and auto-select first icon
+        iconResults[qIndex] = icons;
+        pickerMode[qIndex] = 'icon';
+
+        const best = icons[0];
+        const q = quiz.questions[qIndex];
+        q.imageUrl = `https://api.iconify.design/${best.prefix}/${best.name}.svg?height=128`;
+        q.imageCredit = {
+          name: ICON_SET_NAMES[best.prefix] || best.prefix,
+          username: best.prefix,
+          profileUrl: `https://icon-sets.iconify.design/${best.prefix}/`,
+        };
+        q.emoji = '';
+      }
+    }
 
     function setPickerMode(qIndex, mode) {
       pickerMode[qIndex] = mode;
       const emojiPanel = document.getElementById(`picker-emoji-${qIndex}`);
-      const imagePanel = document.getElementById(`picker-image-${qIndex}`);
+      const iconPanel = document.getElementById(`picker-icon-${qIndex}`);
       if (emojiPanel) emojiPanel.style.display = mode === 'emoji' ? 'block' : 'none';
-      if (imagePanel) imagePanel.style.display = mode === 'image' ? 'block' : 'none';
+      if (iconPanel) iconPanel.style.display = mode === 'icon' ? 'block' : 'none';
       // Update toggle buttons
       const container = document.getElementById(`emoji-dropdown-${qIndex}`);
       if (container) {
@@ -1713,67 +1783,69 @@ Generate 6 puzzles on the theme "${theme}". Return ONLY the JSON.`;
           btn.classList.toggle('active', btn.textContent.toLowerCase() === mode);
         });
       }
-      // Auto-search when switching to image mode
-      if (mode === 'image' && !unsplashResults[qIndex]) {
-        searchUnsplash(qIndex);
+      // Auto-search when switching to icon mode
+      if (mode === 'icon' && !iconResults[qIndex]) {
+        searchIcons(qIndex);
       }
     }
 
-    async function searchUnsplash(qIndex) {
-      const input = document.getElementById(`unsplash-search-${qIndex}`);
+    async function searchIcons(qIndex) {
+      const input = document.getElementById(`icon-search-${qIndex}`);
       const query = input ? input.value.trim() : '';
       if (!query) return;
 
-      const grid = document.getElementById(`unsplash-grid-${qIndex}`);
-      if (grid) grid.innerHTML = '<div class="unsplash-empty">Searching...</div>';
+      const grid = document.getElementById(`icon-grid-${qIndex}`);
+      if (grid) grid.innerHTML = '<div class="icon-empty">Searching...</div>';
 
       try {
-        const resp = await fetch(`/api/unsplash/search?query=${encodeURIComponent(query)}&per_page=12`);
+        const prefixes = ICON_SET_PRIORITY.join(',');
+        const resp = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&prefixes=${prefixes}&limit=32`);
         const data = await resp.json();
-        if (data.error) {
-          grid.innerHTML = `<div class="unsplash-empty">${data.error}</div>`;
+        if (!data.icons || data.icons.length === 0) {
+          if (grid) grid.innerHTML = '<div class="icon-empty">No icons found</div>';
           return;
         }
-        unsplashResults[qIndex] = data.results || [];
-        grid.innerHTML = renderUnsplashGrid(qIndex);
+        const icons = data.icons.map(icon => {
+          const colonIdx = icon.indexOf(':');
+          return { prefix: icon.substring(0, colonIdx), name: icon.substring(colonIdx + 1) };
+        });
+        icons.sort((a, b) => {
+          const ai = ICON_SET_PRIORITY.indexOf(a.prefix);
+          const bi = ICON_SET_PRIORITY.indexOf(b.prefix);
+          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+        });
+        iconResults[qIndex] = icons;
+        grid.innerHTML = renderIconGrid(qIndex);
       } catch (e) {
-        if (grid) grid.innerHTML = `<div class="unsplash-empty">Search failed: ${e.message}</div>`;
+        if (grid) grid.innerHTML = `<div class="icon-empty">Search failed: ${e.message}</div>`;
       }
     }
 
-    function renderUnsplashGrid(qIndex) {
-      const results = unsplashResults[qIndex];
+    function renderIconGrid(qIndex) {
+      const results = iconResults[qIndex];
       if (!results || results.length === 0) {
-        return '<div class="unsplash-empty">Search for photos above</div>';
+        return '<div class="icon-empty">Search for icons above</div>';
       }
-      return results.map(photo => `
-        <div class="unsplash-thumb" onclick="selectUnsplashImage(${qIndex}, '${photo.id}')">
-          <img src="${photo.thumb}" alt="${(photo.alt || '').replace(/'/g, '&#39;')}" loading="lazy">
-          <div class="credit">${photo.credit.name}</div>
+      return results.map((icon, i) => `
+        <div class="icon-thumb" onclick="selectIcon(${qIndex}, ${i})" title="${icon.prefix}:${icon.name}">
+          <img src="https://api.iconify.design/${icon.prefix}/${icon.name}.svg?height=64" alt="${icon.name}" loading="lazy">
         </div>
       `).join('');
     }
 
-    function selectUnsplashImage(qIndex, photoId) {
-      const results = unsplashResults[qIndex] || [];
-      const photo = results.find(p => p.id === photoId);
-      if (!photo) return;
+    function selectIcon(qIndex, iconIdx) {
+      const results = iconResults[qIndex] || [];
+      const icon = results[iconIdx];
+      if (!icon) return;
 
       const q = quiz.questions[qIndex];
-      q.imageUrl = photo.small;
+      q.imageUrl = `https://api.iconify.design/${icon.prefix}/${icon.name}.svg?height=128`;
       q.imageCredit = {
-        name: photo.credit.name,
-        username: photo.credit.username,
-        profileUrl: photo.credit.profileUrl,
+        name: ICON_SET_NAMES[icon.prefix] || icon.prefix,
+        username: icon.prefix,
+        profileUrl: `https://icon-sets.iconify.design/${icon.prefix}/`,
       };
-      q.emoji = '';  // Clear emoji when image is selected
-
-      // Trigger Unsplash download event (required by API guidelines)
-      fetch('/api/unsplash/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photo_id: photoId }),
-      }).catch(() => {});
+      q.emoji = '';  // Clear emoji when icon is selected
 
       document.getElementById(`emoji-dropdown-${qIndex}`).classList.remove('open');
       renderQuestions();

@@ -44,65 +44,95 @@
                 {
                       "category": "Soil",
                       "options": [
-                            "bkt",
-                            "drt",
+                            "lddr",
                             "fnc",
-                            "lddr"
+                            "bkt",
+                            "drt"
                       ],
                       "answer": "drt",
                       "decoded": "DIRT",
+                      "decodedOptions": {
+                            "drt": "DIRT",
+                            "fnc": "FENCE",
+                            "bkt": "BUCKET",
+                            "lddr": "LADDER"
+                      },
                       "emoji": "😕",
                       "bridge": null
                 },
                 {
                       "category": "Harvest",
                       "options": [
-                            "wthr",
-                            "crp",
                             "shvl",
+                            "crp",
+                            "wthr",
                             "mrnng"
                       ],
                       "answer": "crp",
                       "decoded": "CROP",
+                      "decodedOptions": {
+                            "crp": "CROP",
+                            "shvl": "SHOVEL",
+                            "wthr": "WEATHER",
+                            "mrnng": "MORNING"
+                      },
                       "emoji": "🎑",
                       "bridge": null
                 },
                 {
                       "category": "Plant",
                       "options": [
-                            "trctr",
                             "snrs",
-                            "rnfll",
-                            "sw"
+                            "trctr",
+                            "sw",
+                            "rnfll"
                       ],
                       "answer": "sw",
                       "decoded": "SOW",
+                      "decodedOptions": {
+                            "sw": "SOW",
+                            "trctr": "TRACTOR",
+                            "rnfll": "RAINFALL",
+                            "snrs": "SUNRISE"
+                      },
                       "emoji": "💐",
                       "bridge": null
                 },
                 {
                       "category": "Farmer",
                       "options": [
-                            "grwr",
-                            "cmpst",
                             "ptchfrk",
-                            "rchrd"
+                            "rchrd",
+                            "cmpst",
+                            "grwr"
                       ],
                       "answer": "grwr",
                       "decoded": "GROWER",
+                      "decodedOptions": {
+                            "grwr": "GROWER",
+                            "ptchfrk": "PITCHFORK",
+                            "rchrd": "ORCHARD",
+                            "cmpst": "COMPOST"
+                      },
                       "emoji": "🧑‍🌾",
                       "bridge": null
                 },
                 {
                       "category": "Cultivate",
                       "options": [
+                            "tl",
                             "pstr",
-                            "lvstk",
                             "rrgshn",
-                            "tl"
+                            "lvstk"
                       ],
                       "answer": "tl",
                       "decoded": "TILL",
+                      "decodedOptions": {
+                            "tl": "TILL",
+                            "lvstk": "LIVESTOCK",
+                            "rrgshn": "IRRIGATION",
+                            "pstr": "PASTURE"
+                      },
                       "emoji": "👁️‍🗨️",
                       "bridge": null
                 },
@@ -110,12 +140,18 @@
                       "category": "Produce",
                       "options": [
                             "frrw",
-                            "yld",
                             "wld",
+                            "yld",
                             "wndmll"
                       ],
                       "answer": "yld",
                       "decoded": "YIELD",
+                      "decodedOptions": {
+                            "yld": "YIELD",
+                            "wld": "WIELD",
+                            "wndmll": "WINDMILL",
+                            "frrw": "FURROW"
+                      },
                       "emoji": "🏪",
                       "bridge": null
                 }
@@ -279,6 +315,27 @@
       const [shakeOption, setShakeOption] = useState(null);
       const [copied, setCopied] = useState(false);
       const [solvedLinks, setSolvedLinks] = useState([]);
+      const revealTimerRef = useRef(null);
+      const [reviewLink, setReviewLink] = useState(null);
+      const eliminatedPerLink = useRef({});
+
+      const advanceFromReveal = () => {
+        if (!showReveal) return;
+        if (revealTimerRef.current) {
+          clearTimeout(revealTimerRef.current);
+          revealTimerRef.current = null;
+        }
+        if (currentLink < chain.links.length - 1) {
+          setShowReveal(false);
+          setCurrentLink(currentLink + 1);
+          setEliminated([]);
+        } else {
+          setEndTime(Date.now());
+          setSolved(true);
+          playComplete();
+        }
+      };
+
       const [showHelp, setShowHelp] = useState(() => {
         return localStorage.getItem('cnmn-help-dismissed') !== 'true';
       });
@@ -306,7 +363,7 @@
           return React.createElement('img', {
             src: l.imageUrl,
             alt: l.decoded || '',
-            style: { width: s.width, height: s.height, objectFit: 'cover', display: 'block' },
+            style: { width: s.width, height: s.height, objectFit: 'contain', display: 'block' },
           });
         }
         return React.createElement('span', {
@@ -319,21 +376,24 @@
 
         if (option === link.answer) {
           playCorrect();
+          eliminatedPerLink.current[currentLink] = [...eliminated];
           setSolvedLinks([...solvedLinks, currentLink]);
           setShowReveal(true);
 
           if (currentLink < chain.links.length - 1) {
-            setTimeout(() => {
+            revealTimerRef.current = setTimeout(() => {
+              revealTimerRef.current = null;
               setShowReveal(false);
               setCurrentLink(currentLink + 1);
               setEliminated([]);
-            }, 2000);
+            }, 3000);
           } else {
-            setTimeout(() => {
+            revealTimerRef.current = setTimeout(() => {
+              revealTimerRef.current = null;
               setEndTime(Date.now());
               setSolved(true);
               playComplete();
-            }, 2000);
+            }, 3000);
           }
         } else {
           playWrong();
@@ -403,25 +463,23 @@
               </div>
               {chain.links.some(l => l.imageUrl && l.imageCredit) && (
                 <div style={styles.unsplashAttribution}>
-                  Photos by{' '}
-                  {chain.links
+                  Icons:{' '}
+                  {[...new Set(chain.links
                     .filter(l => l.imageUrl && l.imageCredit)
-                    .map((l, i, arr) => (
+                    .map(l => JSON.stringify({ name: l.imageCredit.name, url: l.imageCredit.profileUrl }))
+                  )].map((s, i, arr) => {
+                    const c = JSON.parse(s);
+                    return (
                       <React.Fragment key={i}>
-                        <a href={l.imageCredit.profileUrl + '?utm_source=cnmn&utm_medium=referral'}
+                        <a href={c.url}
                           target="_blank" rel="noopener noreferrer"
                           style={styles.attributionLink}>
-                          {l.imageCredit.name}
+                          {c.name}
                         </a>
                         {i < arr.length - 1 ? ', ' : ''}
                       </React.Fragment>
-                    ))}
-                  {' on '}
-                  <a href="https://unsplash.com/?utm_source=cnmn&utm_medium=referral"
-                    target="_blank" rel="noopener noreferrer"
-                    style={styles.attributionLink}>
-                    Unsplash
-                  </a>
+                    );
+                  })}
                 </div>
               )}
 
@@ -496,7 +554,8 @@
               const sl = chain.links[linkIdx];
               return (
               <React.Fragment key={linkIdx}>
-                <div className="chainImageWrapperTiny" style={{...styles.chainImageWrapperTiny, ...(sl.imageUrl ? {} : styles.emojiContainer)}}>
+                <div className="chainImageWrapperTiny" style={{...styles.chainImageWrapperTiny, ...(sl.imageUrl ? {} : styles.emojiContainer), cursor: 'pointer'}}
+                  onClick={() => { if (!showReveal) setReviewLink(linkIdx); }}>
                   <LinkImage link={sl} size="tiny" />
                 </div>
                 <div style={styles.chainConnectorTiny}>→</div>
@@ -504,31 +563,77 @@
               );
             })}
             {solvedLinks.length < chain.links.length && (
-              <div style={styles.chainPlaceholder}>?</div>
+              <div style={{...styles.chainPlaceholder, ...(reviewLink !== null ? {cursor: 'pointer', borderColor: '#6b3410', color: '#6b3410'} : {})}}
+                onClick={() => { if (reviewLink !== null) setReviewLink(null); }}>?</div>
             )}
           </div>
 
+          {/* Review a previous link */}
+          {reviewLink !== null && (() => {
+            const rl = chain.links[reviewLink];
+            const rlEliminated = eliminatedPerLink.current[reviewLink] || [];
+            return (
+              <div style={styles.mainArea}>
+                <div style={styles.revealContainer} onClick={() => setReviewLink(null)}>
+                  <div style={{...styles.imageReveal, ...(rl.imageUrl ? {} : styles.emojiContainer)}}>
+                    <LinkImage link={rl} size="large" />
+                  </div>
+                  <div style={styles.revealWord}>{rl.decoded}</div>
+                  {rl.decodedOptions && (
+                    <div style={styles.revealOthers}>
+                      {rl.options.filter(o => o !== rl.answer).map(option => {
+                        const wasEliminated = rlEliminated.includes(option);
+                        return (
+                          <div key={option} style={{
+                            ...styles.revealOtherItem,
+                            ...(wasEliminated ? styles.revealOtherEliminated : {})
+                          }}>
+                            <span style={styles.revealOtherCode}>{option}</span>
+                            <span style={styles.revealOtherWord}>{rl.decodedOptions[option]}</span>
+                            {wasEliminated && <span style={styles.revealOtherX}>✗</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div style={styles.reviewBackHint}>tap to go back</div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Main content area */}
-          <div style={styles.mainArea}>
+          {reviewLink === null && <div style={styles.mainArea}>
             {showReveal ? (
-              <div style={styles.revealContainer}>
+              <div style={styles.revealContainer} onClick={advanceFromReveal}>
                 <div style={{...styles.imageReveal, ...(link.imageUrl ? {} : styles.emojiContainer)}}>
                   <LinkImage link={link} size="large" />
                 </div>
                 <div style={styles.revealWord}>{link.decoded}</div>
+                {link.decodedOptions && (
+                  <div style={styles.revealOthers}>
+                    {link.options.filter(o => o !== link.answer).map(option => {
+                      const wasEliminated = eliminated.includes(option);
+                      return (
+                        <div key={option} style={{
+                          ...styles.revealOtherItem,
+                          ...(wasEliminated ? styles.revealOtherEliminated : {})
+                        }}>
+                          <span style={styles.revealOtherCode}>{option}</span>
+                          <span style={styles.revealOtherWord}>{link.decodedOptions[option]}</span>
+                          {wasEliminated && <span style={styles.revealOtherX}>✗</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 {link.imageUrl && link.imageCredit && (
                   <div style={styles.revealAttribution}>
-                    Photo by{' '}
-                    <a href={link.imageCredit.profileUrl + '?utm_source=cnmn&utm_medium=referral'}
+                    Icon:{' '}
+                    <a href={link.imageCredit.profileUrl}
                       target="_blank" rel="noopener noreferrer"
                       style={styles.attributionLink}>
                       {link.imageCredit.name}
-                    </a>
-                    {' on '}
-                    <a href="https://unsplash.com/?utm_source=cnmn&utm_medium=referral"
-                      target="_blank" rel="noopener noreferrer"
-                      style={styles.attributionLink}>
-                      Unsplash
                     </a>
                   </div>
                 )}
@@ -544,6 +649,7 @@
                   {link.options.map((option) => {
                     const isEliminated = eliminated.includes(option);
                     const isShaking = shakeOption === option;
+                    const showDecoded = link.decodedOptions && isEliminated;
 
                     return (
                       <button
@@ -557,13 +663,16 @@
                         disabled={isEliminated || showReveal}
                       >
                         {option}
+                        {showDecoded && (
+                          React.createElement('span', { style: styles.decodedLabel }, link.decodedOptions[option])
+                        )}
                       </button>
                     );
                   })}
                 </div>
               </>
             )}
-          </div>
+          </div>}
 
           <div style={styles.footer}>
             <span style={styles.missCount}>
@@ -760,6 +869,7 @@
         flexDirection: 'column',
         alignItems: 'center',
         animation: 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        cursor: 'pointer',
       },
       imageReveal: {
         width: '220px',
@@ -855,14 +965,22 @@
       optionEliminated: {
         backgroundColor: '#f0e4d3',
         borderColor: '#c4a574',
-        color: '#b8956d',
+        color: '#8b6340',
         cursor: 'default',
         boxShadow: 'none',
         transform: 'translateY(5px)',
-        opacity: '0.5',
+        opacity: '0.75',
       },
       optionShake: {
         animation: 'shake 0.35s ease',
+      },
+      decodedLabel: {
+        display: 'block',
+        fontSize: '12px',
+        fontFamily: "'Libre Baskerville', Georgia, serif",
+        letterSpacing: '0.5px',
+        marginTop: '4px',
+        opacity: 0.7,
       },
       footer: {
         marginTop: '40px',
@@ -925,6 +1043,49 @@
         textAlign: 'center',
         marginTop: '8px',
         lineHeight: '1.4',
+      },
+      revealOthers: {
+        display: 'flex',
+        gap: '10px',
+        marginTop: '16px',
+        animation: 'fadeInUp 0.5s ease 0.3s backwards',
+      },
+      revealOtherItem: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '8px 12px',
+        borderRadius: '8px',
+        backgroundColor: 'rgba(255,255,255,0.6)',
+        border: '2px solid #ecdbc8',
+        minWidth: '70px',
+      },
+      revealOtherEliminated: {
+        backgroundColor: 'rgba(212,165,116,0.15)',
+        borderColor: '#d4a574',
+      },
+      revealOtherCode: {
+        fontSize: '14px',
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontWeight: '600',
+        color: '#8b6340',
+        letterSpacing: '1px',
+      },
+      revealOtherWord: {
+        fontSize: '11px',
+        color: '#8b6340',
+        marginTop: '2px',
+      },
+      revealOtherX: {
+        fontSize: '12px',
+        color: '#c4724c',
+        marginTop: '2px',
+      },
+      reviewBackHint: {
+        fontSize: '12px',
+        color: '#b8956d',
+        marginTop: '16px',
+        letterSpacing: '0.5px',
       },
       revealAttribution: {
         fontSize: '11px',

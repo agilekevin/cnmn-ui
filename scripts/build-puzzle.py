@@ -41,8 +41,11 @@ def transform_quiz_to_chain(quiz_data):
     for i, q in enumerate(questions):
         # Build options array: correct answer first, then distractors
         options = [q.get('answerDisguise', '')]
+        # Map each disguise to its decoded word
+        decoded_options = {q.get('answerDisguise', ''): q.get('answer', '')}
         for d in q.get('distractors', []):
             options.append(d.get('disguise', ''))
+            decoded_options[d.get('disguise', '')] = d.get('word', '')
 
         # Shuffle options (but keep track of answer)
         import random
@@ -54,6 +57,7 @@ def transform_quiz_to_chain(quiz_data):
             'options': options[:4],  # Max 4 options
             'answer': answer_disguise,
             'decoded': q.get('answer', ''),
+            'decodedOptions': decoded_options,
             'emoji': q.get('emoji') or MISSING_EMOJI,
             'bridge': None
         }
