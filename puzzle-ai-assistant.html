@@ -1159,6 +1159,7 @@ Create 3 WRONG answers that:
 2. Are NOT the correct answer or its synonyms
 3. Are tempting but wrong guesses
 4. Are 2-8 lowercase letters each
+5. CRITICAL: Each disguise must be VISUALLY DISTINCT from "${answerDisguise}" and from each other. No two options should look the same when vowels are stripped.
 
 For each, provide the disguise and what fake word it might represent.
 
@@ -1364,6 +1365,8 @@ For each question provide:
 3. Three distractor words with their types (use ONLY these two types):
    - wrong-letters: a plausible-looking consonant pattern that doesn't quite decode to a real word
    - non-synonym: a valid word in the same category but NOT a synonym of the prompt
+
+CRITICAL: When vowels are removed, the answer and every distractor MUST produce DIFFERENT consonant patterns. For example, if the answer is "BREAD" (→ brd), do NOT use BIRD (→ brd), BRAID (→ brd), or BOARD (→ brd). Pick words with distinct consonant skeletons like MUFFIN (→ mffn), WAFFLE (→ wffl), PASTRY (→ pstry).
 
 Format as JSON array:
 [
@@ -2236,6 +2239,8 @@ Provide exactly 3 distractors with types (use ONLY these two types):
 1. wrong-letters: consonant pattern slightly off from a plausible word
 2. non-synonym: valid word in same category but not a synonym
 Mix of types is fine. Use whichever fits best for each distractor.
+
+CRITICAL: Each distractor must have a DIFFERENT consonant skeleton (vowels removed) from the answer "${q.answer.word}" and from each other. For example, BREAD/BIRD/BRAID all reduce to "brd" — that's bad. Pick words like MUFFIN/WAFFLE/PASTRY that look distinct.
 
 Avoid these words: ${[q.answer.word, q.prompt.toUpperCase(), ...q.rejectedDistractors].join(', ')}
 
