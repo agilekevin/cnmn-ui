@@ -12,8 +12,9 @@ Environment variables:
     PORTKEY_SLUG_ANTHROPIC   - Portkey provider slug for Anthropic
     PORTKEY_SLUG_OPENAI      - Portkey provider slug for OpenAI
     PORTKEY_SLUG_GOOGLE      - Portkey provider slug for Google
-    AUTH_USERNAME            - Basic auth username (optional, for deployment)
-    AUTH_PASSWORD            - Basic auth password (optional, for deployment)
+    AUTH_USERS               - Comma-separated user:pass pairs (e.g. "alice:pw1,bob:pw2")
+    AUTH_USERNAME            - (legacy) Single-user fallback if AUTH_USERS is not set
+    AUTH_PASSWORD            - (legacy) Single-user fallback if AUTH_USERS is not set
 """
 
 import os
@@ -31,9 +32,26 @@ app = Flask(__name__, static_folder='.')
 
 # Get API keys from environment
 PORTKEY_API_KEY = os.getenv('PORTKEY_API_KEY', '')
-# Basic auth credentials (optional)
-AUTH_USERNAME = os.getenv('AUTH_USERNAME', '')
-AUTH_PASSWORD = os.getenv('AUTH_PASSWORD', '')
+# Auth credentials: AUTH_USERS="user1:pass1,user2:pass2" or legacy AUTH_USERNAME/AUTH_PASSWORD
+def _parse_auth_users():
+    """Parse AUTH_USERS env var into {username: password} dict."""
+    raw = os.getenv('AUTH_USERS', '')
+    users = {}
+    for pair in raw.split(','):
+        pair = pair.strip()
+        if ':' in pair:
+            user, pw = pair.split(':', 1)
+            if user and pw:
+                users[user] = pw
+    # Legacy fallback
+    if not users:
+        u = os.getenv('AUTH_USERNAME', '')
+        p = os.getenv('AUTH_PASSWORD', '')
+        if u and p:
+            users[u] = p
+    return users
+
+AUTH_USERS = _parse_auth_users()
 
 # Model registry: model ID -> metadata
 MODELS = {
@@ -57,7 +75,7 @@ PROVIDER_SLUGS = {
 
 def check_auth(username, password):
     """Check if username/password combination is valid."""
-    return username == AUTH_USERNAME and password == AUTH_PASSWORD
+    return AUTH_USERS.get(username) == password
 
 
 def authenticate():
@@ -82,7 +100,7 @@ def auth_not_configured_error():
 <head><title>Configuration Error</title></head>
 <body style="font-family: sans-serif; padding: 40px; text-align: center;">
   <h1>⚠️ Authentication Not Configured</h1>
-  <p>This app requires AUTH_USERNAME and AUTH_PASSWORD environment variables to be set.</p>
+  <p>This app requires AUTH_USERS (or AUTH_USERNAME and AUTH_PASSWORD) environment variables to be set.</p>
   <p>Please configure these in your Render dashboard and redeploy.</p>
 </body>
 </html>''',
@@ -96,11 +114,11 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         # In production, require auth to be configured
-        if is_production() and (not AUTH_USERNAME or not AUTH_PASSWORD):
+        if is_production() and not AUTH_USERS:
             return auth_not_configured_error()
 
         # Skip auth check if no credentials configured (local dev)
-        if not AUTH_USERNAME or not AUTH_PASSWORD:
+        if not AUTH_USERS:
             return f(*args, **kwargs)
 
         auth = request.authorization
@@ -287,7 +305,7 @@ if __name__ == '__main__':
         print(f"Providers: {', '.join(f'{p} (@{s})' for p, s in PROVIDER_SLUGS.items())}")
     else:
         print("Providers: none (set PORTKEY_SLUG_ANTHROPIC etc. in .env)")
-    print(f"Auth:      {'✓ enabled' if AUTH_USERNAME and AUTH_PASSWORD else '✗ disabled (open access)'}")
+    print(f"Auth:      {'✓ ' + str(len(AUTH_USERS)) + ' user(s)' if AUTH_USERS else '✗ disabled (open access)'}")
     print("=" * 40)
     print("Open http://localhost:5000 in your browser\n")
     app.run(debug=True, port=5000, host='0.0.0.0')

@@ -7,7 +7,7 @@ import requests_mock as rmock
 
 # Patch env before importing server
 for var in ('PORTKEY_API_KEY', 'PORTKEY_SLUG_ANTHROPIC', 'PORTKEY_SLUG_OPENAI',
-            'PORTKEY_SLUG_GOOGLE', 'AUTH_USERNAME', 'AUTH_PASSWORD'):
+            'PORTKEY_SLUG_GOOGLE', 'AUTH_USERS', 'AUTH_USERNAME', 'AUTH_PASSWORD'):
     os.environ.pop(var, None)
 
 
@@ -15,7 +15,7 @@ for var in ('PORTKEY_API_KEY', 'PORTKEY_SLUG_ANTHROPIC', 'PORTKEY_SLUG_OPENAI',
 def _clean_env(monkeypatch):
     """Ensure a clean env for every test."""
     for var in ('PORTKEY_API_KEY', 'PORTKEY_SLUG_ANTHROPIC', 'PORTKEY_SLUG_OPENAI',
-                'PORTKEY_SLUG_GOOGLE', 'AUTH_USERNAME',
+                'PORTKEY_SLUG_GOOGLE', 'AUTH_USERS', 'AUTH_USERNAME',
                 'AUTH_PASSWORD', 'RENDER', 'PRODUCTION'):
         monkeypatch.delenv(var, raising=False)
 
@@ -29,8 +29,7 @@ def _make_app(monkeypatch, portkey_key='', slugs=None):
 
     monkeypatch.setattr(server, 'PORTKEY_API_KEY', portkey_key)
     monkeypatch.setattr(server, 'PROVIDER_SLUGS', slugs if slugs else {})
-    monkeypatch.setattr(server, 'AUTH_USERNAME', '')
-    monkeypatch.setattr(server, 'AUTH_PASSWORD', '')
+    monkeypatch.setattr(server, 'AUTH_USERS', {})
 
     server.app.config['TESTING'] = True
     return server.app.test_client(), server
