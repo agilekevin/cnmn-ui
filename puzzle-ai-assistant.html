@@ -313,6 +313,10 @@
       100% { transform: rotate(360deg); }
     }
 
+    #themeInput.ideating::placeholder {
+      font-style: italic;
+    }
+
     .icon-retry-spinner {
       width: 20px;
       height: 20px;
@@ -757,7 +761,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Theme</label>
-          <input type="text" id="themeInput" placeholder="e.g., Buildings, Emotions, Weather, Animals" autofocus onkeydown="if(event.key==='Enter')generateQuiz()">
+          <input type="text" id="themeInput" placeholder="" autofocus onkeydown="if(event.key==='Enter')generateQuiz()">
         </div>
         <div class="form-group" style="max-width: 180px;">
           <label>Publication Date</label>
@@ -791,6 +795,7 @@
   <script>
     // State
     let currentModel = '';
+    let previousThemes = [];
     let quiz = {
       theme: '',
       publicationDate: '',
@@ -816,6 +821,7 @@
           }
           document.getElementById('pubDate').value = localDateStr(candidate);
           renderPuzzleList(puzzles);
+          previousThemes = puzzles.map(p => p.theme).filter(Boolean).slice(-100);
           return;
         }
       } catch {}
@@ -830,13 +836,43 @@
       if (!puzzles.length) { el.innerHTML = ''; return; }
       const items = puzzles.map(p => {
         const short = p.date.slice(5);
-        return `<span style="white-space:nowrap"><strong>${short}</strong> ${p.theme || '(no theme)'}</span>`;
+        return `<span style="white-space:nowrap">${short} <strong>${p.theme || '(no theme)'}</strong></span>`;
       }).join('');
       el.innerHTML = items;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initPubDate();
+    async function suggestThemes() {
+      const input = document.getElementById('themeInput');
+      if (!previousThemes.length || currentModel === 'rules' || !currentModel) {
+        input.placeholder = 'e.g., Buildings, Emotions, Weather, Animals';
+        return;
+      }
+      input.classList.add('ideating');
+      let dots = 0;
+      const dotTimer = setInterval(() => {
+        dots = (dots + 1) % 4;
+        input.placeholder = 'ideating on new themes' + '.'.repeat(dots);
+      }, 400);
+      try {
+        const themeList = previousThemes.join(', ');
+        const result = await callServer(
+          `Here are themes already used for a daily word puzzle game: ${themeList}\n\nSuggest 4 fresh, diverse theme ideas that haven't been used yet. Reply with ONLY the 4 themes separated by commas, nothing else.`,
+          { maxTokens: 60 }
+        );
+        const suggestions = result.trim();
+        if (suggestions) {
+          input.placeholder = `e.g., ${suggestions}`;
+        }
+      } catch {
+        input.placeholder = 'e.g., Buildings, Emotions, Weather, Animals';
+      }
+      clearInterval(dotTimer);
+      input.classList.remove('ideating');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await Promise.all([initPubDate(), loadModels()]);
+      suggestThemes();
     });
 
     // Question structure:
@@ -2336,7 +2372,6 @@ Return ONLY the JSON array.`;
     }
 
     // Initialize
-    loadModels();
     loadEmojiData();
   </script>
 </body>
