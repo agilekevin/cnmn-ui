@@ -1,0 +1,186 @@
+{
+  "theme": "weather",
+  "publicationDate": "2026-02-12",
+  "questions": [
+    {
+      "prompt": "rain",
+      "emoji": "",
+      "answer": "SHOWER",
+      "answerDisguise": "shwr",
+      "distractors": [
+        {
+          "word": "BREEZE",
+          "disguise": "brz",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "FROST",
+          "disguise": "frst",
+          "type": "non-synonym"
+        },
+        {
+          "word": "THUNDER",
+          "disguise": "thndr",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Shower",
+      "imageUrl": "https://api.iconify.design/noto/cloud-with-rain.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "wind",
+      "emoji": "\ud83d\udca8",
+      "answer": "BREEZE",
+      "answerDisguise": "brz",
+      "distractors": [
+        {
+          "word": "HAIL",
+          "disguise": "hl",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "LIGHTNING",
+          "disguise": "lghtnng",
+          "type": "non-synonym"
+        },
+        {
+          "word": "DROUGHT",
+          "disguise": "drt",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Breeze"
+    },
+    {
+      "prompt": "storm",
+      "emoji": "",
+      "answer": "TEMPEST",
+      "answerDisguise": "tmpst",
+      "distractors": [
+        {
+          "word": "THERMOMETER",
+          "disguise": "thrmmtr",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "TOPSOIL",
+          "disguise": "tpsl",
+          "type": "non-synonym"
+        },
+        {
+          "word": "TRUMPET",
+          "disguise": "trmpt",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Tempest",
+      "imageUrl": "https://api.iconify.design/game-icons/lightning-storm.svg?height=128",
+      "imageCredit": {
+        "name": "Game Icons",
+        "username": "game-icons",
+        "profileUrl": "https://icon-sets.iconify.design/game-icons/"
+      }
+    },
+    {
+      "prompt": "fog",
+      "emoji": "",
+      "answer": "HAZE",
+      "answerDisguise": "hz",
+      "distractors": [
+        {
+          "word": "HOSE",
+          "disguise": "hs",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "HAYES",
+          "disguise": "hys",
+          "type": "non-synonym"
+        },
+        {
+          "word": "HUES",
+          "disguise": "hs",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Haze",
+      "imageUrl": "https://api.iconify.design/noto/fog.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "cold",
+      "emoji": "",
+      "answer": "FRIGID",
+      "answerDisguise": "frjd",
+      "distractors": [
+        {
+          "word": "FROLIC",
+          "disguise": "frlc",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "REFRIDGERATOR",
+          "disguise": "rfrdgrtr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "FRAYED",
+          "disguise": "fryd",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Frigid",
+      "imageUrl": "https://api.iconify.design/noto/snowflake.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "hot",
+      "emoji": "",
+      "answer": "SCORCHING",
+      "answerDisguise": "skrchng",
+      "distractors": [
+        {
+          "word": "SEARCHING",
+          "disguise": "srchng",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "SCREECHING",
+          "disguise": "skechng",
+          "type": "non-synonym"
+        },
+        {
+          "word": "SKETCHING",
+          "disguise": "sktchng",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Scorching",
+      "imageUrl": "https://api.iconify.design/game-icons/heat-haze.svg?height=128",
+      "imageCredit": {
+        "name": "Game Icons",
+        "username": "game-icons",
+        "profileUrl": "https://icon-sets.iconify.design/game-icons/"
+      }
+    }
+  ]
+}

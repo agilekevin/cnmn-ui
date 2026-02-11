@@ -1,0 +1,162 @@
+{
+  "theme": "Kids",
+  "publicationDate": "2026-02-13",
+  "questions": [
+    {
+      "prompt": "child",
+      "emoji": "\ud83d\udc76",
+      "answer": "YOUTH",
+      "answerDisguise": "yth",
+      "distractors": [
+        {
+          "word": "WAGON",
+          "disguise": "wgn",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "FABRIC",
+          "disguise": "fbrc",
+          "type": "non-synonym"
+        },
+        {
+          "word": "GARDEN",
+          "disguise": "grdn",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Youth"
+    },
+    {
+      "prompt": "play",
+      "emoji": "\ud83d\udc7e",
+      "answer": "FROLIC",
+      "answerDisguise": "frlk",
+      "distractors": [
+        {
+          "word": "SUNSET",
+          "disguise": "snst",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "MIRROR",
+          "disguise": "mrrr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "BASKET",
+          "disguise": "bskt",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Frolic"
+    },
+    {
+      "prompt": "small",
+      "emoji": "\ud83e\udd2a",
+      "answer": "TINY",
+      "answerDisguise": "tny",
+      "distractors": [
+        {
+          "word": "TONE",
+          "disguise": "tn",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "TOWN",
+          "disguise": "twn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "TUNA",
+          "disguise": "tn",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Tiny"
+    },
+    {
+      "prompt": "young",
+      "emoji": "\ud83d\udc76",
+      "answer": "JUVENILE",
+      "answerDisguise": "jvnl",
+      "distractors": [
+        {
+          "word": "JOURNAL",
+          "disguise": "jrnl",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "JUNGLE",
+          "disguise": "jngl",
+          "type": "non-synonym"
+        },
+        {
+          "word": "JAVELIN",
+          "disguise": "jvln",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Juvenile"
+    },
+    {
+      "prompt": "infant",
+      "emoji": "",
+      "answer": "BABE",
+      "answerDisguise": "bb",
+      "distractors": [
+        {
+          "word": "BULB",
+          "disguise": "blb",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "BOMB",
+          "disguise": "bmb",
+          "type": "non-synonym"
+        },
+        {
+          "word": "BARB",
+          "disguise": "brb",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Babe",
+      "imageUrl": "https://api.iconify.design/fluent-emoji-flat/baby-medium.svg?height=128",
+      "imageCredit": {
+        "name": "Fluent Emoji (Microsoft)",
+        "username": "fluent-emoji-flat",
+        "profileUrl": "https://icon-sets.iconify.design/fluent-emoji-flat/"
+      }
+    },
+    {
+      "prompt": "energetic",
+      "emoji": "\u26a1",
+      "answer": "LIVELY",
+      "answerDisguise": "lvly",
+      "distractors": [
+        {
+          "word": "LOVELY",
+          "disguise": "lvly",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "LOWLY",
+          "disguise": "lwly",
+          "type": "non-synonym"
+        },
+        {
+          "word": "LONELY",
+          "disguise": "lnly",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Lively"
+    }
+  ]
+}

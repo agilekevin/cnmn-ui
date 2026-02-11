@@ -1,0 +1,168 @@
+{
+  "theme": "Valentine's Day",
+  "publicationDate": "2026-02-14",
+  "questions": [
+    {
+      "prompt": "love",
+      "emoji": "",
+      "answer": "AFFECTION",
+      "answerDisguise": "ffkshn",
+      "distractors": [
+        {
+          "word": "CHOCOLATE",
+          "disguise": "chclt",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "AFFLICTION",
+          "disguise": "fflkshn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "CALENDAR",
+          "disguise": "clndr",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Affection",
+      "imageUrl": "https://api.iconify.design/noto/red-heart.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "gift",
+      "emoji": "\ud83d\udc9d",
+      "answer": "PRESENT",
+      "answerDisguise": "prznt",
+      "distractors": [
+        {
+          "word": "ARROW",
+          "disguise": "rrw",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "RIBBON",
+          "disguise": "rbbn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "FEBRUARY",
+          "disguise": "fbrry",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Present"
+    },
+    {
+      "prompt": "romance",
+      "emoji": "\ud83d\udc8b",
+      "answer": "COURTSHIP",
+      "answerDisguise": "crtshp",
+      "distractors": [
+        {
+          "word": "CUPID",
+          "disguise": "cpd",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "FLOWER",
+          "disguise": "flwr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "DINNER",
+          "disguise": "dnnr",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Courtship"
+    },
+    {
+      "prompt": "sweetheart",
+      "emoji": "\ud83d\ude0d",
+      "answer": "DARLING",
+      "answerDisguise": "drlng",
+      "distractors": [
+        {
+          "word": "CANDY",
+          "disguise": "cndy",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "CARD",
+          "disguise": "crd",
+          "type": "non-synonym"
+        },
+        {
+          "word": "ROSE",
+          "disguise": "rs",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Darling"
+    },
+    {
+      "prompt": "admirer",
+      "emoji": "",
+      "answer": "SUITOR",
+      "answerDisguise": "str",
+      "distractors": [
+        {
+          "word": "LACE",
+          "disguise": "lc",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "KISS",
+          "disguise": "kss",
+          "type": "non-synonym"
+        },
+        {
+          "word": "RING",
+          "disguise": "rng",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Suitor",
+      "imageUrl": "https://api.iconify.design/noto/smiling-cat-with-heart-eyes.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "passionate",
+      "emoji": "\u2764\ufe0f\u200d\ud83d\udd25",
+      "answer": "FERVENT",
+      "answerDisguise": "frvnt",
+      "distractors": [
+        {
+          "word": "BALLOONS",
+          "disguise": "bllns",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "EMBRACE",
+          "disguise": "mbrc",
+          "type": "non-synonym"
+        },
+        {
+          "word": "POEM",
+          "disguise": "pm",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Fervent"
+    }
+  ]
+}
