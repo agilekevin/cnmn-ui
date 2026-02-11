@@ -225,6 +225,12 @@ Need help brainstorming puzzles? Use the AI assistant tool:
 - Are the disguised words unique enough to distinguish?
 - Do all 4 options fit the phonetic pattern?
 
+## Analytics
+
+Pageview tracking via [GoatCounter](https://www.goatcounter.com/) (cookie-free, GDPR-friendly).
+
+Dashboard: https://cnmn.goatcounter.com/
+
 ## Technical Notes
 
 - Pure static HTML/CSS/JS
@@ -238,10 +244,8 @@ Need help brainstorming puzzles? Use the AI assistant tool:
 - Archive of past puzzles
 - Streak tracking (localStorage)
 - Better mobile responsive design
-- Share button with native share API
 - Accessibility improvements (keyboard nav, screen readers)
 - Backend for puzzle delivery
-- Analytics
 
 ---
 
