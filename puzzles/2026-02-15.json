@@ -1,0 +1,186 @@
+{
+  "theme": "Ocean Life",
+  "publicationDate": "2026-02-15",
+  "questions": [
+    {
+      "prompt": "shark",
+      "emoji": "",
+      "answer": "JAWS",
+      "answerDisguise": "jws",
+      "distractors": [
+        {
+          "word": "CORAL",
+          "disguise": "crl",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "WAVES",
+          "disguise": "wvs",
+          "type": "non-synonym"
+        },
+        {
+          "word": "BEACH",
+          "disguise": "bch",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Jaws",
+      "imageUrl": "https://api.iconify.design/game-icons/shark-fin.svg?height=128",
+      "imageCredit": {
+        "name": "Game Icons",
+        "username": "game-icons",
+        "profileUrl": "https://icon-sets.iconify.design/game-icons/"
+      }
+    },
+    {
+      "prompt": "coral",
+      "emoji": "",
+      "answer": "REEF",
+      "answerDisguise": "rf",
+      "distractors": [
+        {
+          "word": "CRAB",
+          "disguise": "crb",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "SALT",
+          "disguise": "slt",
+          "type": "non-synonym"
+        },
+        {
+          "word": "DIVE",
+          "disguise": "dv",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Sea",
+      "imageUrl": "https://api.iconify.design/noto/water-wave.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "dolphin",
+      "emoji": "\ud83d\udc2c",
+      "answer": "PORPOISE",
+      "answerDisguise": "prps",
+      "distractors": [
+        {
+          "word": "SEAWEED",
+          "disguise": "swd",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "LOBSTER",
+          "disguise": "lbstr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "ANCHOR",
+          "disguise": "nchr",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Porpoise"
+    },
+    {
+      "prompt": "seaweed",
+      "emoji": "",
+      "answer": "KELP",
+      "answerDisguise": "klp",
+      "distractors": [
+        {
+          "word": "WHALE",
+          "disguise": "wl",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "SAILOR",
+          "disguise": "slr",
+          "type": "non-synonym"
+        },
+        {
+          "word": "STORM",
+          "disguise": "strm",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Kelp",
+      "imageUrl": "https://api.iconify.design/twemoji/leafy-green.svg?height=128",
+      "imageCredit": {
+        "name": "Twemoji (Twitter)",
+        "username": "twemoji",
+        "profileUrl": "https://icon-sets.iconify.design/twemoji/"
+      }
+    },
+    {
+      "prompt": "whale",
+      "emoji": "",
+      "answer": "BALEEN",
+      "answerDisguise": "bln",
+      "distractors": [
+        {
+          "word": "PENGUIN",
+          "disguise": "pngn",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "HORIZON",
+          "disguise": "hrzn",
+          "type": "non-synonym"
+        },
+        {
+          "word": "VOYAGE",
+          "disguise": "vyj",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Medusa",
+      "imageUrl": "https://api.iconify.design/noto/spouting-whale.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "crab",
+      "emoji": "",
+      "answer": "CRUSTACEAN",
+      "answerDisguise": "krstshn",
+      "distractors": [
+        {
+          "word": "TREASURE",
+          "disguise": "trsr",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "COMPASS",
+          "disguise": "cmpss",
+          "type": "non-synonym"
+        },
+        {
+          "word": "STARFISH",
+          "disguise": "strfsh",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Crustacean",
+      "imageUrl": "https://api.iconify.design/noto/crab.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    }
+  ]
+}
