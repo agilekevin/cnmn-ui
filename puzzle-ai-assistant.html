@@ -796,19 +796,20 @@
       questions: []  // Array of 6 question objects
     };
 
-    // Initialize date picker to day after latest existing puzzle
+    // Initialize date picker to next missing date starting from tomorrow
     async function initPubDate() {
       try {
         const resp = await fetch('/api/puzzle-dates');
         if (resp.ok) {
-          const dates = await resp.json();
-          if (dates.length > 0) {
-            const latest = dates[dates.length - 1];
-            const next = new Date(latest + 'T12:00:00');
-            next.setDate(next.getDate() + 1);
-            document.getElementById('pubDate').value = next.toISOString().split('T')[0];
-            return;
+          const dates = new Set(await resp.json());
+          const candidate = new Date();
+          candidate.setDate(candidate.getDate() + 1);
+          // Walk forward from tomorrow until we find a date with no puzzle
+          while (dates.has(candidate.toISOString().split('T')[0])) {
+            candidate.setDate(candidate.getDate() + 1);
           }
+          document.getElementById('pubDate').value = candidate.toISOString().split('T')[0];
+          return;
         }
       } catch {}
       // Fallback: tomorrow
