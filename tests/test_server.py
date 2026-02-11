@@ -297,6 +297,37 @@ class TestChatPortkeyCall:
 
 
 # ------------------------------------------------------------------
+# /api/puzzle-dates
+# ------------------------------------------------------------------
+
+class TestPuzzleDates:
+    def test_missing_puzzles_dir_returns_empty(self, monkeypatch, tmp_path):
+        client, srv = _make_app(monkeypatch)
+        # Point __file__'s directory to a temp dir with no puzzles/ subdir
+        monkeypatch.setattr(srv.os.path, 'dirname',
+                            lambda f: str(tmp_path))
+        resp = client.get('/api/puzzle-dates')
+        assert resp.status_code == 200
+        assert resp.get_json() == []
+
+    def test_returns_sorted_dates_ignoring_non_matching(self, monkeypatch, tmp_path):
+        client, srv = _make_app(monkeypatch)
+        puzzles_dir = tmp_path / 'puzzles'
+        puzzles_dir.mkdir()
+        (puzzles_dir / '2026-02-10.json').write_text('{}')
+        (puzzles_dir / '2026-02-12.json').write_text('{}')
+        (puzzles_dir / '2026-02-11.json').write_text('{}')
+        (puzzles_dir / 'not-a-date.json').write_text('{}')
+        (puzzles_dir / '2026-02-09.txt').write_text('')
+
+        monkeypatch.setattr(srv.os.path, 'dirname',
+                            lambda f: str(tmp_path))
+        resp = client.get('/api/puzzle-dates')
+        assert resp.status_code == 200
+        assert resp.get_json() == ['2026-02-10', '2026-02-11', '2026-02-12']
+
+
+# ------------------------------------------------------------------
 # portkey_model_name unit tests
 # ------------------------------------------------------------------
 
