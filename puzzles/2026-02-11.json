@@ -1,0 +1,186 @@
+{
+  "theme": "Emotions",
+  "publicationDate": "2026-02-11",
+  "questions": [
+    {
+      "prompt": "happy",
+      "emoji": "",
+      "answer": "JOYFUL",
+      "answerDisguise": "jyfl",
+      "distractors": [
+        {
+          "word": "ANGRY",
+          "disguise": "ngry",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "TIRED",
+          "disguise": "trd",
+          "type": "non-synonym"
+        },
+        {
+          "word": "HUNGRY",
+          "disguise": "hngry",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Joyful",
+      "imageUrl": "https://api.iconify.design/noto/smiling-face-with-sunglasses.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "sad",
+      "emoji": "",
+      "answer": "GLOOMY",
+      "answerDisguise": "glmy",
+      "distractors": [
+        {
+          "word": "EXCITED",
+          "disguise": "xctd",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "PEACEFUL",
+          "disguise": "pcfl",
+          "type": "non-synonym"
+        },
+        {
+          "word": "PROUD",
+          "disguise": "prd",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "easy",
+      "correctOption": "Gloomy",
+      "imageUrl": "https://api.iconify.design/noto/sad-but-relieved-face.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "angry",
+      "emoji": "",
+      "answer": "ENRAGED",
+      "answerDisguise": "nrgd",
+      "distractors": [
+        {
+          "word": "ENGAGED",
+          "disguise": "nggd",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "AMUSED",
+          "disguise": "msd",
+          "type": "non-synonym"
+        },
+        {
+          "word": "RELAXED",
+          "disguise": "rlxd",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Enraged",
+      "imageUrl": "https://api.iconify.design/noto/angry-face.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "afraid",
+      "emoji": "",
+      "answer": "TERRIFIED",
+      "answerDisguise": "trfyd",
+      "distractors": [
+        {
+          "word": "VERIFIED",
+          "disguise": "vrfd",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "CONFIDENT",
+          "disguise": "cnfdnt",
+          "type": "non-synonym"
+        },
+        {
+          "word": "CURIOUS",
+          "disguise": "crs",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "medium",
+      "correctOption": "Terrified",
+      "imageUrl": "https://api.iconify.design/noto/face-screaming-in-fear.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "nervous",
+      "emoji": "",
+      "answer": "APPREHENSIVE",
+      "answerDisguise": "aprhnsv",
+      "distractors": [
+        {
+          "word": "COMPREHENSIVE",
+          "disguise": "cmprhnsv",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "CALM",
+          "disguise": "clm",
+          "type": "non-synonym"
+        },
+        {
+          "word": "BRAVE",
+          "disguise": "brv",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Apprehensive",
+      "imageUrl": "https://api.iconify.design/noto/anxious-face-with-sweat.svg?height=128",
+      "imageCredit": {
+        "name": "Noto Emoji (Google)",
+        "username": "noto",
+        "profileUrl": "https://icon-sets.iconify.design/noto/"
+      }
+    },
+    {
+      "prompt": "excited",
+      "emoji": "\ud83e\udd29",
+      "answer": "EXHILARATED",
+      "answerDisguise": "xlrtd",
+      "distractors": [
+        {
+          "word": "EXHAUSTED",
+          "disguise": "xhstd",
+          "type": "wrong-letters"
+        },
+        {
+          "word": "BORED",
+          "disguise": "brd",
+          "type": "non-synonym"
+        },
+        {
+          "word": "JEALOUS",
+          "disguise": "jls",
+          "type": "non-synonym"
+        }
+      ],
+      "difficulty": "hard",
+      "correctOption": "Exhilarated"
+    }
+  ]
+}

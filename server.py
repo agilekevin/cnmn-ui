@@ -189,15 +189,23 @@ def save_puzzle():
 @app.route('/api/puzzle-dates')
 @requires_auth
 def puzzle_dates():
-    """Return sorted list of existing puzzle date strings."""
+    """Return sorted list of existing puzzles with date and theme."""
     puzzles_dir = os.path.join(os.path.dirname(__file__), 'puzzles')
     if not os.path.isdir(puzzles_dir):
         return jsonify([])
-    dates = sorted(
-        f[:-5] for f in os.listdir(puzzles_dir)
-        if re.match(r'^\d{4}-\d{2}-\d{2}\.json$', f)
-    )
-    return jsonify(dates)
+    results = []
+    for f in os.listdir(puzzles_dir):
+        if re.match(r'^\d{4}-\d{2}-\d{2}\.json$', f):
+            date = f[:-5]
+            theme = ''
+            try:
+                with open(os.path.join(puzzles_dir, f)) as fh:
+                    theme = json.load(fh).get('theme', '')
+            except (json.JSONDecodeError, OSError):
+                pass
+            results.append({'date': date, 'theme': theme})
+    results.sort(key=lambda r: r['date'])
+    return jsonify(results)
 
 
 @app.route('/api/chat', methods=['POST'])

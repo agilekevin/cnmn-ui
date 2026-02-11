@@ -310,12 +310,12 @@ class TestPuzzleDates:
         assert resp.status_code == 200
         assert resp.get_json() == []
 
-    def test_returns_sorted_dates_ignoring_non_matching(self, monkeypatch, tmp_path):
+    def test_returns_sorted_dates_with_themes(self, monkeypatch, tmp_path):
         client, srv = _make_app(monkeypatch)
         puzzles_dir = tmp_path / 'puzzles'
         puzzles_dir.mkdir()
-        (puzzles_dir / '2026-02-10.json').write_text('{}')
-        (puzzles_dir / '2026-02-12.json').write_text('{}')
+        (puzzles_dir / '2026-02-10.json').write_text('{"theme": "Animals"}')
+        (puzzles_dir / '2026-02-12.json').write_text('{"theme": "Weather"}')
         (puzzles_dir / '2026-02-11.json').write_text('{}')
         (puzzles_dir / 'not-a-date.json').write_text('{}')
         (puzzles_dir / '2026-02-09.txt').write_text('')
@@ -324,7 +324,12 @@ class TestPuzzleDates:
                             lambda f: str(tmp_path))
         resp = client.get('/api/puzzle-dates')
         assert resp.status_code == 200
-        assert resp.get_json() == ['2026-02-10', '2026-02-11', '2026-02-12']
+        data = resp.get_json()
+        assert data == [
+            {'date': '2026-02-10', 'theme': 'Animals'},
+            {'date': '2026-02-11', 'theme': ''},
+            {'date': '2026-02-12', 'theme': 'Weather'},
+        ]
 
 
 # ------------------------------------------------------------------

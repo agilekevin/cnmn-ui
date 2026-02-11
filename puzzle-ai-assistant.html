@@ -766,6 +766,7 @@
         <button onclick="generateQuiz()" id="generateBtn">Generate 6 Questions</button>
       </div>
       <p class="hint">Enter a theme and publication date to generate 6 synonym quiz questions with increasing difficulty.</p>
+      <div id="puzzleList" style="font-size: 0.85em; color: #666; margin-top: 8px; line-height: 1.6; display: flex; flex-wrap: wrap; column-gap: 16px;"></div>
     </div>
 
     <!-- Questions -->
@@ -797,25 +798,41 @@
     };
 
     // Initialize date picker to next missing date starting from tomorrow
+    function localDateStr(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
     async function initPubDate() {
       try {
         const resp = await fetch('/api/puzzle-dates');
         if (resp.ok) {
-          const dates = new Set(await resp.json());
+          const puzzles = await resp.json();
+          const dateSet = new Set(puzzles.map(p => p.date));
           const candidate = new Date();
           candidate.setDate(candidate.getDate() + 1);
           // Walk forward from tomorrow until we find a date with no puzzle
-          while (dates.has(candidate.toISOString().split('T')[0])) {
+          while (dateSet.has(localDateStr(candidate))) {
             candidate.setDate(candidate.getDate() + 1);
           }
-          document.getElementById('pubDate').value = candidate.toISOString().split('T')[0];
+          document.getElementById('pubDate').value = localDateStr(candidate);
+          renderPuzzleList(puzzles);
           return;
         }
       } catch {}
       // Fallback: tomorrow
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      document.getElementById('pubDate').value = tomorrow.toISOString().split('T')[0];
+      document.getElementById('pubDate').value = localDateStr(tomorrow);
+    }
+
+    function renderPuzzleList(puzzles) {
+      const el = document.getElementById('puzzleList');
+      if (!puzzles.length) { el.innerHTML = ''; return; }
+      const items = puzzles.map(p => {
+        const short = p.date.slice(5);
+        return `<span style="white-space:nowrap"><strong>${short}</strong> ${p.theme || '(no theme)'}</span>`;
+      }).join('');
+      el.innerHTML = items;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
