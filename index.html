@@ -556,20 +556,20 @@
                 </div>
               )}
 
-              <div style={styles.statsRow}>
+              <div className="statsRow" style={styles.statsRow}>
                 <div style={styles.stat}>
-                  <div style={styles.statValue}>{formatTime(elapsed)}</div>
+                  <div className="statValue" style={styles.statValue}>{formatTime(elapsed)}</div>
                   <div style={styles.statLabel}>time</div>
                 </div>
                 <div style={styles.statDivider} />
                 <div style={styles.stat}>
-                  <div style={styles.statValue}>{misses}</div>
+                  <div className="statValue" style={styles.statValue}>{misses}</div>
                   <div style={styles.statLabel}>missed</div>
                 </div>
                 {streak.current > 1 && <>
                   <div style={styles.statDivider} />
                   <div style={styles.stat}>
-                    <div style={styles.statValue}>{streak.current}</div>
+                    <div className="statValue" style={styles.statValue}>{streak.current}</div>
                     <div style={styles.statLabel}>streak</div>
                   </div>
                 </>}
@@ -586,7 +586,7 @@
                 style={styles.newsletterForm}
               >
                 <div style={styles.newsletterLabel}>Get the daily puzzle in your inbox</div>
-                <div style={styles.newsletterRow}>
+                <div className="newsletterRow" style={styles.newsletterRow}>
                   <input
                     type="email"
                     name="email"
@@ -683,9 +683,9 @@
                   <div style={{...styles.imageReveal, ...(rl.imageUrl ? {} : styles.emojiContainer)}}>
                     <LinkImage link={rl} size="large" />
                   </div>
-                  <div style={styles.revealWord}>{rl.decoded}</div>
+                  <div className="revealWord" style={styles.revealWord}>{rl.decoded}</div>
                   {rl.decodedOptions && (
-                    <div style={styles.revealOthers}>
+                    <div className="revealOthers" style={styles.revealOthers}>
                       {rl.options.filter(o => o !== rl.answer).map(option => {
                         const wasEliminated = rlEliminated.includes(option);
                         return (
@@ -714,7 +714,7 @@
                 <div style={{...styles.imageReveal, ...(link.imageUrl ? {} : styles.emojiContainer)}}>
                   <LinkImage link={link} size="large" />
                 </div>
-                <div style={styles.revealWord}>{link.decoded}</div>
+                <div className="revealWord" style={styles.revealWord}>{link.decoded}</div>
                 {link.decodedOptions && (
                   <div style={styles.revealOthers}>
                     {link.options.filter(o => o !== link.answer).map(option => {
@@ -759,6 +759,7 @@
                     return (
                       <button
                         key={option}
+                        className="optionBtn"
                         style={{
                           ...styles.option,
                           ...(isEliminated ? styles.optionEliminated : {}),
@@ -825,13 +826,13 @@
         gap: '12px',
       },
       helpButton: {
-        width: '28px',
-        height: '28px',
+        width: '44px',
+        height: '44px',
         borderRadius: '50%',
         border: '2px solid #c4a574',
         backgroundColor: 'transparent',
         color: '#8b6340',
-        fontSize: '14px',
+        fontSize: '16px',
         fontWeight: '700',
         cursor: 'pointer',
         display: 'flex',
@@ -1422,6 +1423,21 @@
       .chainImageWrapperSmall:hover,
       .chainImageWrapperTiny:hover {
         transform: scale(1.1);
+      }
+
+      /* Mobile responsive */
+      .statsRow { flex-wrap: wrap; }
+      .revealWord { word-break: break-word; }
+      .revealOthers { flex-wrap: wrap; justify-content: center; }
+      .newsletterRow { flex-wrap: wrap; }
+
+      @media (max-width: 400px) {
+        .statsRow { gap: 20px !important; }
+        .statsRow .statValue { font-size: 32px !important; }
+        .revealWord { font-size: 24px !important; letter-spacing: 2px !important; }
+        .optionBtn { padding: 18px 14px !important; font-size: 20px !important; }
+        .newsletterRow { flex-direction: column; align-items: stretch; }
+        .newsletterRow input { max-width: none !important; }
       }
     `;
     document.head.appendChild(styleSheet);
