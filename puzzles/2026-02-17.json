@@ -1,0 +1,156 @@
+{
+  "publicationDate": "2026-02-17",
+  "questions": [
+    {
+      "answer": "GELATO",
+      "answerDisguise": "glt",
+      "correctOption": "Gelato",
+      "difficulty": "easy",
+      "distractors": [
+        {
+          "disguise": "glz",
+          "type": "wrong-letters",
+          "word": "GLAZE"
+        },
+        {
+          "disguise": "srbt",
+          "type": "non-synonym",
+          "word": "SORBET"
+        },
+        {
+          "disguise": "chlld",
+          "type": "phonetic-trap",
+          "word": "CHILLED"
+        }
+      ],
+      "emoji": "\ud83c\udf68",
+      "prompt": "ice cream"
+    },
+    {
+      "answer": "CONFECTION",
+      "answerDisguise": "cnfcshn",
+      "correctOption": "Confection",
+      "difficulty": "easy",
+      "distractors": [
+        {
+          "disguise": "cnftt",
+          "type": "wrong-letters",
+          "word": "CONFETTI"
+        },
+        {
+          "disguise": "chclt",
+          "type": "non-synonym",
+          "word": "CHOCOLATE"
+        },
+        {
+          "disguise": "cnccshn",
+          "type": "phonetic-trap",
+          "word": "CONCOCTION"
+        }
+      ],
+      "emoji": "\ud83c\udf6c",
+      "prompt": "sweet"
+    },
+    {
+      "answer": "OVEN",
+      "answerDisguise": "vn",
+      "correctOption": "Oven",
+      "difficulty": "medium",
+      "distractors": [
+        {
+          "disguise": "vnt",
+          "type": "wrong-letters",
+          "word": "VENT"
+        },
+        {
+          "disguise": "ht",
+          "type": "non-synonym",
+          "word": "HEAT"
+        },
+        {
+          "disguise": "bl",
+          "type": "phonetic-trap",
+          "word": "BOIL"
+        }
+      ],
+      "emoji": "\ud83d\udd25",
+      "prompt": "bake"
+    },
+    {
+      "answer": "MOUSSE",
+      "answerDisguise": "mss",
+      "correctOption": "Mousse",
+      "difficulty": "medium",
+      "distractors": [
+        {
+          "disguise": "mrng",
+          "type": "non-synonym",
+          "word": "MERINGUE"
+        },
+        {
+          "disguise": "mst",
+          "type": "phonetic-trap",
+          "word": "MOIST"
+        },
+        {
+          "disguise": "mass",
+          "type": "wrong-letters",
+          "word": "MASS"
+        }
+      ],
+      "emoji": "\ud83e\udd44",
+      "prompt": "creamy"
+    },
+    {
+      "answer": "STRUDEL",
+      "answerDisguise": "strdl",
+      "correctOption": "Strudel",
+      "difficulty": "hard",
+      "distractors": [
+        {
+          "disguise": "prtzl",
+          "type": "non-synonym",
+          "word": "PRETZEL"
+        },
+        {
+          "disguise": "strdnt",
+          "type": "wrong-letters",
+          "word": "STRIDENT"
+        },
+        {
+          "disguise": "strtl",
+          "type": "phonetic-trap",
+          "word": "STARTLE"
+        }
+      ],
+      "emoji": "\ud83e\udd50",
+      "prompt": "flaky"
+    },
+    {
+      "answer": "BRULEE",
+      "answerDisguise": "brl",
+      "correctOption": "Brulee",
+      "difficulty": "hard",
+      "distractors": [
+        {
+          "disguise": "brol",
+          "type": "phonetic-trap",
+          "word": "BROIL"
+        },
+        {
+          "disguise": "grlld",
+          "type": "non-synonym",
+          "word": "GRILLED"
+        },
+        {
+          "disguise": "brrl",
+          "type": "wrong-letters",
+          "word": "BARREL"
+        }
+      ],
+      "emoji": "\ud83c\udf6e",
+      "prompt": "caramelized"
+    }
+  ],
+  "theme": "Desserts"
+}
