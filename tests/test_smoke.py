@@ -1,6 +1,7 @@
 """Playwright smoke tests for the cnmn Quiz Generator UI."""
 
 import json
+import socket
 import subprocess
 import time
 import signal
@@ -9,9 +10,17 @@ import pytest
 from playwright.sync_api import sync_playwright, expect
 
 
+def _free_port():
+    """Find a free TCP port on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('', 0))
+        return s.getsockname()[1]
+
+
 @pytest.fixture(scope="module")
 def server():
-    """Start the Flask server for smoke testing."""
+    """Start the Flask server for smoke testing on a free port."""
+    port = _free_port()
     env = os.environ.copy()
     # Clear any real slug/key vars so only our test values apply.
     # Set to empty string (not delete) so load_dotenv() won't fill them from .env.
@@ -20,8 +29,10 @@ def server():
             env[k] = ''
     env['PORTKEY_API_KEY'] = 'pk-live-test-xxxxxxxxxxxxxxxxxxxx1'
     env['PORTKEY_SLUG_ANTHROPIC'] = 'my-anthropic'
+    env['AUTH_USERS'] = ''
     env['AUTH_USERNAME'] = ''
     env['AUTH_PASSWORD'] = ''
+    env['PORT'] = str(port)
 
     proc = subprocess.Popen(
         [os.path.join(os.path.dirname(__file__), '..', 'venv', 'bin', 'python'),
@@ -32,11 +43,13 @@ def server():
         stderr=subprocess.PIPE,
     )
 
+    server_url = f'http://localhost:{port}'
+
     # Wait for server to be ready
     for _ in range(30):
         try:
             import requests
-            requests.get('http://localhost:5000/api/models', timeout=1)
+            requests.get(f'{server_url}/api/models', timeout=1)
             break
         except Exception:
             time.sleep(0.5)
@@ -44,10 +57,16 @@ def server():
         proc.kill()
         raise RuntimeError("Server did not start in time")
 
-    yield proc
+    yield server_url, proc
 
     proc.send_signal(signal.SIGTERM)
     proc.wait(timeout=5)
+
+
+@pytest.fixture(scope="module")
+def server_url(server):
+    """Return the base URL for the test server."""
+    return server[0]
 
 
 @pytest.fixture(scope="module")
@@ -61,12 +80,12 @@ def browser_page(server):
 
 
 class TestPageLoad:
-    def test_title(self, browser_page):
-        browser_page.goto('http://localhost:5000')
+    def test_title(self, browser_page, server_url):
+        browser_page.goto(server_url)
         assert 'cnmn Quiz Generator' in browser_page.title()
 
-    def test_model_dropdown_populated(self, browser_page):
-        browser_page.goto('http://localhost:5000')
+    def test_model_dropdown_populated(self, browser_page, server_url):
+        browser_page.goto(server_url)
         # Wait for loadModels() to populate the dropdown
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
@@ -86,8 +105,8 @@ class TestPageLoad:
         ai_labels = labels[:-1]  # exclude Rule-Based
         assert any('Claude' in l for l in ai_labels), f"Expected at least one Claude model, got: {ai_labels}"
 
-    def test_status_shows_via_portkey(self, browser_page):
-        browser_page.goto('http://localhost:5000')
+    def test_status_shows_via_portkey(self, browser_page, server_url):
+        browser_page.goto(server_url)
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -96,8 +115,8 @@ class TestPageLoad:
 
 
 class TestRuleBasedQuiz:
-    def test_generate_quiz_with_rules(self, browser_page):
-        browser_page.goto('http://localhost:5000')
+    def test_generate_quiz_with_rules(self, browser_page, server_url):
+        browser_page.goto(server_url)
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -122,9 +141,9 @@ class TestRuleBasedQuiz:
         export = browser_page.locator('#exportSection')
         expect(export).to_be_visible()
 
-    def test_ask_ai_disabled_in_rules_mode(self, browser_page):
+    def test_ask_ai_disabled_in_rules_mode(self, browser_page, server_url):
         """Ask AI emoji button should be disabled when Rule-Based is selected."""
-        browser_page.goto('http://localhost:5000')
+        browser_page.goto(server_url)
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -143,9 +162,9 @@ class TestRuleBasedQuiz:
 
 
 class TestModelSelection:
-    def test_default_model_is_sonnet(self, browser_page):
+    def test_default_model_is_sonnet(self, browser_page, server_url):
         """Sonnet 4.5 should be selected by default when available."""
-        browser_page.goto('http://localhost:5000')
+        browser_page.goto(server_url)
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -158,8 +177,8 @@ class TestModelSelection:
         )
         assert selected == current
 
-    def test_switching_model_updates_state(self, browser_page):
-        browser_page.goto('http://localhost:5000')
+    def test_switching_model_updates_state(self, browser_page, server_url):
+        browser_page.goto(server_url)
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )

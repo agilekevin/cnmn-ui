@@ -226,6 +226,27 @@ def puzzle_dates():
     return jsonify(results)
 
 
+@app.route('/api/puzzle/<date>')
+@requires_auth
+def get_puzzle(date):
+    """Return a single puzzle JSON by date."""
+    if not re.match(r'^\d{4}-\d{2}-\d{2}$', date):
+        return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+
+    puzzles_dir = os.path.join(os.path.dirname(__file__), 'puzzles')
+    filepath = os.path.join(puzzles_dir, f'{date}.json')
+
+    if not os.path.isfile(filepath):
+        return jsonify({'error': f'No puzzle found for {date}'}), 404
+
+    try:
+        with open(filepath) as f:
+            data = json.load(f)
+        return jsonify(data)
+    except (json.JSONDecodeError, OSError) as e:
+        return jsonify({'error': f'Failed to read puzzle: {str(e)}'}), 500
+
+
 @app.route('/api/chat', methods=['POST'])
 @requires_auth
 def chat():
@@ -307,5 +328,6 @@ if __name__ == '__main__':
         print("Providers: none (set PORTKEY_SLUG_ANTHROPIC etc. in .env)")
     print(f"Auth:      {'✓ ' + str(len(AUTH_USERS)) + ' user(s)' if AUTH_USERS else '✗ disabled (open access)'}")
     print("=" * 40)
-    print("Open http://localhost:5000 in your browser\n")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    port = int(os.getenv('PORT', 5000))
+    print(f"Open http://localhost:{port} in your browser\n")
+    app.run(debug=True, port=port, host='0.0.0.0')

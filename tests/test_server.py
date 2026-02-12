@@ -332,6 +332,44 @@ class TestPuzzleDates:
 
 
 # ------------------------------------------------------------------
+# GET /api/puzzle/<date>
+# ------------------------------------------------------------------
+
+class TestGetPuzzle:
+    def test_valid_date_returns_puzzle(self, monkeypatch, tmp_path):
+        client, srv = _make_app(monkeypatch)
+        puzzles_dir = tmp_path / 'puzzles'
+        puzzles_dir.mkdir()
+        puzzle_data = {'theme': 'Animals', 'questions': []}
+        (puzzles_dir / '2026-02-10.json').write_text(json.dumps(puzzle_data))
+
+        monkeypatch.setattr(srv.os.path, 'dirname',
+                            lambda f: str(tmp_path))
+        resp = client.get('/api/puzzle/2026-02-10')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['theme'] == 'Animals'
+        assert data['questions'] == []
+
+    def test_missing_date_returns_404(self, monkeypatch, tmp_path):
+        client, srv = _make_app(monkeypatch)
+        puzzles_dir = tmp_path / 'puzzles'
+        puzzles_dir.mkdir()
+
+        monkeypatch.setattr(srv.os.path, 'dirname',
+                            lambda f: str(tmp_path))
+        resp = client.get('/api/puzzle/2026-12-25')
+        assert resp.status_code == 404
+        assert 'No puzzle found' in resp.get_json()['error']
+
+    def test_invalid_date_format_returns_400(self, monkeypatch):
+        client, _ = _make_app(monkeypatch)
+        resp = client.get('/api/puzzle/not-a-date')
+        assert resp.status_code == 400
+        assert 'Invalid date format' in resp.get_json()['error']
+
+
+# ------------------------------------------------------------------
 # portkey_model_name unit tests
 # ------------------------------------------------------------------
 
