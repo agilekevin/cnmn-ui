@@ -207,6 +207,16 @@
       outline: none;
     }
 
+    @keyframes disguise-flash {
+      0% { background: #2d2d2d; }
+      30% { background: #4a7c50; border-color: #2e7d32; }
+      100% { background: #2d2d2d; }
+    }
+
+    .disguise-input.flash {
+      animation: disguise-flash 0.4s ease;
+    }
+
     .type-badge {
       font-size: 10px;
       padding: 2px 6px;
@@ -846,6 +856,44 @@
       font-style: italic;
     }
 
+    /* Generation summary (persistent collapsed panel) */
+    .gen-summary { margin-bottom: 16px; }
+
+    .gen-summary-bar {
+      cursor: pointer;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .gen-summary-bar:hover { background: #c8e6c9; }
+
+    .gen-summary-body { display: none; padding: 12px 0; }
+    .gen-summary.expanded .gen-summary-body { display: block; }
+    .gen-summary.expanded .gen-summary-arrow { transform: rotate(180deg); }
+
+    .gen-summary-arrow {
+      transition: transform 0.2s;
+      font-size: 12px;
+    }
+
+    .stage-transcript {
+      margin-left: 36px;
+      font-size: 12px;
+      color: #6b3410;
+      padding: 4px 0 8px;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+    }
+
+    .stage-transcript .pick-correct { color: #2e7d32; }
+    .stage-transcript .pick-wrong { color: #c62828; font-weight: 600; }
+
     @media (max-width: 600px) {
       .form-row { flex-direction: column; gap: 8px; }
       .field-row { flex-wrap: wrap; }
@@ -928,6 +976,7 @@
     let puzzle = null;
     let dirty = false;
     let originalJson = '';
+    let generationTranscript = null;
 
     // Emoji picker state
     const emojiCategories = {
@@ -989,6 +1038,36 @@
       'fluent-emoji-high-contrast': 'Fluent Emoji HC',
       'game-icons': 'Game Icons',
     };
+
+    // Token usage tracking
+    let tokenUsage = {};  // { stageName: { prompt_tokens, completion_tokens, total_tokens } }
+
+    function addTokenUsage(stageName, usage) {
+      if (!usage) return;
+      if (!tokenUsage[stageName]) {
+        tokenUsage[stageName] = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+      }
+      tokenUsage[stageName].prompt_tokens += usage.prompt_tokens || 0;
+      tokenUsage[stageName].completion_tokens += usage.completion_tokens || 0;
+      tokenUsage[stageName].total_tokens += usage.total_tokens || 0;
+    }
+
+    function formatTokenSummary() {
+      const stages = Object.entries(tokenUsage).filter(([, u]) => u.total_tokens > 0);
+      if (stages.length === 0) return '';
+      const totals = stages.reduce((acc, [, u]) => ({
+        prompt_tokens: acc.prompt_tokens + u.prompt_tokens,
+        completion_tokens: acc.completion_tokens + u.completion_tokens,
+        total_tokens: acc.total_tokens + u.total_tokens,
+      }), { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
+      const fmt = n => n.toLocaleString();
+      let html = `<div style="margin-top:12px;padding:12px 16px;background:#f5f0eb;border-radius:8px;font-size:13px;color:#6b3410;">`;
+      html += `<strong>Tokens:</strong> ${fmt(totals.prompt_tokens)} prompt + ${fmt(totals.completion_tokens)} completion = ${fmt(totals.total_tokens)} total`;
+      html += `<div style="font-size:11px;color:#8b6340;margin-top:4px;">`;
+      html += stages.map(([name, u]) => `${name}: ${fmt(u.prompt_tokens)}p + ${fmt(u.completion_tokens)}c`).join(' | ');
+      html += `</div></div>`;
+      return html;
+    }
 
     // Generation state
     let generationAbortController = null;
@@ -1053,9 +1132,14 @@
     function renderPuzzle() {
       if (!puzzle || !puzzle.questions) return;
       const container = document.getElementById('questionsContainer');
-      container.innerHTML = '<div class="questions-grid">' +
+      let html = '';
+      if (generationTranscript) {
+        html += renderGenerationSummary(false);
+      }
+      html += '<div class="questions-grid">' +
         puzzle.questions.map((q, i) => renderQuestionCard(q, i)).join('') +
         '</div>';
+      container.innerHTML = html;
     }
 
     function renderQuestionCard(q, index) {
@@ -1222,6 +1306,7 @@
       q.answerDisguise = generateDisguiseRuleBased(q.answer);
       markDirty();
       renderPuzzle();
+      flashDisguiseInput(qIndex);
     }
 
     function regenDistractorDisguise(qIndex, dIndex) {
@@ -1229,6 +1314,19 @@
       d.disguise = generateDisguiseRuleBased(d.word);
       markDirty();
       renderPuzzle();
+      flashDisguiseInput(qIndex, dIndex);
+    }
+
+    function flashDisguiseInput(qIndex, dIndex) {
+      const cards = document.querySelectorAll('.question-card');
+      const card = cards[qIndex];
+      if (!card) return;
+      const idx = dIndex === undefined ? 0 : dIndex + 1;
+      const input = card.querySelectorAll('.disguise-input')[idx];
+      if (input) {
+        input.classList.add('flash');
+        setTimeout(() => input.classList.remove('flash'), 400);
+      }
     }
 
     function regenAllDisguises() {
@@ -1303,7 +1401,7 @@ Theme: "{theme}"
 
 Generate exactly 6 prompt/answer pairs that fit this theme. Each pair has:
 - "prompt": a specific noun or thing that is an EXAMPLE of the theme — not an adjective, feeling, or loosely related concept. For "Winter Clothing" use garment names like "jacket", "mittens", "scarf" — NOT "cold", "cozy", "frosty".
-- "answer": a synonym or strongly-associated word for the prompt (what players must guess)
+- "answer": a synonym or strongly-associated word for the prompt (what players must guess). Must be a word that everyday English speakers would recognize — no foreign-language words, technical jargon, or obscure vocabulary.
 - "emoji": a single emoji that represents the prompt (or empty string if none fits)
 
 Rules:
@@ -1336,24 +1434,17 @@ Assign each distractor one of these types:
 Return ONLY a JSON array:
 [{"word": "EXAMPLE", "type": "wrong-letters"}, ...]`;
 
-    const STAGE5_PROMPT = `You are a playtester for the word puzzle game CNMN ("Consonant Moon"). In this game, players see a clue word and must pick the correct synonym from 4 options that have been "disguised" by stripping vowels and applying phonetic shortcuts.
+    const STAGE5_PROMPT = `You are playing the word puzzle CNMN. For each question you see a clue word and 4 disguised options (vowels stripped, phonetic shortcuts applied). Pick the synonym of the clue.
 
-Here is a complete puzzle to review:
+For each question:
+1. Try to decode each disguised option back into a real word
+2. Pick the one that is a synonym of the clue
+3. Rate your confidence (1-5)
 
-{puzzle_json}
+{questions_text}
 
-For each question, evaluate:
-1. Can the answer be reasonably decoded from its disguise?
-2. Are the distractors distinguishable from the answer's disguise?
-3. Is the synonym relationship between prompt and answer clear?
-4. Are there any consonant skeleton collisions (two options producing the same stripped form)?
-
-Return ONLY a JSON array of issues found. If the puzzle is perfect, return an empty array [].
-Format: [{"question": 1, "severity": "high", "issue": "description"}, ...]
-
-Severity levels:
-- "high": game-breaking (collision, answer undecodable, synonym wrong)
-- "low": minor quality concern (distractor too easy, etc.)`;
+Return ONLY JSON:
+[{"question": 1, "picked": "B", "decoded": "FRIGID", "confidence": 4}, ...]`;
 
     // ── Generation stage functions ──────────────────────────────
     async function callServerWithModel(prompt, model, signal) {
@@ -1365,13 +1456,14 @@ Severity levels:
       });
       const data = await response.json();
       if (!response.ok || data.error) throw new Error(data.error || 'Server error');
-      return data.content;
+      return { content: data.content, usage: data.usage || null };
     }
 
     async function genStage1(theme, model, signal) {
       const prompt = STAGE1_PROMPT.replace('{theme}', theme);
-      const text = await callServerWithModel(prompt, model, signal);
-      return parseJsonResponse(text);
+      const { content, usage } = await callServerWithModel(prompt, model, signal);
+      addTokenUsage('Stage 1: Word Pairs', usage);
+      return parseJsonResponse(content);
     }
 
     function genStage2(pairs) {
@@ -1407,8 +1499,9 @@ Severity levels:
         .replace(/\{prompt\}/g, pair.prompt)
         .replace(/\{answer\}/g, pair.answer)
         .replace(/\{skeleton\}/g, skeleton);
-      const text = await callServerWithModel(prompt, model, signal);
-      const distractors = parseJsonResponse(text);
+      const { content, usage } = await callServerWithModel(prompt, model, signal);
+      addTokenUsage('Stage 3: Distractors', usage);
+      const distractors = parseJsonResponse(content);
       const valid = [];
       for (const d of distractors) {
         d.word = (d.word || '').toUpperCase();
@@ -1468,11 +1561,80 @@ Severity levels:
       return questions;
     }
 
+    function buildPlaytesterQuestions(questions) {
+      const answerKey = [];
+      const lines = [];
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        const options = [
+          { label: '', disguise: q.answerDisguise, isAnswer: true },
+          ...q.distractors.map(d => ({ label: '', disguise: d.disguise, isAnswer: false })),
+        ];
+        // Shuffle options
+        for (let j = options.length - 1; j > 0; j--) {
+          const k = Math.floor(Math.random() * (j + 1));
+          [options[j], options[k]] = [options[k], options[j]];
+        }
+        const labels = ['A', 'B', 'C', 'D'];
+        let correctLabel = '';
+        const optionParts = [];
+        for (let j = 0; j < options.length && j < 4; j++) {
+          options[j].label = labels[j];
+          optionParts.push(`${labels[j]}: ${options[j].disguise}`);
+          if (options[j].isAnswer) correctLabel = labels[j];
+        }
+        answerKey.push({ qIndex: i, correctLabel });
+        lines.push(`Q${i + 1}. Clue: "${q.prompt}" | ${optionParts.join('  ')}`);
+      }
+      return { questionsText: lines.join('\n'), answerKey };
+    }
+
     async function genStage5(questions, theme, model, signal) {
-      const puzzleForReview = { theme, questions };
-      const prompt = STAGE5_PROMPT.replace('{puzzle_json}', JSON.stringify(puzzleForReview, null, 2));
-      const text = await callServerWithModel(prompt, model, signal);
-      try { return parseJsonResponse(text); } catch (e) { return []; }
+      const { questionsText, answerKey } = buildPlaytesterQuestions(questions);
+      const prompt = STAGE5_PROMPT.replace('{questions_text}', questionsText);
+      const { content, usage } = await callServerWithModel(prompt, model, signal);
+      addTokenUsage('Stage 5: Playtester', usage);
+
+      let picks;
+      try { picks = parseJsonResponse(content); } catch (e) { return { issues: [], picks: [], answerKey }; }
+
+      const issues = [];
+      let correctCount = 0;
+      let allMaxConfidence = true;
+
+      for (const pick of picks) {
+        const qNum = pick.question;
+        const keyEntry = answerKey.find(k => k.qIndex === qNum - 1);
+        if (!keyEntry) continue;
+
+        if (pick.picked !== keyEntry.correctLabel) {
+          issues.push({
+            question: qNum,
+            severity: 'high',
+            issue: `Playtester picked wrong answer (chose ${pick.picked}, correct was ${keyEntry.correctLabel}) — synonym relationship may be unclear or distractors too similar`,
+          });
+        } else {
+          correctCount++;
+          if (pick.confidence <= 2) {
+            issues.push({
+              question: qNum,
+              severity: 'low',
+              issue: `Playtester unsure (confidence ${pick.confidence}/5) — question may be too hard`,
+            });
+          }
+        }
+        if (pick.confidence < 5) allMaxConfidence = false;
+      }
+
+      if (allMaxConfidence && picks.length === questions.length) {
+        issues.push({
+          question: 0,
+          severity: 'low',
+          issue: 'All max confidence — puzzle may be too easy',
+        });
+      }
+
+      return { issues, picks, answerKey };
     }
 
     async function genStage6(questions, issues, pairs, model, signal) {
@@ -1539,11 +1701,12 @@ Severity levels:
       }, 400);
       try {
         const themeList = previousThemes.join(', ');
-        const result = await callServerWithModel(
+        const { content, usage } = await callServerWithModel(
           `Here are themes already used for a daily word puzzle game: ${themeList}\n\nSuggest 4 fresh, diverse theme ideas that haven't been used yet. Reply with ONLY the 4 themes separated by commas, nothing else.`,
           model, null
         );
-        const suggestions = result.trim();
+        addTokenUsage('Theme Suggestions', usage);
+        const suggestions = content.trim();
         if (suggestions) {
           input.placeholder = `e.g., ${suggestions}`;
         }
@@ -1576,7 +1739,7 @@ Severity levels:
       updateGenButtonState();
     }
 
-    function renderGenerationProgress(stages, puzzleNum, totalPuzzles) {
+    function renderGenerationProgress(stages, puzzleNum, totalPuzzles, showTokens) {
       const container = document.getElementById('questionsContainer');
       let html = '<div class="generation-progress">';
       if (totalPuzzles > 1) {
@@ -1596,8 +1759,151 @@ Severity levels:
           html += `<div class="progress-detail">${escapeAttr(stage.detail)}</div>`;
         }
       }
+      if (showTokens) html += formatTokenSummary();
       html += '</div>';
       container.innerHTML = html;
+    }
+
+    function renderGenerationSummary(expanded) {
+      const gt = generationTranscript;
+      if (!gt) return '';
+
+      const sd = gt.stageData || {};
+      const tokenEntries = Object.entries(gt.tokenUsage || {}).filter(([, u]) => u.total_tokens > 0);
+      const totalTokens = tokenEntries.reduce((sum, [, u]) => sum + u.total_tokens, 0);
+      const completedStages = gt.stages.filter(s => s.status === 'completed').length;
+
+      let html = `<div class="gen-summary ${expanded ? 'expanded' : ''}">`;
+      html += `<div class="gen-summary-bar" onclick="toggleGenSummary()">`;
+      html += `<span>Generation summary: ${completedStages} stages completed | Tokens: ${totalTokens.toLocaleString()}</span>`;
+      html += `<span class="gen-summary-arrow">&#9660;</span>`;
+      html += `</div>`;
+      html += `<div class="gen-summary-body">`;
+
+      for (let i = 0; i < gt.stages.length; i++) {
+        const stage = gt.stages[i];
+        let icon = '';
+        if (stage.status === 'completed') icon = '&#10003;';
+        else if (stage.status === 'error') icon = '&#10007;';
+        else icon = '&middot;';
+
+        html += `<div class="progress-stage ${stage.status}">`;
+        html += `<span class="stage-icon">${icon}</span>`;
+        html += `<span>${escapeAttr(stage.label)}</span>`;
+        html += `</div>`;
+        if (stage.detail) {
+          html += `<div class="progress-detail">${escapeAttr(stage.detail)}</div>`;
+        }
+
+        // Stage-specific transcripts
+        if (i === 0 && sd.stage1) {
+          html += renderStage1Transcript(sd.stage1);
+        } else if (i === 1 && sd.stage2) {
+          html += renderStage2Transcript(sd.stage2);
+        } else if (i === 2 && sd.stage3) {
+          html += renderStage3Transcript(sd.stage3, sd.stage1);
+        } else if (i === 4 && sd.stage5) {
+          html += renderStage5Transcript(sd.stage5, sd.stage1);
+        } else if (i === 5 && sd.stage6) {
+          html += renderStage6Transcript(sd.stage6, sd.stage1);
+        }
+      }
+
+      // Token summary
+      if (tokenEntries.length > 0) {
+        const fmt = n => n.toLocaleString();
+        const totals = tokenEntries.reduce((acc, [, u]) => ({
+          prompt_tokens: acc.prompt_tokens + u.prompt_tokens,
+          completion_tokens: acc.completion_tokens + u.completion_tokens,
+          total_tokens: acc.total_tokens + u.total_tokens,
+        }), { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
+        html += `<div style="margin-top:8px;padding:8px 16px;background:#f5f0eb;border-radius:8px;font-size:12px;color:#6b3410;">`;
+        html += `<strong>Tokens:</strong> ${fmt(totals.prompt_tokens)} prompt + ${fmt(totals.completion_tokens)} completion = ${fmt(totals.total_tokens)} total`;
+        html += `<div style="font-size:11px;color:#8b6340;margin-top:2px;">`;
+        html += tokenEntries.map(([name, u]) => `${name}: ${fmt(u.prompt_tokens)}p + ${fmt(u.completion_tokens)}c`).join(' | ');
+        html += `</div></div>`;
+      }
+
+      html += `</div></div>`;
+      return html;
+    }
+
+    function renderStage1Transcript(data) {
+      const pairs = data.pairs || [];
+      if (!pairs.length) return '';
+      let html = '<div class="stage-transcript">';
+      html += pairs.map((p, i) =>
+        `${i + 1}. ${escapeAttr(p.prompt)} &rarr; ${escapeAttr(p.answer.toUpperCase())} ${p.emoji || ''}`
+      ).join('&nbsp;&nbsp;&nbsp;');
+      html += '</div>';
+      return html;
+    }
+
+    function renderStage2Transcript(data) {
+      let html = '<div class="stage-transcript">';
+      if (data.ok) {
+        html += 'Validation passed';
+      } else {
+        html += (data.errors || []).map(e => escapeAttr(e)).join('; ');
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function renderStage3Transcript(data, stage1Data) {
+      const distractors = data.distractors || [];
+      const pairs = (stage1Data && stage1Data.pairs) || [];
+      if (!distractors.length) return '';
+      let html = '<div class="stage-transcript">';
+      for (let i = 0; i < distractors.length; i++) {
+        const prompt = pairs[i] ? pairs[i].prompt : `Q${i + 1}`;
+        const dList = distractors[i] || [];
+        const dStr = dList.map(d => `${escapeAttr(d.word)} (${escapeAttr(d.type || 'unknown')})`).join(', ');
+        html += `Q${i + 1} &ldquo;${escapeAttr(prompt)}&rdquo;: ${dStr}<br>`;
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function renderStage5Transcript(data, stage1Data) {
+      const picks = data.picks || [];
+      const answerKey = data.answerKey || [];
+      const pairs = (stage1Data && stage1Data.pairs) || [];
+      if (!picks.length) return '';
+      let html = '<div class="stage-transcript">';
+      for (const pick of picks) {
+        const qIdx = pick.question - 1;
+        const prompt = pairs[qIdx] ? pairs[qIdx].prompt : `Q${pick.question}`;
+        const keyEntry = answerKey.find(k => k.qIndex === qIdx);
+        const isCorrect = keyEntry && pick.picked === keyEntry.correctLabel;
+        const indicator = isCorrect
+          ? '<span class="pick-correct">&#10003;</span>'
+          : `<span class="pick-wrong">&#10007; (correct: ${keyEntry ? keyEntry.correctLabel : '?'})</span>`;
+        html += `Q${pick.question} &ldquo;${escapeAttr(prompt)}&rdquo; &rarr; picked ${escapeAttr(pick.picked)}: ${escapeAttr(pick.decoded || '?')} (confidence ${pick.confidence}/5) ${indicator}<br>`;
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function renderStage6Transcript(data, stage1Data) {
+      const flagged = data.flagged || [];
+      const pairs = (stage1Data && stage1Data.pairs) || [];
+      let html = '<div class="stage-transcript">';
+      if (flagged.length === 0) {
+        html += 'No regeneration needed';
+      } else {
+        const qNames = flagged.map(idx => {
+          const prompt = pairs[idx] ? pairs[idx].prompt : `Q${idx + 1}`;
+          return `Q${idx + 1} &ldquo;${escapeAttr(prompt)}&rdquo;`;
+        });
+        html += `Regenerated: ${qNames.join(', ')}`;
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function toggleGenSummary() {
+      document.querySelector('.gen-summary')?.classList.toggle('expanded');
     }
 
     function cancelGeneration() {
@@ -1622,6 +1928,7 @@ Severity levels:
       if (!theme || !startDate || !model) return;
 
       isGenerating = true;
+      tokenUsage = {};
       generationAbortController = new AbortController();
       const signal = generationAbortController.signal;
       document.getElementById('genStartBtn').disabled = true;
@@ -1643,6 +1950,7 @@ Severity levels:
             { label: 'Stage 5: Playtester review', status: 'pending' },
             { label: 'Stage 6: Targeted regeneration', status: 'pending' },
           ];
+          const transcript = {};
           const update = () => renderGenerationProgress(stages, n + 1, count);
           update();
 
@@ -1660,6 +1968,8 @@ Severity levels:
               const [ok, errors] = genStage2(pairs);
               if (ok) {
                 stages[1].status = 'completed';
+                transcript.stage1 = { pairs: pairs.map(p => ({...p})) };
+                transcript.stage2 = { ok: true, errors: [] };
                 update();
                 break;
               } else {
@@ -1705,6 +2015,7 @@ Severity levels:
             update();
           });
           stages[2].status = 'completed';
+          transcript.stage3 = { distractors: allDistractors };
           update();
 
           // Stage 4: Disguises
@@ -1717,26 +2028,30 @@ Severity levels:
           // Stage 5: Playtester
           stages[4].status = 'active';
           update();
-          const issues = await genStage5(questions, theme, model, signal);
+          const { issues, picks, answerKey } = await genStage5(questions, theme, model, signal);
+          transcript.stage5 = { picks, answerKey };
           const highCount = issues.filter(i => i.severity === 'high').length;
+          const correctCount = questions.length - issues.filter(i => i.severity === 'high').length;
           stages[4].status = 'completed';
-          stages[4].detail = `${highCount} high, ${issues.length - highCount} low severity issues`;
+          stages[4].detail = `Playtester solved ${correctCount}/${questions.length} correctly, ${highCount} high + ${issues.length - highCount} low severity issues`;
           update();
 
           // Stage 6: Regen
           stages[5].status = 'active';
           update();
           if (highCount > 0) {
-            const flaggedCount = new Set(issues.filter(i => i.severity === 'high').map(i => i.question).filter(q => q >= 1 && q <= questions.length)).size;
-            stages[5].detail = `Regenerating ${flaggedCount} question(s)`;
+            const flaggedSet = new Set(issues.filter(i => i.severity === 'high').map(i => i.question).filter(q => q >= 1 && q <= questions.length));
+            stages[5].detail = `Regenerating ${flaggedSet.size} question(s)`;
             update();
             await genStage6(questions, issues, pairs, model, signal);
             stages[5].status = 'completed';
+            transcript.stage6 = { flagged: [...flaggedSet].map(q => q - 1) };
           } else {
             stages[5].status = 'completed';
             stages[5].detail = 'No regeneration needed';
+            transcript.stage6 = { flagged: [] };
           }
-          update();
+          renderGenerationProgress(stages, n + 1, count, true);
 
           // Save
           const newPuzzle = { theme, publicationDate: dateStr, questions };
@@ -1750,6 +2065,7 @@ Severity levels:
             const err = await saveResp.json();
             throw new Error(err.error || 'Save failed');
           }
+          generationTranscript = { stages: stages.map(s => ({...s})), tokenUsage: JSON.parse(JSON.stringify(tokenUsage)), stageData: transcript };
         }
 
         // All done — refresh and load
@@ -2161,6 +2477,7 @@ Severity levels:
           return;
         }
       }
+      generationTranscript = null;
       loadPuzzle(date);
     }
 

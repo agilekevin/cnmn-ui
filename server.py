@@ -142,7 +142,7 @@ def is_key_valid(key, prefix=''):
 @app.route('/')
 @requires_auth
 def index():
-    return send_from_directory('.', 'puzzle-ai-assistant.html')
+    return send_from_directory('.', 'puzzle-editor.html')
 
 
 @app.route('/<path:filename>')
@@ -313,7 +313,10 @@ def call_portkey(model, prompt, max_tokens=1024):
         )
         response.raise_for_status()
         data = response.json()
-        return jsonify({'content': data['choices'][0]['message']['content']})
+        result = {'content': data['choices'][0]['message']['content']}
+        if 'usage' in data:
+            result['usage'] = data['usage']
+        return jsonify(result)
     except requests.exceptions.RequestException as e:
         return jsonify({'error': f'Portkey API error: {str(e)}'}), 500
 
