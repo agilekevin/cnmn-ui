@@ -1,0 +1,156 @@
+{
+  "publicationDate": "2026-02-19",
+  "questions": [
+    {
+      "answer": "SPHERE",
+      "answerDisguise": "sfr",
+      "correctOption": "Sphere",
+      "difficulty": "easy",
+      "distractors": [
+        {
+          "disguise": "sprl",
+          "type": "wrong-letters",
+          "word": "SPIRAL"
+        },
+        {
+          "disguise": "rnd",
+          "type": "non-synonym",
+          "word": "ROUND"
+        },
+        {
+          "disguise": "spr",
+          "type": "phonetic-trap",
+          "word": "SPUR"
+        }
+      ],
+      "emoji": "\u26bd",
+      "prompt": "ball"
+    },
+    {
+      "answer": "CLUB",
+      "answerDisguise": "clb",
+      "correctOption": "Club",
+      "difficulty": "easy",
+      "distractors": [
+        {
+          "disguise": "bll",
+          "type": "non-synonym",
+          "word": "BALL"
+        },
+        {
+          "disguise": "slb",
+          "type": "wrong-letters",
+          "word": "SLAB"
+        },
+        {
+          "disguise": "clp",
+          "type": "phonetic-trap",
+          "word": "CLAP"
+        }
+      ],
+      "emoji": "\u26be",
+      "prompt": "bat"
+    },
+    {
+      "answer": "MESH",
+      "answerDisguise": "msh",
+      "correctOption": "Mesh",
+      "difficulty": "medium",
+      "distractors": [
+        {
+          "disguise": "fsh",
+          "type": "wrong-letters",
+          "word": "FISH"
+        },
+        {
+          "disguise": "wv",
+          "type": "non-synonym",
+          "word": "WEAVE"
+        },
+        {
+          "disguise": "mst",
+          "type": "phonetic-trap",
+          "word": "MAST"
+        }
+      ],
+      "emoji": "\ud83e\udd45",
+      "prompt": "net"
+    },
+    {
+      "answer": "PADDLE",
+      "answerDisguise": "pddl",
+      "correctOption": "Paddle",
+      "difficulty": "medium",
+      "distractors": [
+        {
+          "disguise": "ptl",
+          "type": "wrong-letters",
+          "word": "PEDAL"
+        },
+        {
+          "disguise": "rcqt",
+          "type": "non-synonym",
+          "word": "RACQUET"
+        },
+        {
+          "disguise": "bttl",
+          "type": "phonetic-trap",
+          "word": "BATTLE"
+        }
+      ],
+      "emoji": "\ud83c\udfbe",
+      "prompt": "racket"
+    },
+    {
+      "answer": "DISK",
+      "answerDisguise": "dsk",
+      "correctOption": "Disk",
+      "difficulty": "hard",
+      "distractors": [
+        {
+          "disguise": "dk",
+          "type": "phonetic-trap",
+          "word": "DUCK"
+        },
+        {
+          "disguise": "rnk",
+          "type": "non-synonym",
+          "word": "RINK"
+        },
+        {
+          "disguise": "desk",
+          "type": "wrong-letters",
+          "word": "DESK"
+        }
+      ],
+      "emoji": "\ud83c\udfd2",
+      "prompt": "puck"
+    },
+    {
+      "answer": "shuttlecock",
+      "answerDisguise": "shtlck",
+      "correctOption": "Shuttlecock",
+      "difficulty": "hard",
+      "distractors": [
+        {
+          "disguise": "bord",
+          "type": "wrong-letters",
+          "word": "BOARD"
+        },
+        {
+          "disguise": "fthr",
+          "type": "non-synonym",
+          "word": "FEATHER"
+        },
+        {
+          "disguise": "bd",
+          "type": "phonetic-trap",
+          "word": "BIRD"
+        }
+      ],
+      "emoji": "\ud83c\udff8",
+      "prompt": "Birdie"
+    }
+  ],
+  "theme": "Sports Equipment"
+}

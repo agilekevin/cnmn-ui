@@ -925,7 +925,7 @@
         </div>
       </div>
       <div class="export-section">
-        <button onclick="savePuzzle()">Save</button>
+        <button id="saveBtn" onclick="savePuzzle()">Save</button>
         <button class="export" onclick="exportJSON()">Copy JSON</button>
         <button class="secondary" onclick="regenAllDisguises()">Re-derive All Disguises</button>
         <button class="secondary" onclick="toggleGeneratePanel()" id="generateNewBtn">Generate New</button>
@@ -1080,6 +1080,7 @@
     async function init() {
       loadEmojiData();
       loadAiModel();
+      loadConfig();
       const select = document.getElementById('dateSelect');
       try {
         const resp = await fetch('/api/puzzle-dates');
@@ -2158,6 +2159,20 @@ Return ONLY JSON:
         if (resp.ok) emojiKeywords = await resp.json();
       } catch (e) {
         console.warn('Failed to load emoji data:', e);
+      }
+    }
+
+    async function loadConfig() {
+      try {
+        const resp = await fetch('/api/config');
+        const data = await resp.json();
+        if (!data.saveEnabled) {
+          const btn = document.getElementById('saveBtn');
+          btn.disabled = true;
+          btn.title = 'Not available online — use Copy JSON';
+        }
+      } catch (e) {
+        console.warn('Failed to load config:', e);
       }
     }
 

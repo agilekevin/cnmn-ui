@@ -1,156 +1,156 @@
 {
-  "theme": "Winter Clothing",
   "publicationDate": "2026-02-18",
   "questions": [
     {
-      "prompt": "cold",
-      "emoji": "\ud83e\udd76",
       "answer": "FRIGID",
       "answerDisguise": "frgd",
+      "correctOption": "Frigid",
+      "difficulty": "easy",
       "distractors": [
         {
-          "word": "FROZEN",
           "disguise": "frzn",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "FROZEN"
         },
         {
-          "word": "FRIDGE",
           "disguise": "frj",
-          "type": "phonetic-trap"
+          "type": "phonetic-trap",
+          "word": "FRIDGE"
         },
         {
-          "word": "FORGED",
           "disguise": "forgd",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "FORGED"
         }
       ],
-      "difficulty": "easy",
-      "correctOption": "Frigid"
+      "emoji": "\ud83e\udd76",
+      "prompt": "cold"
     },
     {
-      "prompt": "hat",
-      "emoji": "\ud83e\udde2",
       "answer": "BEANIE",
       "answerDisguise": "bn",
+      "correctOption": "Beanie",
+      "difficulty": "easy",
       "distractors": [
         {
-          "word": "BONNET",
           "disguise": "bnnt",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "BONNET"
         },
         {
-          "word": "BRIM",
           "disguise": "brm",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "BRIM"
         },
         {
-          "word": "BAND",
           "disguise": "bnd",
-          "type": "phonetic-trap"
+          "type": "phonetic-trap",
+          "word": "BAND"
         }
       ],
-      "difficulty": "easy",
-      "correctOption": "Beanie"
+      "emoji": "\ud83e\udde2",
+      "prompt": "hat"
     },
     {
-      "prompt": "gloves",
-      "emoji": "\ud83e\udde4",
       "answer": "MITTENS",
       "answerDisguise": "mttns",
+      "correctOption": "Mittens",
+      "difficulty": "medium",
       "distractors": [
         {
-          "word": "KNITTING",
           "disguise": "nttng",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "KNITTING"
         },
         {
-          "word": "BUTTONS",
           "disguise": "bttns",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "BUTTONS"
         },
         {
-          "word": "MATINS",
           "disguise": "mtns",
-          "type": "phonetic-trap"
+          "type": "phonetic-trap",
+          "word": "MATINS"
         }
       ],
-      "difficulty": "medium",
-      "correctOption": "Mittens"
+      "emoji": "\ud83e\udde4",
+      "prompt": "gloves"
     },
     {
-      "prompt": "jacket",
-      "emoji": "\ud83e\udde5",
       "answer": "PARKA",
       "answerDisguise": "prk",
+      "correctOption": "Parka",
+      "difficulty": "medium",
       "distractors": [
         {
-          "word": "POCKET",
           "disguise": "pkt",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "POCKET"
         },
         {
-          "word": "PARKS",
           "disguise": "prks",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "PARKS"
         },
         {
-          "word": "PRICK",
           "disguise": "prik",
-          "type": "phonetic-trap"
+          "type": "phonetic-trap",
+          "word": "PRICK"
         }
       ],
-      "difficulty": "medium",
-      "correctOption": "Parka"
+      "emoji": "\ud83e\udde5",
+      "prompt": "jacket"
     },
     {
-      "prompt": "cozy",
-      "emoji": "\u2615",
       "answer": "SNUG",
       "answerDisguise": "sng",
+      "correctOption": "Snug",
+      "difficulty": "hard",
       "distractors": [
         {
-          "word": "SNAG",
           "disguise": "snag",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "SNAG"
         },
         {
-          "word": "SOFT",
           "disguise": "sft",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "SOFT"
         },
         {
-          "word": "SUNG",
           "disguise": "sung",
-          "type": "phonetic-trap"
+          "type": "phonetic-trap",
+          "word": "SUNG"
         }
       ],
-      "difficulty": "hard",
-      "correctOption": "Snug"
+      "emoji": "\u2615",
+      "prompt": "cozy"
     },
     {
-      "prompt": "scarf",
-      "emoji": "\ud83e\udde3",
       "answer": "MUFFLER",
       "answerDisguise": "mfflr",
+      "correctOption": "Muffler",
+      "difficulty": "hard",
       "distractors": [
         {
-          "word": "RUFFLED",
           "disguise": "rffld",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "RUFFLED"
         },
         {
-          "word": "SWEATER",
           "disguise": "swtr",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "SWEATER"
         },
         {
-          "word": "MUFFINS",
           "disguise": "mffns",
-          "type": "phonetic-trap"
+          "type": "phonetic-trap",
+          "word": "MUFFINS"
         }
       ],
-      "difficulty": "hard",
-      "correctOption": "Muffler"
+      "emoji": "\ud83e\udde3",
+      "prompt": "scarf"
     }
-  ]
+  ],
+  "theme": "Winter Clothing"
 }

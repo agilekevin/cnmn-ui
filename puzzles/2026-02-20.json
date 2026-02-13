@@ -1,0 +1,156 @@
+{
+  "publicationDate": "2026-02-20",
+  "questions": [
+    {
+      "answer": "pineapple",
+      "answerDisguise": "pnpl",
+      "correctOption": "Ananas",
+      "difficulty": "easy",
+      "distractors": [
+        {
+          "disguise": "bnns",
+          "type": "wrong-letters",
+          "word": "BANANAS"
+        },
+        {
+          "disguise": "mng",
+          "type": "non-synonym",
+          "word": "MANGO"
+        },
+        {
+          "disguise": "nans",
+          "type": "phonetic-trap",
+          "word": "NANAS"
+        }
+      ],
+      "emoji": "\ud83c\udf4d",
+      "prompt": "prickly fruit"
+    },
+    {
+      "answer": "PLANTAIN",
+      "answerDisguise": "plntn",
+      "correctOption": "Plantain",
+      "difficulty": "easy",
+      "distractors": [
+        {
+          "disguise": "plntshn",
+          "type": "wrong-letters",
+          "word": "PLANTATION"
+        },
+        {
+          "disguise": "trpcl",
+          "type": "non-synonym",
+          "word": "TROPICAL"
+        },
+        {
+          "disguise": "pnppl",
+          "type": "phonetic-trap",
+          "word": "PINEAPPLE"
+        }
+      ],
+      "emoji": "\ud83c\udf4c",
+      "prompt": "banana"
+    },
+    {
+      "answer": "DRUPE",
+      "answerDisguise": "drp",
+      "correctOption": "Drupe",
+      "difficulty": "medium",
+      "distractors": [
+        {
+          "disguise": "drop",
+          "type": "wrong-letters",
+          "word": "DROOP"
+        },
+        {
+          "disguise": "frt",
+          "type": "non-synonym",
+          "word": "FRUIT"
+        },
+        {
+          "disguise": "trpc",
+          "type": "phonetic-trap",
+          "word": "TROPIC"
+        }
+      ],
+      "emoji": "\ud83e\udd65",
+      "prompt": "coconut"
+    },
+    {
+      "answer": "STONE",
+      "answerDisguise": "stn",
+      "correctOption": "Stone",
+      "difficulty": "medium",
+      "distractors": [
+        {
+          "disguise": "frt",
+          "type": "non-synonym",
+          "word": "FRUIT"
+        },
+        {
+          "disguise": "sd",
+          "type": "wrong-letters",
+          "word": "SEED"
+        },
+        {
+          "disguise": "skn",
+          "type": "phonetic-trap",
+          "word": "SKIN"
+        }
+      ],
+      "emoji": "\ud83e\udd6d",
+      "prompt": "mango"
+    },
+    {
+      "answer": "PAWPAW",
+      "answerDisguise": "pwpw",
+      "correctOption": "Pawpaw",
+      "difficulty": "hard",
+      "distractors": [
+        {
+          "disguise": "ppyrs",
+          "type": "wrong-letters",
+          "word": "PAPYRUS"
+        },
+        {
+          "disguise": "mng",
+          "type": "non-synonym",
+          "word": "MANGO"
+        },
+        {
+          "disguise": "ppp",
+          "type": "phonetic-trap",
+          "word": "POPUP"
+        }
+      ],
+      "emoji": "\ud83e\udd6d",
+      "prompt": "papaya"
+    },
+    {
+      "answer": "PSIDIUM",
+      "answerDisguise": "psdm",
+      "correctOption": "Psidium",
+      "difficulty": "hard",
+      "distractors": [
+        {
+          "disguise": "pdm",
+          "type": "wrong-letters",
+          "word": "PODIUM"
+        },
+        {
+          "disguise": "ppy",
+          "type": "non-synonym",
+          "word": "PAPAYA"
+        },
+        {
+          "disguise": "psdnym",
+          "type": "phonetic-trap",
+          "word": "PSEUDONYM"
+        }
+      ],
+      "emoji": "\ud83c\udf48",
+      "prompt": "guava"
+    }
+  ],
+  "theme": "Tropical Fruits"
+}

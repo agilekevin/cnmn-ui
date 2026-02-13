@@ -52,6 +52,7 @@ def _parse_auth_users():
     return users
 
 AUTH_USERS = _parse_auth_users()
+IS_CLOUD = os.getenv('RENDER', '') == 'true'
 
 # Model registry: model ID -> metadata
 MODELS = {
@@ -154,6 +155,12 @@ def serve_static(filename):
 def provider_has_slug(provider):
     """Check if a provider has a Portkey slug configured."""
     return provider in PROVIDER_SLUGS
+
+
+@app.route('/api/config')
+@requires_auth
+def get_config():
+    return jsonify({'saveEnabled': not IS_CLOUD})
 
 
 @app.route('/api/models')

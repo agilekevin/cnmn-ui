@@ -1,180 +1,180 @@
 {
-  "theme": "Breakfast Foods",
   "publicationDate": "2026-02-16",
   "questions": [
     {
-      "prompt": "bacon",
-      "emoji": "🥓",
       "answer": "PORK",
       "answerDisguise": "prk",
+      "correctOption": "Pork",
+      "difficulty": "easy",
       "distractors": [
         {
-          "word": "WHEAT",
           "disguise": "wt",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "WHEAT"
         },
         {
-          "word": "SYRUP",
           "disguise": "syrp",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "SYRUP"
         },
         {
-          "word": "JUICE",
           "disguise": "jc",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "JUICE"
         }
       ],
-      "difficulty": "easy",
-      "correctOption": "Pork"
+      "emoji": "\ud83e\udd53",
+      "prompt": "bacon"
     },
     {
-      "prompt": "cereal",
-      "emoji": "🥣",
       "answer": "GRAINS",
       "answerDisguise": "grnz",
+      "correctOption": "Grains",
+      "difficulty": "easy",
       "distractors": [
         {
-          "word": "BUTTER",
           "disguise": "bttr",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "BUTTER"
         },
         {
-          "word": "COFFEE",
           "disguise": "cff",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "COFFEE"
         },
         {
-          "word": "BRAINS",
           "disguise": "brns",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "BRAINS"
         }
       ],
-      "difficulty": "easy",
-      "correctOption": "Grains"
+      "emoji": "\ud83e\udd63",
+      "prompt": "cereal"
     },
     {
-      "prompt": "sausage",
-      "emoji": "",
       "answer": "LINKS",
       "answerDisguise": "lnx",
+      "correctOption": "Links",
+      "difficulty": "medium",
       "distractors": [
         {
-          "word": "EGGS",
           "disguise": "gz",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "EGGS"
         },
         {
-          "word": "PIGS",
           "disguise": "pgs",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "PIGS"
         },
         {
-          "word": "FRIES",
           "disguise": "frz",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "FRIES"
         }
       ],
-      "difficulty": "medium",
-      "correctOption": "Links",
-      "imageUrl": "https://api.iconify.design/game-icons/toaster.svg?height=128",
+      "emoji": "",
       "imageCredit": {
         "name": "Game Icons",
-        "username": "game-icons",
-        "profileUrl": "https://icon-sets.iconify.design/game-icons/"
-      }
+        "profileUrl": "https://icon-sets.iconify.design/game-icons/",
+        "username": "game-icons"
+      },
+      "imageUrl": "https://api.iconify.design/game-icons/sausage.svg?height=128",
+      "prompt": "sausage"
     },
     {
-      "prompt": "pancake",
-      "emoji": "",
       "answer": "FLAPJACK",
       "answerDisguise": "flpjk",
+      "correctOption": "Flapjack",
+      "difficulty": "medium",
       "distractors": [
         {
-          "word": "OATMEAL",
           "disguise": "tml",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "OATMEAL"
         },
         {
-          "word": "SAUSAGE",
           "disguise": "ssj",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "SAUSAGE"
         },
         {
-          "word": "YOGURT",
           "disguise": "ygrt",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "YOGURT"
         }
       ],
-      "difficulty": "medium",
-      "correctOption": "Flapjack",
-      "imageUrl": "https://api.iconify.design/noto/flatbread.svg?height=128",
+      "emoji": "",
       "imageCredit": {
         "name": "Noto Emoji (Google)",
-        "username": "noto",
-        "profileUrl": "https://icon-sets.iconify.design/noto/"
-      }
+        "profileUrl": "https://icon-sets.iconify.design/noto/",
+        "username": "noto"
+      },
+      "imageUrl": "https://api.iconify.design/noto/flatbread.svg?height=128",
+      "prompt": "pancake"
     },
     {
-      "prompt": "omelette",
-      "emoji": "",
       "answer": "FRITTATA",
       "answerDisguise": "frtt",
+      "correctOption": "Frittata",
+      "difficulty": "hard",
       "distractors": [
         {
-          "word": "GRANOLA",
           "disguise": "grnl",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "GRANOLA"
         },
         {
-          "word": "BISCUIT",
           "disguise": "bsct",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "BISCUIT"
         },
         {
-          "word": "MUFFIN",
           "disguise": "mffn",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "MUFFIN"
         }
       ],
-      "difficulty": "hard",
-      "correctOption": "Frittata",
-      "imageUrl": "https://api.iconify.design/game-icons/fried-eggs.svg?height=128",
+      "emoji": "",
       "imageCredit": {
         "name": "Game Icons",
-        "username": "game-icons",
-        "profileUrl": "https://icon-sets.iconify.design/game-icons/"
-      }
+        "profileUrl": "https://icon-sets.iconify.design/game-icons/",
+        "username": "game-icons"
+      },
+      "imageUrl": "https://api.iconify.design/game-icons/fried-eggs.svg?height=128",
+      "prompt": "omelette"
     },
     {
-      "prompt": "marmalade",
-      "emoji": "",
       "answer": "PRESERVES",
       "answerDisguise": "przrvz",
+      "correctOption": "Preserves",
+      "difficulty": "hard",
       "distractors": [
         {
-          "word": "WAFFLES",
           "disguise": "wffls",
-          "type": "wrong-letters"
+          "type": "wrong-letters",
+          "word": "WAFFLES"
         },
         {
-          "word": "CREPES",
           "disguise": "crps",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "CREPES"
         },
         {
-          "word": "BAGELS",
           "disguise": "bgls",
-          "type": "non-synonym"
+          "type": "non-synonym",
+          "word": "BAGELS"
         }
       ],
-      "difficulty": "hard",
-      "correctOption": "Preserves",
-      "imageUrl": "https://api.iconify.design/noto/tangerine.svg?height=128",
+      "emoji": "",
       "imageCredit": {
         "name": "Noto Emoji (Google)",
-        "username": "noto",
-        "profileUrl": "https://icon-sets.iconify.design/noto/"
-      }
+        "profileUrl": "https://icon-sets.iconify.design/noto/",
+        "username": "noto"
+      },
+      "imageUrl": "https://api.iconify.design/noto/tangerine.svg?height=128",
+      "prompt": "marmalade"
     }
-  ]
+  ],
+  "theme": "Breakfast Foods"
 }
