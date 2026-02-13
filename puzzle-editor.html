@@ -1347,6 +1347,10 @@
       return word.toLowerCase().replace(/[aeiou]/g, '');
     }
 
+    function collapseRuns(s) {
+      return s.replace(/(.)\1+/g, '$1');
+    }
+
     function parseJsonResponse(text) {
       const m = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
       if (m) text = m[1];
@@ -1495,6 +1499,7 @@ Return ONLY JSON:
       const skeleton = consonantSkeleton(pair.answer);
       const answerUpper = pair.answer.toUpperCase();
       const promptUpper = pair.prompt.toUpperCase();
+      const answerDisguiseNorm = collapseRuns(generateDisguiseRuleBased(answerUpper));
       const prompt = STAGE3_PROMPT
         .replace(/\{prompt\}/g, pair.prompt)
         .replace(/\{answer\}/g, pair.answer)
@@ -1508,6 +1513,7 @@ Return ONLY JSON:
         if (!d.word) continue;
         if (d.word === answerUpper || d.word === promptUpper) continue;
         if (consonantSkeleton(d.word) === skeleton) continue;
+        if (collapseRuns(generateDisguiseRuleBased(d.word)) === answerDisguiseNorm) continue;
         valid.push(d);
       }
       return valid.length >= 3 ? valid.slice(0, 3) : distractors.slice(0, 3);

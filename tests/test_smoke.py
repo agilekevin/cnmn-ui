@@ -81,11 +81,11 @@ def browser_page(server):
 
 class TestPageLoad:
     def test_title(self, browser_page, server_url):
-        browser_page.goto(server_url)
+        browser_page.goto(server_url + '/puzzle-ai-assistant.html')
         assert 'cnmn Quiz Generator' in browser_page.title()
 
     def test_model_dropdown_populated(self, browser_page, server_url):
-        browser_page.goto(server_url)
+        browser_page.goto(server_url + '/puzzle-ai-assistant.html')
         # Wait for loadModels() to populate the dropdown
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
@@ -106,7 +106,7 @@ class TestPageLoad:
         assert any('Claude' in l for l in ai_labels), f"Expected at least one Claude model, got: {ai_labels}"
 
     def test_status_shows_via_portkey(self, browser_page, server_url):
-        browser_page.goto(server_url)
+        browser_page.goto(server_url + '/puzzle-ai-assistant.html')
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -116,7 +116,7 @@ class TestPageLoad:
 
 class TestRuleBasedQuiz:
     def test_generate_quiz_with_rules(self, browser_page, server_url):
-        browser_page.goto(server_url)
+        browser_page.goto(server_url + '/puzzle-ai-assistant.html')
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -143,7 +143,7 @@ class TestRuleBasedQuiz:
 
     def test_ask_ai_disabled_in_rules_mode(self, browser_page, server_url):
         """Ask AI emoji button should be disabled when Rule-Based is selected."""
-        browser_page.goto(server_url)
+        browser_page.goto(server_url + '/puzzle-ai-assistant.html')
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -164,7 +164,7 @@ class TestRuleBasedQuiz:
 class TestModelSelection:
     def test_default_model_is_sonnet(self, browser_page, server_url):
         """Sonnet 4.5 should be selected by default when available."""
-        browser_page.goto(server_url)
+        browser_page.goto(server_url + '/puzzle-ai-assistant.html')
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
@@ -178,7 +178,7 @@ class TestModelSelection:
         assert selected == current
 
     def test_switching_model_updates_state(self, browser_page, server_url):
-        browser_page.goto(server_url)
+        browser_page.goto(server_url + '/puzzle-ai-assistant.html')
         browser_page.wait_for_function(
             "document.querySelector('#modelSelect').options.length > 1"
         )
